@@ -1,3 +1,4 @@
+import { newId } from "@/lib/ids";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
@@ -53,7 +54,7 @@ function FranchisesPage() {
 function FranchiseDialog({ initial, onSave, onDelete }: { initial?: Franchise; onSave: (f: Franchise) => void; onDelete?: () => void }) {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<Franchise>(initial ?? {
-    id: `f-${Date.now()}`, name: "", code: "", city: "", state: "", region: "", status: "ativa",
+    id: newId(), name: "", code: "", city: "", state: "", region: "", status: "ativa",
     start_date: new Date().toISOString().slice(0,10), created_at: new Date().toISOString(),
   });
   return (

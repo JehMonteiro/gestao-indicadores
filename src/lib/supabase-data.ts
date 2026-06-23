@@ -267,7 +267,7 @@ export async function loadAllFromSupabase(userId: string) {
 
 export const dbWrite = {
   async sector(s: Sector) {
-    await supabase.from("sectors").upsert({
+    return supabase.from("sectors").upsert({
       id: s.id,
       code: s.code,
       name: s.name,
@@ -277,10 +277,10 @@ export const dbWrite = {
     });
   },
   async deleteSector(id: string) {
-    await supabase.from("sectors").delete().eq("id", id);
+    return supabase.from("sectors").delete().eq("id", id);
   },
   async franchise(f: Franchise) {
-    await supabase.from("franchises").upsert({
+    return supabase.from("franchises").upsert({
       id: f.id,
       code: f.code,
       name: f.name,
@@ -291,10 +291,10 @@ export const dbWrite = {
     });
   },
   async deleteFranchise(id: string) {
-    await supabase.from("franchises").delete().eq("id", id);
+    return supabase.from("franchises").delete().eq("id", id);
   },
   async indicator(i: Indicator) {
-    await supabase.from("indicators").upsert({
+    return supabase.from("indicators").upsert({
       id: i.id,
       code: i.code,
       name: i.name,
@@ -313,10 +313,10 @@ export const dbWrite = {
     });
   },
   async deleteIndicator(id: string) {
-    await supabase.from("indicators").delete().eq("id", id);
+    return supabase.from("indicators").delete().eq("id", id);
   },
   async target(t: IndicatorTarget) {
-    await supabase.from("targets").upsert({
+    return supabase.from("targets").upsert({
       id: t.id,
       indicator_id: t.indicator_id,
       franchise_id: t.franchise_id ?? null,
@@ -329,7 +329,7 @@ export const dbWrite = {
     });
   },
   async entry(e: IndicatorEntry) {
-    await supabase.from("indicator_entries").upsert({
+    return supabase.from("indicator_entries").upsert({
       id: e.id,
       indicator_id: e.indicator_id,
       target_id: e.target_id ?? null,
@@ -350,7 +350,7 @@ export const dbWrite = {
     });
   },
   async userSector(us: UserSector) {
-    await supabase.from("user_sectors").upsert({
+    return supabase.from("user_sectors").upsert({
       id: us.id,
       user_id: us.user_id,
       sector_id: us.sector_id,
@@ -358,10 +358,10 @@ export const dbWrite = {
     });
   },
   async removeUserSector(id: string) {
-    await supabase.from("user_sectors").delete().eq("id", id);
+    return supabase.from("user_sectors").delete().eq("id", id);
   },
   async userFranchise(uf: UserFranchise) {
-    await supabase.from("user_franchises").upsert({
+    return supabase.from("user_franchises").upsert({
       id: uf.id,
       user_id: uf.user_id,
       franchise_id: uf.franchise_id,
@@ -369,13 +369,13 @@ export const dbWrite = {
     });
   },
   async removeUserFranchise(id: string) {
-    await supabase.from("user_franchises").delete().eq("id", id);
+    return supabase.from("user_franchises").delete().eq("id", id);
   },
   async markNotificationRead(id: string) {
-    await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
+    return supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
   },
   async settings(s: SystemSettings) {
-    await supabase.from("app_settings").upsert({
+    return supabase.from("app_settings").upsert({
       id: 1,
       threshold_success: s.achieved_threshold,
       threshold_warning: s.warning_threshold,
@@ -383,7 +383,7 @@ export const dbWrite = {
     });
   },
   async audit(a: { user_id: string; action: string; entity_type: string; entity_id: string; new_data?: unknown }) {
-    await supabase.rpc("log_audit", {
+    return supabase.rpc("log_audit", {
       _action: a.action,
       _entity_type: a.entity_type,
       _entity_id: a.entity_id || (null as any),
@@ -395,8 +395,17 @@ export const dbWrite = {
 function reportError(err: unknown, label: string) {
   // eslint-disable-next-line no-console
   console.error(`[supabase-data:${label}]`, err);
+  // Surface backend failures to the user so writes don't appear successful then vanish on reload.
+  import("sonner").then(({ toast }) => {
+    const msg = err instanceof Error ? err.message : typeof err === "string" ? err : "Falha ao salvar no banco de dados";
+    toast.error(`Erro ao salvar (${label})`, { description: msg });
+  }).catch(() => {});
 }
 
 export function fireAndForget(label: string, p: Promise<unknown>) {
-  p.catch((err) => reportError(err, label));
+  p.then((res: any) => {
+    if (res && typeof res === "object" && "error" in res && res.error) {
+      reportError(res.error, label);
+    }
+  }).catch((err) => reportError(err, label));
 }

@@ -1,3 +1,4 @@
+import { newId } from "@/lib/ids";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { z } from "zod";
@@ -58,7 +59,7 @@ function NewEntry() {
     if (!ind) { toast.error("Selecione um indicador"); return; }
     if (actual === "" || isNaN(Number(actual))) { toast.error("Informe um valor numérico"); return; }
     const entry: IndicatorEntry = {
-      id: `e-${Date.now()}`,
+      id: newId(),
       indicator_id: ind.id, target_id: target?.id,
       user_id: user?.id ?? "u-colab", sector_id: ind.owner_sector_id, franchise_id: ind.scope === "franquia" ? franchiseId : undefined,
       period_start: periodStart, period_end: periodEnd,
