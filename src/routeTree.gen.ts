@@ -13,7 +13,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVisaoGeralRouteImport } from './routes/_authenticated/visao-geral'
+import { Route as AuthenticatedMeusIndicadoresRouteImport } from './routes/_authenticated/meus-indicadores'
 import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
+import { Route as AuthenticatedAprovacoesRouteImport } from './routes/_authenticated/aprovacoes'
 import { Route as AuthenticatedLancamentosIndexRouteImport } from './routes/_authenticated/lancamentos.index'
 import { Route as AuthenticatedIndicadoresIndexRouteImport } from './routes/_authenticated/indicadores.index'
 import { Route as AuthenticatedLancamentosNovoRouteImport } from './routes/_authenticated/lancamentos.novo'
@@ -40,9 +42,20 @@ const AuthenticatedVisaoGeralRoute = AuthenticatedVisaoGeralRouteImport.update({
   path: '/visao-geral',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMeusIndicadoresRoute =
+  AuthenticatedMeusIndicadoresRouteImport.update({
+    id: '/meus-indicadores',
+    path: '/meus-indicadores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMeuPainelRoute = AuthenticatedMeuPainelRouteImport.update({
   id: '/meu-painel',
   path: '/meu-painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAprovacoesRoute = AuthenticatedAprovacoesRouteImport.update({
+  id: '/aprovacoes',
+  path: '/aprovacoes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLancamentosIndexRoute =
@@ -85,7 +98,9 @@ const AuthenticatedIndicadoresIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
   '/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
   '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
@@ -97,7 +112,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
   '/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
   '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
@@ -111,7 +128,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/_authenticated/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/_authenticated/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
   '/_authenticated/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/_authenticated/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
   '/_authenticated/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
@@ -125,7 +144,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/aprovacoes'
     | '/meu-painel'
+    | '/meus-indicadores'
     | '/visao-geral'
     | '/indicadores/$id'
     | '/indicadores/novo'
@@ -137,7 +158,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/aprovacoes'
     | '/meu-painel'
+    | '/meus-indicadores'
     | '/visao-geral'
     | '/indicadores/$id'
     | '/indicadores/novo'
@@ -150,7 +173,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/aprovacoes'
     | '/_authenticated/meu-painel'
+    | '/_authenticated/meus-indicadores'
     | '/_authenticated/visao-geral'
     | '/_authenticated/indicadores/$id'
     | '/_authenticated/indicadores/novo'
@@ -196,11 +221,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVisaoGeralRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/meus-indicadores': {
+      id: '/_authenticated/meus-indicadores'
+      path: '/meus-indicadores'
+      fullPath: '/meus-indicadores'
+      preLoaderRoute: typeof AuthenticatedMeusIndicadoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/meu-painel': {
       id: '/_authenticated/meu-painel'
       path: '/meu-painel'
       fullPath: '/meu-painel'
       preLoaderRoute: typeof AuthenticatedMeuPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/aprovacoes': {
+      id: '/_authenticated/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/aprovacoes'
+      preLoaderRoute: typeof AuthenticatedAprovacoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/lancamentos/': {
@@ -249,7 +288,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAprovacoesRoute: typeof AuthenticatedAprovacoesRoute
   AuthenticatedMeuPainelRoute: typeof AuthenticatedMeuPainelRoute
+  AuthenticatedMeusIndicadoresRoute: typeof AuthenticatedMeusIndicadoresRoute
   AuthenticatedVisaoGeralRoute: typeof AuthenticatedVisaoGeralRoute
   AuthenticatedIndicadoresIdRoute: typeof AuthenticatedIndicadoresIdRoute
   AuthenticatedIndicadoresNovoRoute: typeof AuthenticatedIndicadoresNovoRoute
@@ -260,7 +301,9 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAprovacoesRoute: AuthenticatedAprovacoesRoute,
   AuthenticatedMeuPainelRoute: AuthenticatedMeuPainelRoute,
+  AuthenticatedMeusIndicadoresRoute: AuthenticatedMeusIndicadoresRoute,
   AuthenticatedVisaoGeralRoute: AuthenticatedVisaoGeralRoute,
   AuthenticatedIndicadoresIdRoute: AuthenticatedIndicadoresIdRoute,
   AuthenticatedIndicadoresNovoRoute: AuthenticatedIndicadoresNovoRoute,
