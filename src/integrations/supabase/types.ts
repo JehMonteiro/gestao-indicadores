@@ -549,6 +549,15 @@ export type Database = {
         Args: { _sector_id: string; _user_id: string }
         Returns: boolean
       }
+      log_audit: {
+        Args: {
+          _action: string
+          _entity_id: string
+          _entity_type: string
+          _payload: Json
+        }
+        Returns: undefined
+      }
       seed_demo_data: { Args: never; Returns: undefined }
     }
     Enums: {
