@@ -28,11 +28,11 @@ function FranchisesPage() {
   const canEdit = user?.global_role === "superadmin" || user?.global_role === "admin_corporativo";
   return (
     <div>
-      <PageHeader title="Franquias" description="Unidades franqueadas e seus dados cadastrais."
+      <PageHeader title="Empresas" description="Unidades/empresas cadastradas e seus dados."
         actions={canEdit && <FranchiseDialog onSave={upsert} />}
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Unidade</TableHead><TableHead>Código</TableHead><TableHead>Cidade/UF</TableHead><TableHead>Região</TableHead><TableHead>Início</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Cidade/UF</TableHead><TableHead>Região</TableHead><TableHead>Início</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
         <TableBody>
           {franchises.map((f) => (
             <TableRow key={f.id}>
