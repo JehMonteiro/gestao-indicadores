@@ -61,11 +61,11 @@ function FranchiseDialog({ initial, onSave, onDelete }: { initial?: Franchise; o
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant={initial ? "ghost" : "default"} size={initial ? "icon" : "default"}>
-          {initial ? <Pencil className="size-4" /> : <><Plus className="size-4" />Nova franquia</>}
+          {initial ? <Pencil className="size-4" /> : <><Plus className="size-4" />Nova empresa</>}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{initial ? "Editar franquia" : "Nova franquia"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{initial ? "Editar empresa" : "Nova empresa"}</DialogTitle></DialogHeader>
         <div className="space-y-3 grid sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2"><Label>Nome</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
           <div><Label>Código</Label><Input value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })} /></div>
