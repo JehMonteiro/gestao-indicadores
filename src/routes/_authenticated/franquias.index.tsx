@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil } from "lucide-react";
 import type { Franchise } from "@/mocks/types";
-import { formatDate } from "@/lib/format";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/franquias/")({
@@ -32,15 +32,12 @@ function FranchisesPage() {
         actions={canEdit && <FranchiseDialog onSave={upsert} />}
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Cidade/UF</TableHead><TableHead>Região</TableHead><TableHead>Início</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
         <TableBody>
           {franchises.map((f) => (
             <TableRow key={f.id}>
               <TableCell className="font-medium">{f.name}</TableCell>
               <TableCell className="font-mono text-xs">{f.code}</TableCell>
-              <TableCell>{f.city}/{f.state}</TableCell>
-              <TableCell>{f.region}</TableCell>
-              <TableCell>{formatDate(f.start_date)}</TableCell>
               <TableCell><Badge variant={f.status === "ativa" ? "secondary" : "outline"} className="capitalize">{f.status}</Badge></TableCell>
               <TableCell className="text-right">{canEdit && <FranchiseDialog initial={f} onSave={(x) => { upsert(x); toast.success("Atualizado"); }} onDelete={() => { remove(f.id); toast.success("Removido"); }} />}</TableCell>
             </TableRow>
@@ -72,10 +69,6 @@ function FranchiseDialog({ initial, onSave, onDelete }: { initial?: Franchise; o
           <div><Label>CNPJ (opcional)</Label><Input value={f.document ?? ""} onChange={(e) => setF({ ...f, document: e.target.value })} /></div>
           <div><Label>Razão social</Label><Input value={f.legal_name ?? ""} onChange={(e) => setF({ ...f, legal_name: e.target.value })} /></div>
           <div><Label>Nome fantasia</Label><Input value={f.trade_name ?? ""} onChange={(e) => setF({ ...f, trade_name: e.target.value })} /></div>
-          <div><Label>Cidade</Label><Input value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} /></div>
-          <div><Label>UF</Label><Input value={f.state} onChange={(e) => setF({ ...f, state: e.target.value.toUpperCase() })} maxLength={2} /></div>
-          <div><Label>Região</Label><Input value={f.region} onChange={(e) => setF({ ...f, region: e.target.value })} /></div>
-          <div><Label>Início</Label><Input type="date" value={f.start_date.slice(0,10)} onChange={(e) => setF({ ...f, start_date: e.target.value })} /></div>
         </div>
         <DialogFooter>
           {onDelete && <Button variant="destructive" onClick={() => { onDelete(); setOpen(false); }}>Excluir</Button>}
