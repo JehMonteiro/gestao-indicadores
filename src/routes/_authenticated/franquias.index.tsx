@@ -69,10 +69,6 @@ function FranchiseDialog({ initial, onSave, onDelete }: { initial?: Franchise; o
           <div><Label>CNPJ (opcional)</Label><Input value={f.document ?? ""} onChange={(e) => setF({ ...f, document: e.target.value })} /></div>
           <div><Label>Razão social</Label><Input value={f.legal_name ?? ""} onChange={(e) => setF({ ...f, legal_name: e.target.value })} /></div>
           <div><Label>Nome fantasia</Label><Input value={f.trade_name ?? ""} onChange={(e) => setF({ ...f, trade_name: e.target.value })} /></div>
-          <div><Label>Cidade</Label><Input value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} /></div>
-          <div><Label>UF</Label><Input value={f.state} onChange={(e) => setF({ ...f, state: e.target.value.toUpperCase() })} maxLength={2} /></div>
-          <div><Label>Região</Label><Input value={f.region} onChange={(e) => setF({ ...f, region: e.target.value })} /></div>
-          <div><Label>Início</Label><Input type="date" value={f.start_date.slice(0,10)} onChange={(e) => setF({ ...f, start_date: e.target.value })} /></div>
         </div>
         <DialogFooter>
           {onDelete && <Button variant="destructive" onClick={() => { onDelete(); setOpen(false); }}>Excluir</Button>}
