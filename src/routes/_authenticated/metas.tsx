@@ -110,7 +110,13 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
           </div>
           <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => { onSave(f); setOpen(false); }}>Salvar</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => {
+          onSave({ ...f, id: newId() });
+          setOpen(false);
+          setF({ id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "setor",
+            period_start: new Date().toISOString().slice(0,10), period_end: new Date().toISOString().slice(0,10),
+            target_value: 0, weight: 1, created_by: "u-admin", created_at: new Date().toISOString() });
+        }}>Salvar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
