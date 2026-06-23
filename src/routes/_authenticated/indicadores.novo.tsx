@@ -138,7 +138,7 @@ function NewIndicator() {
                   <SelectItem value="corporativo">Corporativo</SelectItem>
                   <SelectItem value="setor">Setor</SelectItem>
                   <SelectItem value="franquia">Franquia</SelectItem>
-                  <SelectItem value="usuario">Usuário individual</SelectItem>
+                  
                 </SelectContent>
               </Select>
             </Field>
