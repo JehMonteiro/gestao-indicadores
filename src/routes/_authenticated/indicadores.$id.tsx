@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, Outlet, useRouterState } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -19,6 +19,9 @@ export const Route = createFileRoute("/_authenticated/indicadores/$id")({
 
 function IndicatorDetail() {
   const { id } = Route.useParams();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (pathname.endsWith("/editar")) return <Outlet />;
+
   const indicators = useStore((s) => s.indicators);
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
