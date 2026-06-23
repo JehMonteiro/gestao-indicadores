@@ -80,7 +80,15 @@ function FranchiseDialog({ initial, onSave, onDelete }: { initial?: Franchise; o
         <DialogFooter>
           {onDelete && <Button variant="destructive" onClick={() => { onDelete(); setOpen(false); }}>Excluir</Button>}
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button onClick={() => { onSave(f); setOpen(false); }}>Salvar</Button>
+          <Button onClick={() => {
+            const payload = initial ? f : { ...f, id: newId() };
+            onSave(payload);
+            setOpen(false);
+            if (!initial) {
+              setF({ id: newId(), name: "", code: "", city: "", state: "", region: "", status: "ativa",
+                start_date: new Date().toISOString().slice(0,10), created_at: new Date().toISOString() });
+            }
+          }}>Salvar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
