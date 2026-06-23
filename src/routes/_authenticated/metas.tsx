@@ -62,7 +62,7 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
   const franchises = useStore((s) => s.franchises);
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<IndicatorTarget>({
-    id: `t-${Date.now()}`, indicator_id: indicators[0]?.id ?? "", scope_type: "setor",
+    id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "setor",
     period_start: new Date().toISOString().slice(0,10), period_end: new Date().toISOString().slice(0,10),
     target_value: 0, weight: 1, created_by: "u-admin", created_at: new Date().toISOString(),
   });

@@ -56,7 +56,7 @@ function NewIndicator() {
       return;
     }
     const ind: Indicator = {
-      id: `i-${Date.now()}`,
+      id: newId(),
       shared_sector_ids: [], responsible_ids: [],
       created_by: user?.id ?? "u-admin", created_at: new Date().toISOString(),
       ...f,

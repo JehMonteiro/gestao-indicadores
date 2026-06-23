@@ -102,7 +102,7 @@ function UsersPage() {
                     );
                   })}
                 </div>
-                <AddSectorRow userId={editing.id} onAdd={(sid, role) => { upsertUS({ id: `us-${Date.now()}`, user_id: editing.id, sector_id: sid, sector_role: role, active: true, joined_at: new Date().toISOString() }); toast.success("Vínculo adicionado"); }} />
+                <AddSectorRow userId={editing.id} onAdd={(sid, role) => { upsertUS({ id: newId(), user_id: editing.id, sector_id: sid, sector_role: role, active: true, joined_at: new Date().toISOString() }); toast.success("Vínculo adicionado"); }} />
               </div>
               <div>
                 <p className="text-sm font-medium mb-2">Franquias</p>
@@ -117,7 +117,7 @@ function UsersPage() {
                     );
                   })}
                 </div>
-                <AddFranchiseRow userId={editing.id} onAdd={(fid, role) => { upsertUF({ id: `uf-${Date.now()}`, user_id: editing.id, franchise_id: fid, franchise_role: role, active: true, joined_at: new Date().toISOString() }); toast.success("Vínculo adicionado"); }} />
+                <AddFranchiseRow userId={editing.id} onAdd={(fid, role) => { upsertUF({ id: newId(), user_id: editing.id, franchise_id: fid, franchise_role: role, active: true, joined_at: new Date().toISOString() }); toast.success("Vínculo adicionado"); }} />
               </div>
             </div>
             <DialogFooter><Button onClick={() => setEditing(null)}>Fechar</Button></DialogFooter>
@@ -156,7 +156,7 @@ function AddFranchiseRow({ userId, onAdd }: { userId: string; onAdd: (fid: strin
 function ProfileDialog({ onSave }: { onSave: (p: Profile) => void }) {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<Profile>({
-    id: `u-${Date.now()}`, full_name: "", email: "", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: new Date().toISOString(),
+    id: newId(), full_name: "", email: "", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: new Date().toISOString(),
   });
   return (
     <Dialog open={open} onOpenChange={setOpen}>

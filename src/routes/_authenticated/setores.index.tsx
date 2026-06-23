@@ -62,7 +62,7 @@ function SectorsPage() {
 function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave: (s: Sector) => void; onDelete?: () => void }) {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<Sector>(initial ?? {
-    id: `s-${Date.now()}`, name: "", code: "", color: "#2563eb", icon: "Briefcase",
+    id: newId(), name: "", code: "", color: "#2563eb", icon: "Briefcase",
     active: true, requires_approval: true, display_order: 99, created_at: new Date().toISOString(),
   });
   return (
