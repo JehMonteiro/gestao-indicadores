@@ -38,24 +38,7 @@ function AuthPage() {
     navigate({ to: "/meu-painel", replace: true });
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/meu-painel`,
-        data: { full_name: fullName || email.split("@")[0] },
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message.includes("registered") ? "E-mail já cadastrado." : "Não foi possível criar a conta.");
-      return;
-    }
-    toast.success("Conta criada. Verifique seu e-mail se a confirmação estiver ativa.");
-  };
+
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
