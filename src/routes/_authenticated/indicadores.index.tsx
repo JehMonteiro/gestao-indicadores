@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { classify, classificationStyles, computeAchievement, formatValue, indicatorPeriodLabel } from "@/lib/format";
-import { Plus, Search, Target } from "lucide-react";
+import { Plus, Search, Target, Pencil, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { useCurrentUser } from "@/mocks/store";
 
 export const Route = createFileRoute("/_authenticated/indicadores/")({
   head: () => ({ meta: [{ title: "Indicadores — Gestão de Indicadores" }] }),
@@ -25,16 +31,28 @@ function IndicatorsList() {
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const settings = useStore((s) => s.settings);
+  const deleteIndicator = useStore((s) => s.deleteIndicator);
+  const logAudit = useStore((s) => s.logAudit);
+  const user = useCurrentUser();
 
   const [q, setQ] = useState("");
   const [sectorId, setSectorId] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
+  const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = indicators.filter((i) =>
     (q === "" || i.name.toLowerCase().includes(q.toLowerCase()) || i.code.toLowerCase().includes(q.toLowerCase())) &&
     (sectorId === "all" || i.owner_sector_id === sectorId) &&
     (status === "all" || i.status === status)
   );
+
+  const confirmDelete = () => {
+    if (!toDelete) return;
+    deleteIndicator(toDelete.id);
+    logAudit({ user_id: user?.id ?? "", action: "delete", entity_type: "indicator", entity_id: toDelete.id });
+    toast.success(`Indicador "${toDelete.name}" excluído`);
+    setToDelete(null);
+  };
 
   return (
     <div>
@@ -82,6 +100,7 @@ function IndicatorsList() {
                 <TableHead>Último resultado</TableHead>
                 <TableHead>Atingimento</TableHead>
                 <TableHead>Status</TableHead>
+                {isAdmin && <TableHead className="w-20 text-right">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -103,6 +122,18 @@ function IndicatorsList() {
                     <TableCell className="font-mono text-sm">{e ? formatValue(e.actual_value, i.value_type, i.unit) : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={cs.className}>{pct != null ? `${Math.round(pct)}% · ${cs.label}` : cs.label}</Badge></TableCell>
                     <TableCell><Badge variant="secondary" className="capitalize">{i.status}</Badge></TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button asChild size="icon" variant="ghost" title="Editar">
+                            <Link to="/indicadores/$id/editar" params={{ id: i.id }}><Pencil className="size-4" /></Link>
+                          </Button>
+                          <Button size="icon" variant="ghost" title="Excluir" onClick={() => setToDelete({ id: i.id, name: i.name })}>
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -110,6 +141,23 @@ function IndicatorsList() {
           </Table>
         </Card>
       )}
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir indicador?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O indicador "{toDelete?.name}" e seus dados relacionados serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
