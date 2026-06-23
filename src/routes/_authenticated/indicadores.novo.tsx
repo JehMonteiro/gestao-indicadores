@@ -29,18 +29,7 @@ function NewIndicator() {
   const navigate = useNavigate();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
-  if (!adminLoading && !isAdmin) {
-    return (
-      <div>
-        <PageHeader title="Novo indicador" description="Apenas administradores podem criar indicadores." />
-        <EmptyState
-          title="Acesso restrito"
-          description="Você não tem permissão para criar indicadores. Solicite ao administrador."
-          icon={<ShieldAlert className="size-5" />}
-        />
-      </div>
-    );
-  }
+
 
 
 
