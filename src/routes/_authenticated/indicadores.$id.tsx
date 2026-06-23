@@ -69,7 +69,7 @@ function IndicatorDetail() {
             <Item k="Tipo de valor" v={`${ind.value_type}${ind.unit ? ` (${ind.unit})` : ""}`} />
             <Item k="Regra" v={ind.direction.replace("_", " ")} />
             <Item k="Forma de preenchimento" v={ind.input_method} />
-            <Item k="Peso" v={String(ind.weight)} />
+            
             <Item k="Necessita aprovação" v={ind.requires_approval ? "Sim" : "Não"} />
             <Item k="Permite anexo" v={ind.allows_attachment ? "Sim" : "Não"} />
             <Item k="Fonte" v={ind.data_source ?? "—"} />
