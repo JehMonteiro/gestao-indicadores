@@ -15,20 +15,7 @@ import type {
   UserFranchise,
   UserSector,
 } from "./types";
-import {
-  seedAuditLogs,
-  seedCategories,
-  seedEntries,
-  seedFranchises,
-  seedIndicators,
-  seedNotifications,
-  seedProfiles,
-  seedSectors,
-  seedSettings,
-  seedTargets,
-  seedUserFranchises,
-  seedUserSectors,
-} from "./seed";
+import { dbWrite, fireAndForget } from "@/lib/supabase-data";
 
 type State = {
   currentUserId: string | null;
@@ -54,6 +41,9 @@ type Actions = {
   setActiveSector: (id: string | null) => void;
   setActiveFranchise: (id: string | null) => void;
 
+  hydrate: (data: Partial<State>) => void;
+  clearAll: () => void;
+
   upsertSector: (s: Sector) => void;
   deleteSector: (id: string) => void;
   upsertFranchise: (f: Franchise) => void;
@@ -74,25 +64,30 @@ type Actions = {
   updateSettings: (s: Partial<SystemSettings>) => void;
 
   logAudit: (a: Omit<AuditLog, "id" | "created_at">) => void;
-  resetDemoData: () => void;
+};
+
+const defaultSettings: SystemSettings = {
+  platform_name: "Gestão de Indicadores",
+  achieved_threshold: 100,
+  warning_threshold: 80,
 };
 
 const initial: State = {
   currentUserId: null,
   activeSectorId: null,
   activeFranchiseId: null,
-  profiles: seedProfiles,
-  sectors: seedSectors,
-  userSectors: seedUserSectors,
-  franchises: seedFranchises,
-  userFranchises: seedUserFranchises,
-  categories: seedCategories,
-  indicators: seedIndicators,
-  targets: seedTargets,
-  entries: seedEntries,
-  notifications: seedNotifications,
-  auditLogs: seedAuditLogs,
-  settings: seedSettings,
+  profiles: [],
+  sectors: [],
+  userSectors: [],
+  franchises: [],
+  userFranchises: [],
+  categories: [],
+  indicators: [],
+  targets: [],
+  entries: [],
+  notifications: [],
+  auditLogs: [],
+  settings: defaultSettings,
 };
 
 const uid = () => `id-${Math.random().toString(36).slice(2, 10)}`;
@@ -100,46 +95,99 @@ const now = () => new Date().toISOString();
 
 export const useStore = create<State & Actions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initial,
       setCurrentUser: (id) => set({ currentUserId: id, activeSectorId: null, activeFranchiseId: null }),
       setActiveSector: (id) => set({ activeSectorId: id }),
       setActiveFranchise: (id) => set({ activeFranchiseId: id }),
 
-      upsertSector: (s) => set((st) => ({ sectors: upsert(st.sectors, s) })),
-      deleteSector: (id) => set((st) => ({ sectors: st.sectors.filter((x) => x.id !== id) })),
-      upsertFranchise: (f) => set((st) => ({ franchises: upsert(st.franchises, f) })),
-      deleteFranchise: (id) => set((st) => ({ franchises: st.franchises.filter((x) => x.id !== id) })),
-      upsertIndicator: (i) => set((st) => ({ indicators: upsert(st.indicators, i) })),
-      deleteIndicator: (id) => set((st) => ({ indicators: st.indicators.filter((x) => x.id !== id) })),
-      upsertTarget: (t) => set((st) => ({ targets: upsert(st.targets, t) })),
-      upsertEntry: (e) => set((st) => ({ entries: upsert(st.entries, e) })),
-      setEntryStatus: (id, status, extra) =>
-        set((st) => ({
-          entries: st.entries.map((e) =>
-            e.id === id ? { ...e, status, updated_at: now(), ...extra } : e,
-          ),
-        })),
+      hydrate: (data) => set((st) => ({ ...st, ...data })),
+      clearAll: () => set({ ...initial, currentUserId: null }),
 
-      upsertUserSector: (us) => set((st) => ({ userSectors: upsert(st.userSectors, us) })),
-      removeUserSector: (id) => set((st) => ({ userSectors: st.userSectors.filter((x) => x.id !== id) })),
-      upsertUserFranchise: (uf) => set((st) => ({ userFranchises: upsert(st.userFranchises, uf) })),
-      removeUserFranchise: (id) => set((st) => ({ userFranchises: st.userFranchises.filter((x) => x.id !== id) })),
+      upsertSector: (s) => {
+        set((st) => ({ sectors: upsert(st.sectors, s) }));
+        fireAndForget("sector", dbWrite.sector(s));
+      },
+      deleteSector: (id) => {
+        set((st) => ({ sectors: st.sectors.filter((x) => x.id !== id) }));
+        fireAndForget("deleteSector", dbWrite.deleteSector(id));
+      },
+      upsertFranchise: (f) => {
+        set((st) => ({ franchises: upsert(st.franchises, f) }));
+        fireAndForget("franchise", dbWrite.franchise(f));
+      },
+      deleteFranchise: (id) => {
+        set((st) => ({ franchises: st.franchises.filter((x) => x.id !== id) }));
+        fireAndForget("deleteFranchise", dbWrite.deleteFranchise(id));
+      },
+      upsertIndicator: (i) => {
+        set((st) => ({ indicators: upsert(st.indicators, i) }));
+        fireAndForget("indicator", dbWrite.indicator(i));
+      },
+      deleteIndicator: (id) => {
+        set((st) => ({ indicators: st.indicators.filter((x) => x.id !== id) }));
+        fireAndForget("deleteIndicator", dbWrite.deleteIndicator(id));
+      },
+      upsertTarget: (t) => {
+        set((st) => ({ targets: upsert(st.targets, t) }));
+        fireAndForget("target", dbWrite.target(t));
+      },
+      upsertEntry: (e) => {
+        set((st) => ({ entries: upsert(st.entries, e) }));
+        fireAndForget("entry", dbWrite.entry(e));
+      },
+      setEntryStatus: (id, status, extra) => {
+        let updated: IndicatorEntry | undefined;
+        set((st) => ({
+          entries: st.entries.map((e) => {
+            if (e.id !== id) return e;
+            updated = { ...e, status, updated_at: now(), ...extra };
+            return updated;
+          }),
+        }));
+        if (updated) fireAndForget("entryStatus", dbWrite.entry(updated));
+      },
+
+      upsertUserSector: (us) => {
+        set((st) => ({ userSectors: upsert(st.userSectors, us) }));
+        fireAndForget("userSector", dbWrite.userSector(us));
+      },
+      removeUserSector: (id) => {
+        set((st) => ({ userSectors: st.userSectors.filter((x) => x.id !== id) }));
+        fireAndForget("removeUserSector", dbWrite.removeUserSector(id));
+      },
+      upsertUserFranchise: (uf) => {
+        set((st) => ({ userFranchises: upsert(st.userFranchises, uf) }));
+        fireAndForget("userFranchise", dbWrite.userFranchise(uf));
+      },
+      removeUserFranchise: (id) => {
+        set((st) => ({ userFranchises: st.userFranchises.filter((x) => x.id !== id) }));
+        fireAndForget("removeUserFranchise", dbWrite.removeUserFranchise(id));
+      },
       upsertProfile: (p) => set((st) => ({ profiles: upsert(st.profiles, p) })),
 
-      markNotificationRead: (id) =>
+      markNotificationRead: (id) => {
         set((st) => ({
           notifications: st.notifications.map((n) => (n.id === id ? { ...n, read_at: now() } : n)),
-        })),
-      updateSettings: (s) => set((st) => ({ settings: { ...st.settings, ...s } })),
+        }));
+        fireAndForget("notificationRead", dbWrite.markNotificationRead(id));
+      },
+      updateSettings: (s) => {
+        let next: SystemSettings | undefined;
+        set((st) => {
+          next = { ...st.settings, ...s };
+          return { settings: next };
+        });
+        if (next) fireAndForget("settings", dbWrite.settings(next));
+      },
 
-      logAudit: (a) =>
-        set((st) => ({
-          auditLogs: [{ id: uid(), created_at: now(), ...a }, ...st.auditLogs].slice(0, 500),
-        })),
-      resetDemoData: () => set({ ...initial, currentUserId: get().currentUserId }),
+      logAudit: (a) => {
+        const row: AuditLog = { id: uid(), created_at: now(), ...a };
+        set((st) => ({ auditLogs: [row, ...st.auditLogs].slice(0, 500) }));
+        fireAndForget("audit", dbWrite.audit(a));
+      },
     }),
-    { name: "gi-store-v1" },
+    { name: "gi-store-v2" },
   ),
 );
 

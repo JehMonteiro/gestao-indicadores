@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { loadAllFromSupabase } from "@/lib/supabase-data";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações" }] }),
@@ -17,9 +19,10 @@ export const Route = createFileRoute("/_authenticated/configuracoes")({
 function SettingsPage() {
   const settings = useStore((s) => s.settings);
   const update = useStore((s) => s.updateSettings);
-  const reset = useStore((s) => s.resetDemoData);
+  const hydrate = useStore((s) => s.hydrate);
   const user = useCurrentUser();
   const [local, setLocal] = useState(settings);
+  const [busy, setBusy] = useState<"seed" | "clear" | null>(null);
 
   if (user?.global_role !== "superadmin") {
     return (
@@ -28,6 +31,30 @@ function SettingsPage() {
         <Card><CardContent className="p-8 text-center text-sm text-muted-foreground">Você não tem permissão para acessar esta área.</CardContent></Card>
       </div>
     );
+  }
+
+  async function refresh() {
+    if (!user) return;
+    const data = await loadAllFromSupabase(user.id);
+    hydrate(data);
+  }
+
+  async function seedDemo() {
+    setBusy("seed");
+    const { error } = await supabase.rpc("seed_demo_data" as any);
+    setBusy(null);
+    if (error) { toast.error("Não foi possível carregar os dados de demonstração."); return; }
+    await refresh();
+    toast.success("Dados de demonstração carregados");
+  }
+
+  async function clearDemo() {
+    setBusy("clear");
+    const { error } = await supabase.rpc("clear_demo_data" as any);
+    setBusy(null);
+    if (error) { toast.error("Não foi possível limpar os dados de demonstração."); return; }
+    await refresh();
+    toast.success("Dados de demonstração removidos");
   }
 
   return (
@@ -52,23 +79,37 @@ function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 border-destructive/40">
-          <CardHeader><CardTitle className="text-base text-destructive">Dados de demonstração</CardTitle></CardHeader>
+        <Card className="lg:col-span-2">
+          <CardHeader><CardTitle className="text-base">Dados de demonstração</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">Reseta todos os setores, franquias, indicadores, metas, lançamentos e logs para o estado inicial de demonstração. Útil antes da integração com o backend real.</p>
-            <AlertDialog>
-              <AlertDialogTrigger asChild><Button variant="destructive">Resetar dados de demonstração</Button></AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmar reset?</AlertDialogTitle>
-                  <AlertDialogDescription>Todos os dados serão substituídos pelos dados iniciais de exemplo. Esta ação não pode ser desfeita.</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => { reset(); toast.success("Dados resetados"); }}>Confirmar</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <p className="text-sm text-muted-foreground">
+              Carrega setores, franquias, indicadores, metas e lançamentos de exemplo para experimentar o sistema.
+              Tudo fica marcado como demo e pode ser removido a qualquer momento.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={seedDemo} disabled={busy !== null}>
+                {busy === "seed" ? "Carregando..." : "Carregar dados de demonstração"}
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" disabled={busy !== null}>
+                    {busy === "clear" ? "Removendo..." : "Limpar dados de demonstração"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remover dados de demonstração?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Todos os registros marcados como demo serão apagados. Dados reais não serão afetados.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearDemo}>Confirmar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </CardContent>
         </Card>
       </div>
