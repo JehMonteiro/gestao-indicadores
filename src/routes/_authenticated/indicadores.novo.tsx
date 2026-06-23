@@ -163,7 +163,7 @@ function NewIndicator() {
               <Select value={f.value_type} onValueChange={(v) => set("value_type", v as ValueType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(["inteiro","decimal","percentual","moeda","tempo","quantidade","boolean","nota","texto"] as ValueType[]).map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  {(["inteiro","decimal","percentual","moeda"] as ValueType[]).map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
