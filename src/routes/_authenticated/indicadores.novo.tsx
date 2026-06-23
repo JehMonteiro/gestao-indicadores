@@ -138,7 +138,7 @@ function NewIndicator() {
                   <SelectItem value="corporativo">Corporativo</SelectItem>
                   <SelectItem value="setor">Setor</SelectItem>
                   <SelectItem value="franquia">Franquia</SelectItem>
-                  <SelectItem value="usuario">Usuário individual</SelectItem>
+                  
                 </SelectContent>
               </Select>
             </Field>
@@ -163,7 +163,7 @@ function NewIndicator() {
               <Select value={f.value_type} onValueChange={(v) => set("value_type", v as ValueType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(["inteiro","decimal","percentual","moeda","tempo","quantidade","boolean","nota","texto"] as ValueType[]).map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  {(["inteiro","decimal","percentual","moeda"] as ValueType[]).map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
@@ -172,7 +172,7 @@ function NewIndicator() {
               <Select value={f.frequency} onValueChange={(v) => set("frequency", v as Frequency)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(["diaria","semanal","quinzenal","mensal","trimestral","semestral","anual"] as Frequency[]).map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  {(["diaria","semanal","mensal","trimestral","semestral","anual"] as Frequency[]).map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
