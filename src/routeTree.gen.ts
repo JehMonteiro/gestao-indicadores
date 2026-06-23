@@ -14,7 +14,10 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVisaoGeralRouteImport } from './routes/_authenticated/visao-geral'
 import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
+import { Route as AuthenticatedLancamentosIndexRouteImport } from './routes/_authenticated/lancamentos.index'
 import { Route as AuthenticatedIndicadoresIndexRouteImport } from './routes/_authenticated/indicadores.index'
+import { Route as AuthenticatedLancamentosNovoRouteImport } from './routes/_authenticated/lancamentos.novo'
+import { Route as AuthenticatedLancamentosIdRouteImport } from './routes/_authenticated/lancamentos.$id'
 import { Route as AuthenticatedIndicadoresNovoRouteImport } from './routes/_authenticated/indicadores.novo'
 import { Route as AuthenticatedIndicadoresIdRouteImport } from './routes/_authenticated/indicadores.$id'
 
@@ -42,10 +45,28 @@ const AuthenticatedMeuPainelRoute = AuthenticatedMeuPainelRouteImport.update({
   path: '/meu-painel',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLancamentosIndexRoute =
+  AuthenticatedLancamentosIndexRouteImport.update({
+    id: '/lancamentos/',
+    path: '/lancamentos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedIndicadoresIndexRoute =
   AuthenticatedIndicadoresIndexRouteImport.update({
     id: '/indicadores/',
     path: '/indicadores/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosNovoRoute =
+  AuthenticatedLancamentosNovoRouteImport.update({
+    id: '/lancamentos/novo',
+    path: '/lancamentos/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosIdRoute =
+  AuthenticatedLancamentosIdRouteImport.update({
+    id: '/lancamentos/$id',
+    path: '/lancamentos/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedIndicadoresNovoRoute =
@@ -68,7 +89,10 @@ export interface FileRoutesByFullPath {
   '/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
   '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
+  '/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
   '/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
+  '/lancamentos/': typeof AuthenticatedLancamentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +101,10 @@ export interface FileRoutesByTo {
   '/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
   '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
+  '/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
   '/indicadores': typeof AuthenticatedIndicadoresIndexRoute
+  '/lancamentos': typeof AuthenticatedLancamentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +115,10 @@ export interface FileRoutesById {
   '/_authenticated/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/_authenticated/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
   '/_authenticated/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/_authenticated/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
+  '/_authenticated/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
   '/_authenticated/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
+  '/_authenticated/lancamentos/': typeof AuthenticatedLancamentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,7 +129,10 @@ export interface FileRouteTypes {
     | '/visao-geral'
     | '/indicadores/$id'
     | '/indicadores/novo'
+    | '/lancamentos/$id'
+    | '/lancamentos/novo'
     | '/indicadores/'
+    | '/lancamentos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -108,7 +141,10 @@ export interface FileRouteTypes {
     | '/visao-geral'
     | '/indicadores/$id'
     | '/indicadores/novo'
+    | '/lancamentos/$id'
+    | '/lancamentos/novo'
     | '/indicadores'
+    | '/lancamentos'
   id:
     | '__root__'
     | '/'
@@ -118,7 +154,10 @@ export interface FileRouteTypes {
     | '/_authenticated/visao-geral'
     | '/_authenticated/indicadores/$id'
     | '/_authenticated/indicadores/novo'
+    | '/_authenticated/lancamentos/$id'
+    | '/_authenticated/lancamentos/novo'
     | '/_authenticated/indicadores/'
+    | '/_authenticated/lancamentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -164,11 +203,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMeuPainelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/lancamentos/': {
+      id: '/_authenticated/lancamentos/'
+      path: '/lancamentos'
+      fullPath: '/lancamentos/'
+      preLoaderRoute: typeof AuthenticatedLancamentosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/indicadores/': {
       id: '/_authenticated/indicadores/'
       path: '/indicadores'
       fullPath: '/indicadores/'
       preLoaderRoute: typeof AuthenticatedIndicadoresIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/novo': {
+      id: '/_authenticated/lancamentos/novo'
+      path: '/lancamentos/novo'
+      fullPath: '/lancamentos/novo'
+      preLoaderRoute: typeof AuthenticatedLancamentosNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/$id': {
+      id: '/_authenticated/lancamentos/$id'
+      path: '/lancamentos/$id'
+      fullPath: '/lancamentos/$id'
+      preLoaderRoute: typeof AuthenticatedLancamentosIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/indicadores/novo': {
@@ -193,7 +253,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedVisaoGeralRoute: typeof AuthenticatedVisaoGeralRoute
   AuthenticatedIndicadoresIdRoute: typeof AuthenticatedIndicadoresIdRoute
   AuthenticatedIndicadoresNovoRoute: typeof AuthenticatedIndicadoresNovoRoute
+  AuthenticatedLancamentosIdRoute: typeof AuthenticatedLancamentosIdRoute
+  AuthenticatedLancamentosNovoRoute: typeof AuthenticatedLancamentosNovoRoute
   AuthenticatedIndicadoresIndexRoute: typeof AuthenticatedIndicadoresIndexRoute
+  AuthenticatedLancamentosIndexRoute: typeof AuthenticatedLancamentosIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -201,7 +264,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedVisaoGeralRoute: AuthenticatedVisaoGeralRoute,
   AuthenticatedIndicadoresIdRoute: AuthenticatedIndicadoresIdRoute,
   AuthenticatedIndicadoresNovoRoute: AuthenticatedIndicadoresNovoRoute,
+  AuthenticatedLancamentosIdRoute: AuthenticatedLancamentosIdRoute,
+  AuthenticatedLancamentosNovoRoute: AuthenticatedLancamentosNovoRoute,
   AuthenticatedIndicadoresIndexRoute: AuthenticatedIndicadoresIndexRoute,
+  AuthenticatedLancamentosIndexRoute: AuthenticatedLancamentosIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
