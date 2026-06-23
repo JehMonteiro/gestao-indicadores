@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,14 @@ function EditIndicator() {
 
   const existing = indicators.find((i) => i.id === id);
   const [f, setF] = useState<Indicator | null>(existing ?? null);
+  const [loadedIndicatorId, setLoadedIndicatorId] = useState<string | null>(existing?.id ?? null);
+
+  useEffect(() => {
+    if (existing && loadedIndicatorId !== existing.id) {
+      setF(existing);
+      setLoadedIndicatorId(existing.id);
+    }
+  }, [existing, loadedIndicatorId]);
 
   if (!adminLoading && !isAdmin) {
     return (
