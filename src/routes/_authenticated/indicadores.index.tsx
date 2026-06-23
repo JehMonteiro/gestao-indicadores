@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { classify, classificationStyles, computeAchievement, formatValue, indicatorPeriodLabel } from "@/lib/format";
-import { Plus, Search, Target } from "lucide-react";
+import { Plus, Search, Target, Pencil, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { useCurrentUser } from "@/mocks/store";
 
 export const Route = createFileRoute("/_authenticated/indicadores/")({
   head: () => ({ meta: [{ title: "Indicadores — Gestão de Indicadores" }] }),

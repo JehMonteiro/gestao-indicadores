@@ -32,6 +32,7 @@ import { Route as AuthenticatedLancamentosIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedIndicadoresNovoRouteImport } from './routes/_authenticated/indicadores.novo'
 import { Route as AuthenticatedIndicadoresIdRouteImport } from './routes/_authenticated/indicadores.$id'
 import { Route as AuthenticatedFranquiasIdRouteImport } from './routes/_authenticated/franquias.$id'
+import { Route as AuthenticatedIndicadoresIdEditarRouteImport } from './routes/_authenticated/indicadores.$id.editar'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -158,6 +159,12 @@ const AuthenticatedFranquiasIdRoute =
     path: '/franquias/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIndicadoresIdEditarRoute =
+  AuthenticatedIndicadoresIdEditarRouteImport.update({
+    id: '/editar',
+    path: '/editar',
+    getParentRoute: () => AuthenticatedIndicadoresIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -173,7 +180,7 @@ export interface FileRoutesByFullPath {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/franquias/$id': typeof AuthenticatedFranquiasIdRoute
-  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRouteWithChildren
   '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
   '/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
   '/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
   '/lancamentos/': typeof AuthenticatedLancamentosIndexRoute
   '/setores/': typeof AuthenticatedSetoresIndexRoute
+  '/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -197,7 +205,7 @@ export interface FileRoutesByTo {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/franquias/$id': typeof AuthenticatedFranquiasIdRoute
-  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRouteWithChildren
   '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
   '/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
   '/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
@@ -206,6 +214,7 @@ export interface FileRoutesByTo {
   '/indicadores': typeof AuthenticatedIndicadoresIndexRoute
   '/lancamentos': typeof AuthenticatedLancamentosIndexRoute
   '/setores': typeof AuthenticatedSetoresIndexRoute
+  '/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -223,7 +232,7 @@ export interface FileRoutesById {
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/visao-geral': typeof AuthenticatedVisaoGeralRoute
   '/_authenticated/franquias/$id': typeof AuthenticatedFranquiasIdRoute
-  '/_authenticated/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/_authenticated/indicadores/$id': typeof AuthenticatedIndicadoresIdRouteWithChildren
   '/_authenticated/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
   '/_authenticated/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
   '/_authenticated/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   '/_authenticated/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
   '/_authenticated/lancamentos/': typeof AuthenticatedLancamentosIndexRoute
   '/_authenticated/setores/': typeof AuthenticatedSetoresIndexRoute
+  '/_authenticated/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/indicadores/'
     | '/lancamentos/'
     | '/setores/'
+    | '/indicadores/$id/editar'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/indicadores'
     | '/lancamentos'
     | '/setores'
+    | '/indicadores/$id/editar'
   id:
     | '__root__'
     | '/'
@@ -307,6 +319,7 @@ export interface FileRouteTypes {
     | '/_authenticated/indicadores/'
     | '/_authenticated/lancamentos/'
     | '/_authenticated/setores/'
+    | '/_authenticated/indicadores/$id/editar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -478,8 +491,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFranquiasIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/indicadores/$id/editar': {
+      id: '/_authenticated/indicadores/$id/editar'
+      path: '/editar'
+      fullPath: '/indicadores/$id/editar'
+      preLoaderRoute: typeof AuthenticatedIndicadoresIdEditarRouteImport
+      parentRoute: typeof AuthenticatedIndicadoresIdRoute
+    }
   }
 }
+
+interface AuthenticatedIndicadoresIdRouteChildren {
+  AuthenticatedIndicadoresIdEditarRoute: typeof AuthenticatedIndicadoresIdEditarRoute
+}
+
+const AuthenticatedIndicadoresIdRouteChildren: AuthenticatedIndicadoresIdRouteChildren =
+  {
+    AuthenticatedIndicadoresIdEditarRoute:
+      AuthenticatedIndicadoresIdEditarRoute,
+  }
+
+const AuthenticatedIndicadoresIdRouteWithChildren =
+  AuthenticatedIndicadoresIdRoute._addFileChildren(
+    AuthenticatedIndicadoresIdRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAprovacoesRoute: typeof AuthenticatedAprovacoesRoute
@@ -493,7 +528,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedVisaoGeralRoute: typeof AuthenticatedVisaoGeralRoute
   AuthenticatedFranquiasIdRoute: typeof AuthenticatedFranquiasIdRoute
-  AuthenticatedIndicadoresIdRoute: typeof AuthenticatedIndicadoresIdRoute
+  AuthenticatedIndicadoresIdRoute: typeof AuthenticatedIndicadoresIdRouteWithChildren
   AuthenticatedIndicadoresNovoRoute: typeof AuthenticatedIndicadoresNovoRoute
   AuthenticatedLancamentosIdRoute: typeof AuthenticatedLancamentosIdRoute
   AuthenticatedLancamentosNovoRoute: typeof AuthenticatedLancamentosNovoRoute
@@ -516,7 +551,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedVisaoGeralRoute: AuthenticatedVisaoGeralRoute,
   AuthenticatedFranquiasIdRoute: AuthenticatedFranquiasIdRoute,
-  AuthenticatedIndicadoresIdRoute: AuthenticatedIndicadoresIdRoute,
+  AuthenticatedIndicadoresIdRoute: AuthenticatedIndicadoresIdRouteWithChildren,
   AuthenticatedIndicadoresNovoRoute: AuthenticatedIndicadoresNovoRoute,
   AuthenticatedLancamentosIdRoute: AuthenticatedLancamentosIdRoute,
   AuthenticatedLancamentosNovoRoute: AuthenticatedLancamentosNovoRoute,
