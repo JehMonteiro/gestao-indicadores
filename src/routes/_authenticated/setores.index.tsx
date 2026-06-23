@@ -94,7 +94,15 @@ function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave:
         <DialogFooter className="gap-2">
           {onDelete && <Button variant="destructive" onClick={() => { onDelete(); setOpen(false); }}>Excluir</Button>}
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button onClick={() => { onSave(f); setOpen(false); }}>Salvar</Button>
+          <Button onClick={() => {
+            const payload = initial ? f : { ...f, id: newId() };
+            onSave(payload);
+            setOpen(false);
+            if (!initial) {
+              setF({ id: newId(), name: "", code: "", color: "#2563eb", icon: "Briefcase",
+                active: true, requires_approval: true, display_order: 99, created_at: new Date().toISOString() });
+            }
+          }}>Salvar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
