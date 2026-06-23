@@ -395,12 +395,13 @@ export const dbWrite = {
 };
 
 function reportError(err: unknown, label: string) {
+  // Keep raw error in server/devtools console only — do not surface DB internals to users.
   // eslint-disable-next-line no-console
   console.error(`[supabase-data:${label}]`, err);
-  // Surface backend failures to the user so writes don't appear successful then vanish on reload.
   import("sonner").then(({ toast }) => {
-    const msg = err instanceof Error ? err.message : typeof err === "string" ? err : "Falha ao salvar no banco de dados";
-    toast.error(`Erro ao salvar (${label})`, { description: msg });
+    toast.error("Não foi possível salvar", {
+      description: "Tente novamente em instantes. Se persistir, contate o administrador.",
+    });
   }).catch(() => {});
 }
 
