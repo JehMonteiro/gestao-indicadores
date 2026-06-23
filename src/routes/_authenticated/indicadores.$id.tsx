@@ -20,14 +20,14 @@ export const Route = createFileRoute("/_authenticated/indicadores/$id")({
 function IndicatorDetail() {
   const { id } = Route.useParams();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  if (pathname.endsWith("/editar")) return <Outlet />;
-
   const indicators = useStore((s) => s.indicators);
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const sectors = useStore((s) => s.sectors);
   const settings = useStore((s) => s.settings);
   const { isAdmin } = useIsAdmin();
+
+  if (pathname.endsWith("/editar")) return <Outlet />;
 
   const ind = indicators.find((i) => i.id === id);
   if (!ind) throw notFound();
