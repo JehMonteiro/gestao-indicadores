@@ -188,7 +188,17 @@ export const useStore = create<State & Actions>()(
         fireAndForget("audit", dbWrite.audit(a));
       },
     }),
-    { name: "gi-store-v2" },
+    {
+      name: "gi-store-v2",
+      // Persist only lightweight identity/UI context. Sensitive business data
+      // (entries, audit logs, profiles, roles) is reloaded fresh from Supabase
+      // on each session to avoid leaving it readable in localStorage.
+      partialize: (state) => ({
+        currentUserId: state.currentUserId,
+        activeSectorId: state.activeSectorId,
+        activeFranchiseId: state.activeFranchiseId,
+      }),
+    },
   ),
 );
 
