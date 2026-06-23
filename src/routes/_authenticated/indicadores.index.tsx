@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
 import { useVisibleIndicators } from "@/lib/permissions";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
