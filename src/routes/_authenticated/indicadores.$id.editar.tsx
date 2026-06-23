@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +63,12 @@ function EditIndicator() {
     return (
       <div>
         <PageHeader title="Editar indicador" />
-        <EmptyState title="Indicador não encontrado" description="O indicador solicitado não existe." icon={<ShieldAlert className="size-5" />} />
+        <EmptyState
+          title="Abra a edição pela lista de indicadores"
+          description="Os dados ainda estão sendo sincronizados. Volte para a lista e toque no ícone de edição do indicador."
+          icon={<ShieldAlert className="size-5" />}
+          action={<Button asChild><Link to="/indicadores">Voltar para indicadores</Link></Button>}
+        />
       </div>
     );
   }
