@@ -529,26 +529,6 @@ export type Database = {
     }
     Functions: {
       clear_demo_data: { Args: never; Returns: undefined }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_admin: { Args: { _user_id: string }; Returns: boolean }
-      is_manager_of_sector: {
-        Args: { _sector_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_member_of_franchise: {
-        Args: { _franchise_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_member_of_sector: {
-        Args: { _sector_id: string; _user_id: string }
-        Returns: boolean
-      }
       log_audit: {
         Args: {
           _action: string
