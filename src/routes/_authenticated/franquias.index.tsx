@@ -16,7 +16,7 @@ import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/franquias/")({
-  head: () => ({ meta: [{ title: "Franquias" }] }),
+  head: () => ({ meta: [{ title: "Empresas" }] }),
   component: FranchisesPage,
 });
 
@@ -28,11 +28,11 @@ function FranchisesPage() {
   const canEdit = user?.global_role === "superadmin" || user?.global_role === "admin_corporativo";
   return (
     <div>
-      <PageHeader title="Franquias" description="Unidades franqueadas e seus dados cadastrais."
+      <PageHeader title="Empresas" description="Unidades/empresas cadastradas e seus dados."
         actions={canEdit && <FranchiseDialog onSave={upsert} />}
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Unidade</TableHead><TableHead>Código</TableHead><TableHead>Cidade/UF</TableHead><TableHead>Região</TableHead><TableHead>Início</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Cidade/UF</TableHead><TableHead>Região</TableHead><TableHead>Início</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
         <TableBody>
           {franchises.map((f) => (
             <TableRow key={f.id}>
@@ -61,11 +61,11 @@ function FranchiseDialog({ initial, onSave, onDelete }: { initial?: Franchise; o
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant={initial ? "ghost" : "default"} size={initial ? "icon" : "default"}>
-          {initial ? <Pencil className="size-4" /> : <><Plus className="size-4" />Nova franquia</>}
+          {initial ? <Pencil className="size-4" /> : <><Plus className="size-4" />Nova empresa</>}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>{initial ? "Editar franquia" : "Nova franquia"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{initial ? "Editar empresa" : "Nova empresa"}</DialogTitle></DialogHeader>
         <div className="space-y-3 grid sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2"><Label>Nome</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
           <div><Label>Código</Label><Input value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })} /></div>
