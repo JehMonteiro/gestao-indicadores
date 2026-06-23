@@ -23,6 +23,7 @@ function EditIndicator() {
   const { id } = Route.useParams();
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
+  const franchises = useStore((s) => s.franchises);
   const categories = useStore((s) => s.categories);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
@@ -85,6 +86,15 @@ function EditIndicator() {
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
+            <Field label="Empresa">
+              <Select value={f.franchise_id || "none"} onValueChange={(v) => set("franchise_id", v === "none" ? undefined : v)}>
+                <SelectTrigger><SelectValue placeholder="— Corporativo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Corporativo (todas)</SelectItem>
+                  {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
+                </SelectContent>
               </Select>
             </Field>
             <Field label="Categoria">

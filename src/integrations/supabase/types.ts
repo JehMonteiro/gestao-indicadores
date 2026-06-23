@@ -214,6 +214,7 @@ export type Database = {
           description: string | null
           direction: Database["public"]["Enums"]["indicator_direction"]
           formula: string | null
+          franchise_id: string | null
           id: string
           is_demo: boolean
           name: string
@@ -235,6 +236,7 @@ export type Database = {
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
           formula?: string | null
+          franchise_id?: string | null
           id?: string
           is_demo?: boolean
           name: string
@@ -256,6 +258,7 @@ export type Database = {
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
           formula?: string | null
+          franchise_id?: string | null
           id?: string
           is_demo?: boolean
           name?: string
@@ -270,6 +273,13 @@ export type Database = {
           value_type?: Database["public"]["Enums"]["value_type"]
         }
         Relationships: [
+          {
+            foreignKeyName: "indicators_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "indicators_owner_sector_id_fkey"
             columns: ["owner_sector_id"]

@@ -1,0 +1,2 @@
+ALTER TABLE public.indicators ADD COLUMN IF NOT EXISTS franchise_id uuid REFERENCES public.franchises(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_indicators_franchise_id ON public.indicators(franchise_id);
