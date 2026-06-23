@@ -23,6 +23,7 @@ function EditIndicator() {
   const { id } = Route.useParams();
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
+  const franchises = useStore((s) => s.franchises);
   const categories = useStore((s) => s.categories);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
