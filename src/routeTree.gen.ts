@@ -9,38 +9,140 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedVisaoGeralRouteImport } from './routes/_authenticated/visao-geral'
+import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
+import { Route as AuthenticatedIndicadoresIndexRouteImport } from './routes/_authenticated/indicadores.index'
+import { Route as AuthenticatedIndicadoresNovoRouteImport } from './routes/_authenticated/indicadores.novo'
+import { Route as AuthenticatedIndicadoresIdRouteImport } from './routes/_authenticated/indicadores.$id'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVisaoGeralRoute = AuthenticatedVisaoGeralRouteImport.update({
+  id: '/visao-geral',
+  path: '/visao-geral',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMeuPainelRoute = AuthenticatedMeuPainelRouteImport.update({
+  id: '/meu-painel',
+  path: '/meu-painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedIndicadoresIndexRoute =
+  AuthenticatedIndicadoresIndexRouteImport.update({
+    id: '/indicadores/',
+    path: '/indicadores/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresNovoRoute =
+  AuthenticatedIndicadoresNovoRouteImport.update({
+    id: '/indicadores/novo',
+    path: '/indicadores/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresIdRoute =
+  AuthenticatedIndicadoresIdRouteImport.update({
+    id: '/indicadores/$id',
+    path: '/indicadores/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/visao-geral': typeof AuthenticatedVisaoGeralRoute
+  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/visao-geral': typeof AuthenticatedVisaoGeralRoute
+  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/indicadores': typeof AuthenticatedIndicadoresIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/_authenticated/visao-geral': typeof AuthenticatedVisaoGeralRoute
+  '/_authenticated/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/_authenticated/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/_authenticated/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/meu-painel'
+    | '/visao-geral'
+    | '/indicadores/$id'
+    | '/indicadores/novo'
+    | '/indicadores/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/meu-painel'
+    | '/visao-geral'
+    | '/indicadores/$id'
+    | '/indicadores/novo'
+    | '/indicadores'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/meu-painel'
+    | '/_authenticated/visao-geral'
+    | '/_authenticated/indicadores/$id'
+    | '/_authenticated/indicadores/novo'
+    | '/_authenticated/indicadores/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +150,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/visao-geral': {
+      id: '/_authenticated/visao-geral'
+      path: '/visao-geral'
+      fullPath: '/visao-geral'
+      preLoaderRoute: typeof AuthenticatedVisaoGeralRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/meu-painel': {
+      id: '/_authenticated/meu-painel'
+      path: '/meu-painel'
+      fullPath: '/meu-painel'
+      preLoaderRoute: typeof AuthenticatedMeuPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores/': {
+      id: '/_authenticated/indicadores/'
+      path: '/indicadores'
+      fullPath: '/indicadores/'
+      preLoaderRoute: typeof AuthenticatedIndicadoresIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores/novo': {
+      id: '/_authenticated/indicadores/novo'
+      path: '/indicadores/novo'
+      fullPath: '/indicadores/novo'
+      preLoaderRoute: typeof AuthenticatedIndicadoresNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores/$id': {
+      id: '/_authenticated/indicadores/$id'
+      path: '/indicadores/$id'
+      fullPath: '/indicadores/$id'
+      preLoaderRoute: typeof AuthenticatedIndicadoresIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMeuPainelRoute: typeof AuthenticatedMeuPainelRoute
+  AuthenticatedVisaoGeralRoute: typeof AuthenticatedVisaoGeralRoute
+  AuthenticatedIndicadoresIdRoute: typeof AuthenticatedIndicadoresIdRoute
+  AuthenticatedIndicadoresNovoRoute: typeof AuthenticatedIndicadoresNovoRoute
+  AuthenticatedIndicadoresIndexRoute: typeof AuthenticatedIndicadoresIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMeuPainelRoute: AuthenticatedMeuPainelRoute,
+  AuthenticatedVisaoGeralRoute: AuthenticatedVisaoGeralRoute,
+  AuthenticatedIndicadoresIdRoute: AuthenticatedIndicadoresIdRoute,
+  AuthenticatedIndicadoresNovoRoute: AuthenticatedIndicadoresNovoRoute,
+  AuthenticatedIndicadoresIndexRoute: AuthenticatedIndicadoresIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
