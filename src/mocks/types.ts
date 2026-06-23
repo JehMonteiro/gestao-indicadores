@@ -125,6 +125,7 @@ export interface Indicator {
   objective?: string;
   owner_sector_id: string;
   shared_sector_ids: string[];
+  franchise_id?: string;
   category_id?: string;
   strategic_pillar?: string;
   audience: Audience;
