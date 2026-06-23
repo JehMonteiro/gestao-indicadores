@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,14 @@ function EditIndicator() {
 
   const existing = indicators.find((i) => i.id === id);
   const [f, setF] = useState<Indicator | null>(existing ?? null);
+  const [loadedIndicatorId, setLoadedIndicatorId] = useState<string | null>(existing?.id ?? null);
+
+  useEffect(() => {
+    if (existing && loadedIndicatorId !== existing.id) {
+      setF(existing);
+      setLoadedIndicatorId(existing.id);
+    }
+  }, [existing, loadedIndicatorId]);
 
   if (!adminLoading && !isAdmin) {
     return (
@@ -47,7 +55,12 @@ function EditIndicator() {
     return (
       <div>
         <PageHeader title="Editar indicador" />
-        <EmptyState title="Indicador não encontrado" description="O indicador solicitado não existe." icon={<ShieldAlert className="size-5" />} />
+        <EmptyState
+          title={indicators.length === 0 ? "Carregando informações do indicador" : "Abra a edição pela lista de indicadores"}
+          description={indicators.length === 0 ? "Aguarde a sincronização dos dados." : "Volte para a lista e toque no ícone de edição do indicador."}
+          icon={<ShieldAlert className="size-5" />}
+          action={indicators.length === 0 ? undefined : <Button asChild><Link to="/indicadores">Voltar para indicadores</Link></Button>}
+        />
       </div>
     );
   }

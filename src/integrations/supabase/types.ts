@@ -208,69 +208,105 @@ export type Database = {
       indicators: {
         Row: {
           allows_attachment: boolean
+          audience: string
           code: string
           created_at: string
           created_by: string | null
+          critical_threshold: number | null
+          data_source: string | null
+          default_target: number | null
           description: string | null
           direction: Database["public"]["Enums"]["indicator_direction"]
           formula: string | null
           franchise_id: string | null
           id: string
+          input_method: string
+          instructions: string | null
           is_demo: boolean
+          maximum_value: number | null
+          minimum_value: number | null
           name: string
+          objective: string | null
           owner_sector_id: string | null
           periodicity: Database["public"]["Enums"]["periodicity"]
           requires_approval: boolean
           responsible_user_id: string | null
           scope: Database["public"]["Enums"]["indicator_scope"]
+          start_date: string | null
           status: Database["public"]["Enums"]["indicator_status"]
+          strategic_pillar: string | null
           unit: string | null
           updated_at: string
           value_type: Database["public"]["Enums"]["value_type"]
+          warning_threshold: number | null
         }
         Insert: {
           allows_attachment?: boolean
+          audience?: string
           code: string
           created_at?: string
           created_by?: string | null
+          critical_threshold?: number | null
+          data_source?: string | null
+          default_target?: number | null
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
           formula?: string | null
           franchise_id?: string | null
           id?: string
+          input_method?: string
+          instructions?: string | null
           is_demo?: boolean
+          maximum_value?: number | null
+          minimum_value?: number | null
           name: string
+          objective?: string | null
           owner_sector_id?: string | null
           periodicity?: Database["public"]["Enums"]["periodicity"]
           requires_approval?: boolean
           responsible_user_id?: string | null
           scope?: Database["public"]["Enums"]["indicator_scope"]
+          start_date?: string | null
           status?: Database["public"]["Enums"]["indicator_status"]
+          strategic_pillar?: string | null
           unit?: string | null
           updated_at?: string
           value_type?: Database["public"]["Enums"]["value_type"]
+          warning_threshold?: number | null
         }
         Update: {
           allows_attachment?: boolean
+          audience?: string
           code?: string
           created_at?: string
           created_by?: string | null
+          critical_threshold?: number | null
+          data_source?: string | null
+          default_target?: number | null
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
           formula?: string | null
           franchise_id?: string | null
           id?: string
+          input_method?: string
+          instructions?: string | null
           is_demo?: boolean
+          maximum_value?: number | null
+          minimum_value?: number | null
           name?: string
+          objective?: string | null
           owner_sector_id?: string | null
           periodicity?: Database["public"]["Enums"]["periodicity"]
           requires_approval?: boolean
           responsible_user_id?: string | null
           scope?: Database["public"]["Enums"]["indicator_scope"]
+          start_date?: string | null
           status?: Database["public"]["Enums"]["indicator_status"]
+          strategic_pillar?: string | null
           unit?: string | null
           updated_at?: string
           value_type?: Database["public"]["Enums"]["value_type"]
+          warning_threshold?: number | null
         }
         Relationships: [
           {

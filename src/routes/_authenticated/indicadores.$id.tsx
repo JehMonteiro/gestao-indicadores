@@ -1,6 +1,7 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, Outlet, useRouterState } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { classify, classificationStyles, computeAchievement, formatDate, formatMonth, formatValue, indicatorPeriodLabel } from "@/lib/format";
+import { Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/indicadores/$id")({
   head: ({ params }) => ({ meta: [{ title: `Indicador ${params.id}` }] }),
@@ -17,11 +19,15 @@ export const Route = createFileRoute("/_authenticated/indicadores/$id")({
 
 function IndicatorDetail() {
   const { id } = Route.useParams();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const indicators = useStore((s) => s.indicators);
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const sectors = useStore((s) => s.sectors);
   const settings = useStore((s) => s.settings);
+  const { isAdmin } = useIsAdmin();
+
+  if (pathname.endsWith("/editar")) return <Outlet />;
 
   const ind = indicators.find((i) => i.id === id);
   if (!ind) throw notFound();
@@ -42,6 +48,7 @@ function IndicatorDetail() {
         description={ind.description ?? "Detalhes, metas e histórico de lançamentos."}
         actions={<>
           <Button variant="outline" asChild><Link to="/indicadores">Voltar</Link></Button>
+          {isAdmin && <Button variant="outline" asChild><Link to="/indicadores/$id/editar" params={{ id: ind.id }}><Pencil className="size-4" />Editar</Link></Button>}
           <Button asChild><Link to="/lancamentos/novo" search={{ indicator: ind.id }}>Lançar resultado</Link></Button>
         </>}
       />
