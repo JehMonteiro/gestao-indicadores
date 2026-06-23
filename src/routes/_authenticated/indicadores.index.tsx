@@ -96,6 +96,7 @@ function IndicatorsList() {
               <TableRow>
                 <TableHead>Indicador</TableHead>
                 <TableHead>Setor</TableHead>
+                <TableHead>Empresa</TableHead>
                 <TableHead>Periodicidade</TableHead>
                 <TableHead>Último resultado</TableHead>
                 <TableHead>Atingimento</TableHead>
@@ -106,6 +107,7 @@ function IndicatorsList() {
             <TableBody>
               {filtered.map((i) => {
                 const sector = sectors.find((s) => s.id === i.owner_sector_id);
+                const franchise = i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id) : null;
                 const t = targets.filter((t) => t.indicator_id === i.id).slice(-1)[0];
                 const e = entries.filter((e) => e.indicator_id === i.id && e.status === "aprovado").slice(-1)[0];
                 const pct = computeAchievement(e, t, i.direction);
@@ -117,6 +119,7 @@ function IndicatorsList() {
                       <Link to="/indicadores/$id" params={{ id: i.id }} className="hover:underline font-medium">{i.name}</Link>
                     </TableCell>
                     <TableCell>{sector && <Badge variant="outline" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</TableCell>
+                    <TableCell className="text-sm">{franchise ? franchise.name : <span className="text-muted-foreground">Corporativo</span>}</TableCell>
                     <TableCell className="text-sm">{indicatorPeriodLabel(i)}</TableCell>
                     <TableCell className="font-mono text-sm">{e ? formatValue(e.actual_value, i.value_type, i.unit) : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={cs.className}>{pct != null ? `${Math.round(pct)}% · ${cs.label}` : cs.label}</Badge></TableCell>
