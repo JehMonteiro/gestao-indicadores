@@ -39,7 +39,7 @@ function IndicatorsList() {
   return (
     <div>
       <PageHeader title="Indicadores" description="Catálogo de indicadores por setor."
-        actions={<Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>}
+        actions={isAdmin ? <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button> : null}
       />
 
       <Card className="mb-4">
