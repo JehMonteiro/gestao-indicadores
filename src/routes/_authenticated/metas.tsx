@@ -35,19 +35,24 @@ function TargetsPage() {
         }
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Escopo</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead><TableHead>Peso</TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Escopo</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead></TableRow></TableHeader>
         <TableBody>
           {targets.slice(0, 50).map((t) => {
             const ind = indicators.find((i) => i.id === t.indicator_id);
+            const empresa = t.franchise_id
+              ? franchises.find((f) => f.id === t.franchise_id)?.name ?? "—"
+              : ind?.franchise_id
+                ? franchises.find((f) => f.id === ind.franchise_id)?.name ?? "Corporativo"
+                : "Corporativo";
             const ctx = t.sector_id ? sectors.find((s) => s.id === t.sector_id)?.name
               : t.franchise_id ? franchises.find((f) => f.id === t.franchise_id)?.name : "Empresa";
             return (
               <TableRow key={t.id}>
                 <TableCell className="font-medium">{ind?.name}</TableCell>
+                <TableCell className="text-sm">{empresa}</TableCell>
                 <TableCell><span className="capitalize text-sm">{t.scope_type}</span> · <span className="text-xs text-muted-foreground">{ctx}</span></TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
                 <TableCell className="font-mono">{ind && formatValue(t.target_value, ind.value_type, ind.unit)}</TableCell>
-                <TableCell>{t.weight}</TableCell>
               </TableRow>
             );
           })}
