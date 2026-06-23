@@ -52,10 +52,12 @@ function NewIndicator() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!f.name || !f.code || !f.owner_sector_id) {
-      toast.error("Preencha nome, código e setor proprietário");
+    if (!f.name || !f.owner_sector_id) {
+      toast.error("Preencha nome e setor proprietário");
       return;
     }
+    const autoCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
+    f.code = f.code || autoCode;
     const ind: Indicator = {
       id: newId(),
       shared_sector_ids: [], responsible_ids: [],
@@ -87,11 +89,10 @@ function NewIndicator() {
       <form onSubmit={submit} className="space-y-4 max-w-4xl">
         <Card>
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
-          <CardContent className="grid sm:grid-cols-2 gap-3">
+          <CardContent className="grid sm:grid-cols-1 gap-3">
             <Field label="Nome"><Input value={f.name} onChange={(e) => set("name", e.target.value)} required /></Field>
-            <Field label="Código"><Input value={f.code} onChange={(e) => set("code", e.target.value.toUpperCase())} required /></Field>
-            <Field label="Descrição" className="sm:col-span-2"><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></Field>
-            <Field label="Objetivo" className="sm:col-span-2"><Textarea value={f.objective} onChange={(e) => set("objective", e.target.value)} /></Field>
+            <Field label="Descrição"><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></Field>
+            <Field label="Objetivo"><Textarea value={f.objective} onChange={(e) => set("objective", e.target.value)} /></Field>
           </CardContent>
         </Card>
 
@@ -191,7 +192,7 @@ function NewIndicator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Peso"><Input type="number" min={0} value={f.weight} onChange={(e) => set("weight", Number(e.target.value))} /></Field>
+            
           </CardContent>
         </Card>
 

@@ -55,8 +55,8 @@ function EditIndicator() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!f.name || !f.code || !f.owner_sector_id) {
-      toast.error("Preencha nome, código e setor proprietário");
+    if (!f.name || !f.owner_sector_id) {
+      toast.error("Preencha nome e setor proprietário");
       return;
     }
     upsert(f);
@@ -71,11 +71,10 @@ function EditIndicator() {
       <form onSubmit={submit} className="space-y-4 max-w-4xl">
         <Card>
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
-          <CardContent className="grid sm:grid-cols-2 gap-3">
+          <CardContent className="grid sm:grid-cols-1 gap-3">
             <Field label="Nome"><Input value={f.name} onChange={(e) => set("name", e.target.value)} required /></Field>
-            <Field label="Código"><Input value={f.code} onChange={(e) => set("code", e.target.value.toUpperCase())} required /></Field>
-            <Field label="Descrição" className="sm:col-span-2"><Textarea value={f.description ?? ""} onChange={(e) => set("description", e.target.value)} /></Field>
-            <Field label="Objetivo" className="sm:col-span-2"><Textarea value={f.objective ?? ""} onChange={(e) => set("objective", e.target.value)} /></Field>
+            <Field label="Descrição"><Textarea value={f.description ?? ""} onChange={(e) => set("description", e.target.value)} /></Field>
+            <Field label="Objetivo"><Textarea value={f.objective ?? ""} onChange={(e) => set("objective", e.target.value)} /></Field>
           </CardContent>
         </Card>
 
@@ -175,7 +174,7 @@ function EditIndicator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Peso"><Input type="number" min={0} value={f.weight ?? 1} onChange={(e) => set("weight", Number(e.target.value))} /></Field>
+            
           </CardContent>
         </Card>
 

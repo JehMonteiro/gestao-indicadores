@@ -93,7 +93,6 @@ function IndicatorsList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
                 <TableHead>Indicador</TableHead>
                 <TableHead>Setor</TableHead>
                 <TableHead>Periodicidade</TableHead>
@@ -113,7 +112,6 @@ function IndicatorsList() {
                 const cs = classificationStyles(c);
                 return (
                   <TableRow key={i.id} className="cursor-pointer">
-                    <TableCell className="font-mono text-xs">{i.code}</TableCell>
                     <TableCell>
                       <Link to="/indicadores/$id" params={{ id: i.id }} className="hover:underline font-medium">{i.name}</Link>
                     </TableCell>

@@ -46,8 +46,7 @@ function IndicatorDetail() {
         </>}
       />
 
-      <div className="grid lg:grid-cols-4 gap-4 mb-4">
-        <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Código</p><p className="font-mono text-lg mt-1">{ind.code}</p></CardContent></Card>
+      <div className="grid lg:grid-cols-3 gap-4 mb-4">
         <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Setor</p>{sector && <Badge variant="outline" className="mt-1" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Periodicidade</p><p className="text-sm mt-1">{indicatorPeriodLabel(ind)}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Status</p><Badge variant="secondary" className="mt-1 capitalize">{ind.status}</Badge></CardContent></Card>
