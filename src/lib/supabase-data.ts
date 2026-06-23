@@ -386,7 +386,7 @@ export const dbWrite = {
     await supabase.rpc("log_audit", {
       _action: a.action,
       _entity_type: a.entity_type,
-      _entity_id: a.entity_id || null,
+      _entity_id: a.entity_id || (null as any),
       _payload: (a.new_data as any) ?? null,
     });
   },
