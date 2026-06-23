@@ -51,6 +51,14 @@ function EditIndicator() {
     );
   }
 
+  if (!f && indicators.length === 0) {
+    return (
+      <div>
+        <PageHeader title="Editar indicador" description="Carregando informações do indicador." />
+      </div>
+    );
+  }
+
   if (!f) {
     return (
       <div>
