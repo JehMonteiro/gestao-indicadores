@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
@@ -20,7 +20,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -38,24 +38,7 @@ function AuthPage() {
     navigate({ to: "/meu-painel", replace: true });
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/meu-painel`,
-        data: { full_name: fullName || email.split("@")[0] },
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message.includes("registered") ? "E-mail já cadastrado." : "Não foi possível criar a conta.");
-      return;
-    }
-    toast.success("Conta criada. Verifique seu e-mail se a confirmação estiver ativa.");
-  };
+
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -86,48 +69,23 @@ function AuthPage() {
           <Card>
             <CardHeader>
               <CardTitle>Acessar plataforma</CardTitle>
-              <CardDescription>Entre com sua conta ou crie uma nova.</CardDescription>
+              <CardDescription>Entre com sua conta corporativa.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="login">
-                <TabsList className="grid grid-cols-2 mb-4">
-                  <TabsTrigger value="login">Entrar</TabsTrigger>
-                  <TabsTrigger value="signup">Criar conta</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email-l">E-mail</Label>
-                      <Input id="email-l" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password-l">Senha</Label>
-                      <Input id="password-l" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
-                  </form>
-                </TabsContent>
-
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name-s">Nome completo</Label>
-                      <Input id="name-s" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email-s">E-mail</Label>
-                      <Input id="email-s" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password-s">Senha</Label>
-                      <Input id="password-s" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
-                      <p className="text-xs text-muted-foreground">Mínimo 6 caracteres. O primeiro usuário cadastrado recebe acesso de superadmin.</p>
-                    </div>
-                    <Button type="submit" className="w-full" disabled={loading}>{loading ? "Criando..." : "Criar conta"}</Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-l">E-mail</Label>
+                  <Input id="email-l" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-l">Senha</Label>
+                  <Input id="password-l" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Apenas administradores podem cadastrar novos usuários. Solicite acesso ao seu gestor.
+                </p>
+              </form>
             </CardContent>
           </Card>
         </div>
@@ -135,3 +93,4 @@ function AuthPage() {
     </div>
   );
 }
+

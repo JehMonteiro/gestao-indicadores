@@ -9,8 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import type { Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, Scope, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/app/page-header";
+import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/indicadores/novo")({
   head: () => ({ meta: [{ title: "Novo indicador" }] }),
@@ -24,6 +27,11 @@ function NewIndicator() {
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
   const navigate = useNavigate();
+  const { isAdmin, loading: adminLoading } = useIsAdmin();
+
+
+
+
 
   const [f, setF] = useState({
     name: "", code: "", description: "", objective: "",
@@ -58,6 +66,19 @@ function NewIndicator() {
     toast.success("Indicador criado com sucesso");
     navigate({ to: "/indicadores/$id", params: { id: ind.id } });
   };
+
+  if (!adminLoading && !isAdmin) {
+    return (
+      <div>
+        <PageHeader title="Novo indicador" description="Apenas administradores podem criar indicadores." />
+        <EmptyState
+          title="Acesso restrito"
+          description="Você não tem permissão para criar indicadores. Solicite ao administrador."
+          icon={<ShieldAlert className="size-5" />}
+        />
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
 import { useVisibleIndicators } from "@/lib/permissions";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/indicadores/")({
 
 function IndicatorsList() {
   const indicators = useVisibleIndicators();
+  const { isAdmin } = useIsAdmin();
   const sectors = useStore((s) => s.sectors);
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
@@ -37,7 +39,7 @@ function IndicatorsList() {
   return (
     <div>
       <PageHeader title="Indicadores" description="Catálogo de indicadores por setor."
-        actions={<Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>}
+        actions={isAdmin ? <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button> : null}
       />
 
       <Card className="mb-4">

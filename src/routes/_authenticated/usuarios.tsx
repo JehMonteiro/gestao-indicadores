@@ -13,6 +13,9 @@ import { Pencil, Plus, UserMinus, UserPlus } from "lucide-react";
 import { useState } from "react";
 import type { Profile, SectorRole, FranchiseRole, GlobalRole } from "@/mocks/types";
 import { toast } from "sonner";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+import { EmptyState } from "@/components/app/page-header";
+import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({ meta: [{ title: "Usuários" }] }),
@@ -37,6 +40,20 @@ function UsersPage() {
   const removeUF = useStore((s) => s.removeUserFranchise);
 
   const [editing, setEditing] = useState<Profile | null>(null);
+  const { isAdmin, loading: adminLoading } = useIsAdmin();
+
+  if (!adminLoading && !isAdmin) {
+    return (
+      <div>
+        <PageHeader title="Usuários" description="Apenas administradores podem gerenciar usuários." />
+        <EmptyState
+          title="Acesso restrito"
+          description="Você não tem permissão para visualizar ou cadastrar usuários. Solicite ao administrador."
+          icon={<ShieldAlert className="size-5" />}
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -45,6 +62,7 @@ function UsersPage() {
           <ProfileDialog onSave={(p) => { upsertProfile(p); toast.success("Usuário salvo"); }} />
         }
       />
+
       <Card><Table>
         <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Perfil global</TableHead><TableHead>Tipo</TableHead><TableHead>Setores</TableHead><TableHead>Franquias</TableHead><TableHead></TableHead></TableRow></TableHeader>
         <TableBody>
