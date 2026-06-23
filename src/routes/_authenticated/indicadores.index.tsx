@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/mocks/store";
+import { ImportIndicatorsDialog } from "@/components/app/import-indicators-dialog";
 
 export const Route = createFileRoute("/_authenticated/indicadores/")({
   head: () => ({ meta: [{ title: "Indicadores — Gestão de Indicadores" }] }),
@@ -58,7 +59,12 @@ function IndicatorsList() {
   return (
     <div>
       <PageHeader title="Indicadores" description="Catálogo de indicadores por setor."
-        actions={isAdmin ? <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button> : null}
+        actions={isAdmin ? (
+          <div className="flex gap-2">
+            <ImportIndicatorsDialog />
+            <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>
+          </div>
+        ) : null}
       />
 
       <Card className="mb-4">
