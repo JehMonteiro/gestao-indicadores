@@ -182,7 +182,11 @@ function ProfileDialog({ onSave }: { onSave: (p: Profile) => void }) {
             </div>
           </div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => { onSave(f); setOpen(false); }}>Salvar</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => {
+          onSave({ ...f, id: newId() });
+          setOpen(false);
+          setF({ id: newId(), full_name: "", email: "", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: new Date().toISOString() });
+        }}>Salvar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
