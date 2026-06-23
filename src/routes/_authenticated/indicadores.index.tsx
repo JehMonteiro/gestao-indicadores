@@ -31,16 +31,28 @@ function IndicatorsList() {
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const settings = useStore((s) => s.settings);
+  const deleteIndicator = useStore((s) => s.deleteIndicator);
+  const logAudit = useStore((s) => s.logAudit);
+  const user = useCurrentUser();
 
   const [q, setQ] = useState("");
   const [sectorId, setSectorId] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
+  const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = indicators.filter((i) =>
     (q === "" || i.name.toLowerCase().includes(q.toLowerCase()) || i.code.toLowerCase().includes(q.toLowerCase())) &&
     (sectorId === "all" || i.owner_sector_id === sectorId) &&
     (status === "all" || i.status === status)
   );
+
+  const confirmDelete = () => {
+    if (!toDelete) return;
+    deleteIndicator(toDelete.id);
+    logAudit({ user_id: user?.id ?? "", action: "delete", entity_type: "indicator", entity_id: toDelete.id });
+    toast.success(`Indicador "${toDelete.name}" excluído`);
+    setToDelete(null);
+  };
 
   return (
     <div>
