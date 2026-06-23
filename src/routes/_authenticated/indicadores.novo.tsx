@@ -9,8 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import type { Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, Scope, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/app/page-header";
+import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/indicadores/novo")({
   head: () => ({ meta: [{ title: "Novo indicador" }] }),
