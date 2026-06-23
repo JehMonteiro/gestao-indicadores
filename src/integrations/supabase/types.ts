@@ -528,6 +528,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clear_demo_data: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -548,6 +549,7 @@ export type Database = {
         Args: { _sector_id: string; _user_id: string }
         Returns: boolean
       }
+      seed_demo_data: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role:
