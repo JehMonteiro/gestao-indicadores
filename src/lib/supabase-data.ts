@@ -383,12 +383,11 @@ export const dbWrite = {
     });
   },
   async audit(a: { user_id: string; action: string; entity_type: string; entity_id: string; new_data?: unknown }) {
-    await supabase.from("audit_logs").insert({
-      user_id: a.user_id || null,
-      action: a.action,
-      entity_type: a.entity_type,
-      entity_id: a.entity_id || null,
-      payload: (a.new_data as any) ?? null,
+    await supabase.rpc("log_audit", {
+      _action: a.action,
+      _entity_type: a.entity_type,
+      _entity_id: a.entity_id || (null as any),
+      _payload: (a.new_data as any) ?? null,
     });
   },
 };
