@@ -13,6 +13,9 @@ import { Pencil, Plus, UserMinus, UserPlus } from "lucide-react";
 import { useState } from "react";
 import type { Profile, SectorRole, FranchiseRole, GlobalRole } from "@/mocks/types";
 import { toast } from "sonner";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+import { EmptyState } from "@/components/app/page-header";
+import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({ meta: [{ title: "Usuários" }] }),
