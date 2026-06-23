@@ -73,7 +73,6 @@ function mapIndicator(row: any): Indicator {
     shared_sector_ids: [],
     franchise_id: row.franchise_id ?? undefined,
     strategic_pillar: row.strategic_pillar ?? undefined,
-    audience: "ambos",
     audience: row.audience ?? "ambos",
     scope: row.scope,
     responsible_ids: row.responsible_user_id ? [row.responsible_user_id] : [],
