@@ -215,10 +215,12 @@ function UserMenu() {
   const navigate = useNavigate();
   if (!user) return null;
 
-  const signOut = () => {
+  const signOut = async () => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    await supabase.auth.signOut();
     setCurrentUser(null);
     toast.success("Sessão encerrada");
-    navigate({ to: "/auth" });
+    navigate({ to: "/auth", replace: true });
   };
 
   return (
