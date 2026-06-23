@@ -1,3 +1,4 @@
+import { newId } from "@/lib/ids";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { z } from "zod";

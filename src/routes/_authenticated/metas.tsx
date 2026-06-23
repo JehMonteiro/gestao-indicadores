@@ -1,3 +1,4 @@
+import { newId } from "@/lib/ids";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore, useCurrentUser } from "@/mocks/store";
