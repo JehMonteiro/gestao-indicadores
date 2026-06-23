@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/indicadores/")({
 
 function IndicatorsList() {
   const indicators = useVisibleIndicators();
+  const { isAdmin } = useIsAdmin();
   const sectors = useStore((s) => s.sectors);
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
