@@ -262,24 +262,23 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SheetContent side="left" className="p-0 w-64 bg-sidebar">
           <Sidebar onNavigate={() => setOpen(false)} />
         </SheetContent>
+        <div className="flex-1 min-w-0 flex flex-col">
+          <header className="h-14 border-b bg-card flex items-center px-3 lg:px-6 gap-2 sticky top-0 z-20">
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="size-4" />
+              </Button>
+            </SheetTrigger>
+            <ContextSwitcher />
+            <div className="flex-1" />
+            <NotificationsBell />
+            <UserMenu />
+          </header>
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-4 sm:p-6 max-w-[1400px] mx-auto w-full">{children}</div>
+          </main>
+        </div>
       </Sheet>
-
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="h-14 border-b bg-card flex items-center px-3 lg:px-6 gap-2 sticky top-0 z-20">
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
-              <Menu className="size-4" />
-            </Button>
-          </SheetTrigger>
-          <ContextSwitcher />
-          <div className="flex-1" />
-          <NotificationsBell />
-          <UserMenu />
-        </header>
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 max-w-[1400px] mx-auto w-full">{children}</div>
-        </main>
-      </div>
     </div>
   );
 }
