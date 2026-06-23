@@ -51,23 +51,15 @@ function EditIndicator() {
     );
   }
 
-  if (!f && indicators.length === 0) {
-    return (
-      <div>
-        <PageHeader title="Editar indicador" description="Carregando informações do indicador." />
-      </div>
-    );
-  }
-
   if (!f) {
     return (
       <div>
         <PageHeader title="Editar indicador" />
         <EmptyState
-          title="Abra a edição pela lista de indicadores"
-          description="Os dados ainda estão sendo sincronizados. Volte para a lista e toque no ícone de edição do indicador."
+          title={indicators.length === 0 ? "Carregando informações do indicador" : "Abra a edição pela lista de indicadores"}
+          description={indicators.length === 0 ? "Aguarde a sincronização dos dados." : "Volte para a lista e toque no ícone de edição do indicador."}
           icon={<ShieldAlert className="size-5" />}
-          action={<Button asChild><Link to="/indicadores">Voltar para indicadores</Link></Button>}
+          action={indicators.length === 0 ? undefined : <Button asChild><Link to="/indicadores">Voltar para indicadores</Link></Button>}
         />
       </div>
     );
