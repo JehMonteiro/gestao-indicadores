@@ -1,128 +1,66 @@
+## Fase 2 — Backend real (Lovable Cloud)
 
-# Plano — Gestão de Indicadores (Fase 1: Frontend com dados mockados)
+Cloud ativado. Vou migrar o app dos dados mockados para o backend real, em 4 etapas.
 
-Foco desta fase: construir toda a interface navegável, responsiva e com aparência corporativa, usando dados mockados em TypeScript. Autenticação real, banco e RLS entram na Fase 2 (Lovable Cloud já será ativada ao iniciar a Fase 2). Toda a estrutura de tipos e mocks será montada espelhando o schema final, para a migração ser direta.
+### Etapa 1 — Schema do banco (migração SQL)
 
-## Identidade visual
+Tabelas (todas com RLS + GRANTs):
 
-- Estética: corporativa minimalista, densidade média, cantos suaves (radius 0.5rem), tipografia clara.
-- Fontes: Inter (UI) + JetBrains Mono (números/códigos) via `@fontsource`.
-- Paleta (tokens semânticos em `src/styles.css`, oklch):
-  - Primária azul corporativo profundo, secundária cinza-azulado, accent teal.
-  - Status: verde (atingido), âmbar (atenção), vermelho (crítico), cinza (sem info), azul (informativo).
-- Componentes shadcn já presentes; nada hardcoded de cor.
+- `profiles` — espelho de `auth.users` (id, full_name, avatar_url, status)
+- `app_role` (enum): `superadmin`, `admin_corporativo`, `gestor_setor`, `gestor_franquia`, `analista`, `colaborador`, `franqueado`, `auditor`
+- `user_roles` — papel global por usuário (separado do profile, padrão de segurança)
+- `sectors` — setores corporativos (nome, código, cor, status)
+- `franchises` — unidades franqueadas (nome, código, cidade/UF, status)
+- `user_sectors` — vínculo usuário↔setor + função no setor
+- `user_franchises` — vínculo usuário↔franquia + função
+- `indicators` — catálogo (código, nome, fórmula, unidade, tipo de valor, direção, escopo, periodicidade, setor dono, requer aprovação, permite anexo, status)
+- `targets` — metas por indicador + período + franquia (opcional)
+- `indicator_entries` — lançamentos (período, valor, status do workflow, revisão, aprovador, motivo de rejeição)
+- `audit_logs` — auditoria (usuário, ação, entidade, payload)
+- `notifications` — notificações in-app
+- `app_settings` — limiares de classificação (single row)
 
-## Arquitetura de rotas (TanStack Start)
+Função `SECURITY DEFINER` `public.has_role(uuid, app_role)` para uso em policies sem recursão. Funções auxiliares `is_member_of_sector(uuid)` e `is_member_of_franchise(uuid)`.
 
-Layout protegido fake via `_authenticated/route.tsx` que lê um "usuário simulado" do contexto (trocável no topo). Sem chamadas Supabase ainda.
+### Etapa 2 — Autenticação
 
-```
-src/routes/
-  __root.tsx                  (providers + toaster)
-  index.tsx                   (redirect → /auth ou /visao-geral)
-  auth.tsx                    (login mock + seletor de perfil de demo)
-  _authenticated/
-    route.tsx                 (AppShell: sidebar + header + seletor de contexto)
-    visao-geral.tsx           (Dashboard executivo)
-    meu-painel.tsx
-    meus-indicadores.tsx
-    lancamentos.index.tsx
-    lancamentos.novo.tsx
-    lancamentos.$id.tsx
-    aprovacoes.tsx
-    setores.index.tsx
-    setores.$id.tsx
-    franquias.index.tsx
-    franquias.$id.tsx
-    indicadores.index.tsx
-    indicadores.novo.tsx
-    indicadores.$id.tsx
-    metas.tsx
-    relatorios.tsx
-    usuarios.tsx
-    auditoria.tsx
-    configuracoes.tsx
-    perfil.tsx
-```
+- Página `/auth` real (email+senha, signup + login, redirect pós-login para `/meu-painel`)
+- Trigger `on_auth_user_created` cria `profiles` automaticamente
+- `_authenticated/route.tsx` continua gateando o subtree (já é o padrão do template)
+- Wire de `onAuthStateChange` em `__root.tsx`
+- Botão "Sair" no shell já existe — apontar para `supabase.auth.signOut()`
 
-Menu lateral filtrado pelo perfil global do usuário simulado. Itens sem permissão não aparecem.
+### Etapa 3 — Camada de dados (server functions + React Query)
 
-## Camada de dados mockada
+Substituir o `useStore` Zustand por server functions tipadas em `src/lib/*.functions.ts`:
 
-`src/mocks/` com tipos TypeScript espelhando o schema da seção 13 do briefing:
+- `sectors.functions.ts`, `franchises.functions.ts`, `indicators.functions.ts`, `targets.functions.ts`, `entries.functions.ts`, `users.functions.ts`, `audit.functions.ts`, `notifications.functions.ts`, `settings.functions.ts`
+- Todas com `requireSupabaseAuth` (RLS aplica como o usuário logado)
+- Validação Zod em `.inputValidator()`
+- React Query (`useSuspenseQuery` + `ensureQueryData` nos loaders) substitui leitura direta do store
+- Mutations via `useMutation` + `queryClient.invalidateQueries`
 
-- `types.ts` — enums (GlobalRole, SectorRole, ValueType, Frequency, Direction, EntryStatus, etc.) e interfaces (Profile, Sector, Franchise, Indicator, IndicatorTarget, IndicatorEntry, AuditLog, Notification…).
-- `seed.ts` — gera os dados de demonstração do briefing (5 setores, 3 franquias, 10 indicadores, ~8 usuários cobrindo todos os perfis, metas e ~60 lançamentos em diferentes status/períodos).
-- `store.ts` — store Zustand persistida em `localStorage` com:
-  - usuário atual + troca rápida ("Entrar como…" no header para demo).
-  - CRUD em memória de setores, franquias, indicadores, metas, lançamentos, notificações, logs.
-  - Ação "Resetar dados de demonstração" em Configurações.
+### Etapa 4 — Seed de demonstração + reset
 
-> Importante: este store é apenas para a fase de UI. Na Fase 2 ele será substituído por server functions + Supabase com a mesma interface, mantendo as telas estáveis.
+- Botão "Carregar dados demo" em `/configuracoes` chama uma server function `seedDemoData` (restrita a `superadmin`) que insere setores, franquias, indicadores, metas e alguns lançamentos de exemplo
+- Botão "Limpar dados demo" chama `clearDemoData` (apaga apenas registros marcados como `is_demo = true`)
+- Primeiro usuário cadastrado recebe automaticamente role `superadmin` (via trigger)
 
-## Módulos / telas
+### Decisões técnicas
 
-1. **Autenticação (mock)**: tela de login com e-mail/senha (qualquer credencial entra) + cards "Entrar como" para cada perfil demo, recuperação de senha e primeiro acesso (UI apenas).
-2. **AppShell**: sidebar recolhível com ícones, header com busca, notificações, avatar e seletor de contexto (setor/franquia ativa quando aplicável).
-3. **Visão geral / Dashboards**: cards de KPIs, gráficos (Recharts — linha de evolução, barras por setor, rosca de status, ranking de franquias), listas de pendências/atrasos. Versões diferentes para executivo, setor, franquia e "Meu painel".
-4. **Indicadores**: lista com filtros (setor, categoria, público, status, periodicidade), página de detalhe com aba de definição/metas/histórico, formulário de cadastro/edição com todos os campos da seção 5 e validação Zod.
-5. **Metas**: lista e formulário com escopo (empresa/setor/franquia/usuário) e períodos.
-6. **Lançamentos**: lista com filtros, formulário de lançamento (rascunho/envio), página de detalhe com revisões e anexos (mock de upload).
-7. **Aprovações**: central com abas Pendentes/Aprovados/Rejeitados/Atrasados, ações aprovar/rejeitar (com motivo).
-8. **Setores / Franquias / Usuários**: CRUD com tabelas paginadas, dialogs de criação/edição, gestão de vínculos (usuário ↔ setor com papel, usuário ↔ franquia com papel).
-9. **Relatórios**: relatório detalhado por indicador + exportação CSV (cliente) e botão "PDF (em breve)".
-10. **Auditoria**: tabela de logs filtrável (gerada a partir das ações do store).
-11. **Configurações**: limites de classificação (atingido/atenção/crítico), nome da plataforma, cores principais, botão "Limpar dados de demonstração".
-12. **Perfil do usuário**: dados básicos editáveis no mock.
+- Edge functions: nenhuma nesta fase (tudo via `createServerFn`)
+- `attachSupabaseAuth` já estará registrado em `src/start.ts` (necessário para fns autenticadas)
+- Loaders em rotas `_authenticated/*` podem chamar fns protegidas com segurança
+- Componentes lêem via `useSuspenseQuery`; nada de `useEffect` + `fetch`
+- O store Zustand é removido ao final da etapa 3; `useCurrentUser` passa a vir de um hook `useAuth()` baseado na sessão Supabase
 
-## Cálculo de desempenho
+### Ordem de execução
 
-Função pura `computeAchievement(entry, target, indicator)` cobrindo:
-- maior-melhor, menor-melhor, faixa ideal, meta exata,
-- proteção contra divisão por zero,
-- classificação configurável (lê limites das configurações),
-- índice consolidado ponderado por peso.
+1. Migração SQL (tabelas + RLS + GRANTs + trigger de profile + funções helper)
+2. Auth: refatorar `/auth` + `__root.tsx` + remover login mockado
+3. Server functions + React Query (substituir mocks rota a rota: setores → franquias → indicadores → metas → lançamentos → aprovações → usuários → auditoria → notificações)
+4. Seed/reset demo + ajustes finais (permissões visíveis, estados de loading/erro, responsividade)
 
-Coberta por testes unitários básicos com `vitest`.
+Ao final desta fase o app está rodando 100% no Lovable Cloud, sem dados mockados.
 
-## Estados de UX
-
-- Skeletons em todas as listas/dashboards.
-- Empty states ilustrados com orientação ("Nenhum indicador cadastrado neste setor — Criar indicador").
-- Toasts (sonner) para sucesso/erro.
-- Dialog de confirmação antes de arquivar/excluir.
-- Mensagens de permissão amigáveis quando o perfil simulado não tem acesso.
-- Datas em pt-BR (`Intl.DateTimeFormat`), moeda em BRL, números com separador local.
-
-## Responsividade
-
-Sidebar vira drawer no mobile; tabelas com scroll horizontal + cards alternativos em telas pequenas; gráficos responsivos.
-
-## Detalhes técnicos
-
-- Stack: React 19 + TanStack Start/Router/Query, Tailwind v4, shadcn/ui, Recharts, Zustand (persist), Zod + react-hook-form, date-fns (locale pt-BR), sonner.
-- Instalar: `@fontsource/inter`, `@fontsource/jetbrains-mono`, `zustand`, `recharts`, `date-fns`.
-- Sem Lovable Cloud ainda — todas as rotas são públicas em build, mas o AppShell exige "login simulado" via store (redireciona para `/auth` quando não há usuário).
-- Tipos e mocks ficam isolados em `src/mocks/` para troca fácil por server functions na Fase 2.
-- Cada rota define `head()` com title/description próprios.
-
-## Fora desta fase (Fase 2, após aprovação visual)
-
-- Ativar Lovable Cloud, criar migrações com todas as tabelas, enums, índices, soft delete.
-- Funções `has_role`, `is_sector_manager`, `belongs_to_franchise`, etc.
-- RLS por tabela conforme seção 14.
-- Auth real (email/senha) + perfis + trigger de criação de profile.
-- Server functions substituindo o store mockado (mesma interface).
-- Storage para anexos com policies espelhando o lançamento.
-- Notificações persistidas; auditoria escrita por triggers.
-- Exportações PDF e melhorias de relatório.
-
-## Critérios de aceite desta fase
-
-- Navegação completa entre todas as páginas listadas, sem telas em branco.
-- Troca de "usuário demo" altera menu, dashboards e permissões visuais.
-- CRUD funcional em memória para setores, franquias, indicadores, metas, lançamentos.
-- Fluxo de aprovação funciona ponta a ponta (rascunho → enviado → aprovado/rejeitado com revisão).
-- Cálculo de atingimento e classificação corretos para os 4 tipos de regra.
-- Layout responsivo em desktop/tablet/mobile, estados de loading/vazio/erro presentes.
-- Botão de "Resetar dados de demonstração" funciona.
+Posso seguir?

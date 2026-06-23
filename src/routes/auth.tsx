@@ -1,58 +1,60 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useStore } from "@/mocks/store";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ShieldCheck, ChevronRight } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  beforeLoad: () => {
-    if (typeof window !== "undefined") {
-      const raw = localStorage.getItem("gi-store-v1");
-      if (raw && JSON.parse(raw)?.state?.currentUserId) {
-        throw redirect({ to: "/meu-painel" });
-      }
-    }
-  },
   head: () => ({ meta: [{ title: "Entrar — Gestão de Indicadores" }] }),
   component: AuthPage,
 });
 
-const demoRoles: Record<string, string> = {
-  superadmin: "Superadministrador",
-  admin_corporativo: "Administrador corporativo",
-  gestor_setor: "Gestor de setor",
-  colaborador: "Colaborador interno",
-  gestor_franquia: "Gestor de franquia",
-  franqueado: "Franqueado",
-  auditor: "Auditor / visualizador",
-};
-
 function AuthPage() {
-  const profiles = useStore((s) => s.profiles);
-  const setCurrentUser = useStore((s) => s.setCurrentUser);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
 
-  const enterAs = (id: string, name: string) => {
-    setCurrentUser(id);
-    toast.success(`Bem-vindo(a), ${name}`);
-    navigate({ to: "/meu-painel" });
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/meu-painel", replace: true });
+    });
+  }, [navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) { toast.error("Não foi possível entrar. Verifique e-mail e senha."); return; }
+    toast.success("Bem-vindo(a)!");
+    navigate({ to: "/meu-painel", replace: true });
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const found = profiles.find((p) => p.email.toLowerCase() === email.toLowerCase());
-    if (!found) {
-      toast.error("Usuário não encontrado nos dados de demonstração");
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/meu-painel`,
+        data: { full_name: fullName || email.split("@")[0] },
+      },
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message.includes("registered") ? "E-mail já cadastrado." : "Não foi possível criar a conta.");
       return;
     }
-    enterAs(found.id, found.full_name);
+    toast.success("Conta criada. Verifique seu e-mail se a confirmação estiver ativa.");
   };
 
   return (
@@ -76,51 +78,56 @@ function AuthPage() {
             lançamentos, histórico auditável e dashboards consolidados.
           </p>
         </div>
-        <p className="text-xs opacity-60">© {new Date().getFullYear()} — Versão de demonstração</p>
+        <p className="text-xs opacity-60">© 2026</p>
       </div>
 
       <div className="flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-md">
           <Card>
             <CardHeader>
-              <CardTitle>Entrar</CardTitle>
-              <CardDescription>Acesse com seu e-mail corporativo.</CardDescription>
+              <CardTitle>Acessar plataforma</CardTitle>
+              <CardDescription>Entre com sua conta ou crie uma nova.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input id="email" type="email" placeholder="voce@empresa.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
-                  <p className="text-xs text-muted-foreground">Recuperação de senha e primeiro acesso disponíveis na versão completa.</p>
-                </div>
-                <Button type="submit" className="w-full">Entrar</Button>
-              </form>
-            </CardContent>
-          </Card>
+              <Tabs defaultValue="login">
+                <TabsList className="grid grid-cols-2 mb-4">
+                  <TabsTrigger value="login">Entrar</TabsTrigger>
+                  <TabsTrigger value="signup">Criar conta</TabsTrigger>
+                </TabsList>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Entrar como (demonstração)</CardTitle>
-              <CardDescription>Experimente cada perfil para ver as permissões.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {profiles.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => enterAs(p.id, p.full_name)}
-                  className="w-full flex items-center justify-between rounded-md border border-transparent hover:border-border hover:bg-muted/50 px-3 py-2 text-left transition"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{p.full_name}</p>
-                    <p className="text-xs text-muted-foreground">{demoRoles[p.global_role]} · {p.email}</p>
-                  </div>
-                  <ChevronRight className="size-4 text-muted-foreground" />
-                </button>
-              ))}
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email-l">E-mail</Label>
+                      <Input id="email-l" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password-l">Senha</Label>
+                      <Input id="password-l" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name-s">Nome completo</Label>
+                      <Input id="name-s" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email-s">E-mail</Label>
+                      <Input id="email-s" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password-s">Senha</Label>
+                      <Input id="password-s" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                      <p className="text-xs text-muted-foreground">Mínimo 6 caracteres. O primeiro usuário cadastrado recebe acesso de superadmin.</p>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>{loading ? "Criando..." : "Criar conta"}</Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
@@ -128,4 +135,3 @@ function AuthPage() {
     </div>
   );
 }
-// touch

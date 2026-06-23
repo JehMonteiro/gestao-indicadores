@@ -14,16 +14,574 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_settings: {
+        Row: {
+          id: number
+          threshold_danger: number
+          threshold_success: number
+          threshold_warning: number
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          threshold_danger?: number
+          threshold_success?: number
+          threshold_warning?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          threshold_danger?: number
+          threshold_success?: number
+          threshold_warning?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          payload: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      franchises: {
+        Row: {
+          city: string | null
+          code: string
+          created_at: string
+          id: string
+          is_demo: boolean
+          name: string
+          opened_at: string | null
+          state: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          name: string
+          opened_at?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          name?: string
+          opened_at?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      indicator_entries: {
+        Row: {
+          actual_value: number
+          approved_at: string | null
+          approved_by: string | null
+          comment: string | null
+          created_at: string
+          franchise_id: string | null
+          id: string
+          indicator_id: string
+          is_demo: boolean
+          justification: string | null
+          period_end: string
+          period_start: string
+          rejection_reason: string | null
+          revision_number: number
+          sector_id: string | null
+          status: Database["public"]["Enums"]["entry_status"]
+          submitted_at: string | null
+          target_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_value: number
+          approved_at?: string | null
+          approved_by?: string | null
+          comment?: string | null
+          created_at?: string
+          franchise_id?: string | null
+          id?: string
+          indicator_id: string
+          is_demo?: boolean
+          justification?: string | null
+          period_end: string
+          period_start: string
+          rejection_reason?: string | null
+          revision_number?: number
+          sector_id?: string | null
+          status?: Database["public"]["Enums"]["entry_status"]
+          submitted_at?: string | null
+          target_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_value?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          comment?: string | null
+          created_at?: string
+          franchise_id?: string | null
+          id?: string
+          indicator_id?: string
+          is_demo?: boolean
+          justification?: string | null
+          period_end?: string
+          period_start?: string
+          rejection_reason?: string | null
+          revision_number?: number
+          sector_id?: string | null
+          status?: Database["public"]["Enums"]["entry_status"]
+          submitted_at?: string | null
+          target_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_entries_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_entries_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_entries_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_entries_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicators: {
+        Row: {
+          allows_attachment: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction: Database["public"]["Enums"]["indicator_direction"]
+          formula: string | null
+          id: string
+          is_demo: boolean
+          name: string
+          owner_sector_id: string | null
+          periodicity: Database["public"]["Enums"]["periodicity"]
+          requires_approval: boolean
+          responsible_user_id: string | null
+          scope: Database["public"]["Enums"]["indicator_scope"]
+          status: Database["public"]["Enums"]["indicator_status"]
+          unit: string | null
+          updated_at: string
+          value_type: Database["public"]["Enums"]["value_type"]
+        }
+        Insert: {
+          allows_attachment?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction?: Database["public"]["Enums"]["indicator_direction"]
+          formula?: string | null
+          id?: string
+          is_demo?: boolean
+          name: string
+          owner_sector_id?: string | null
+          periodicity?: Database["public"]["Enums"]["periodicity"]
+          requires_approval?: boolean
+          responsible_user_id?: string | null
+          scope?: Database["public"]["Enums"]["indicator_scope"]
+          status?: Database["public"]["Enums"]["indicator_status"]
+          unit?: string | null
+          updated_at?: string
+          value_type?: Database["public"]["Enums"]["value_type"]
+        }
+        Update: {
+          allows_attachment?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction?: Database["public"]["Enums"]["indicator_direction"]
+          formula?: string | null
+          id?: string
+          is_demo?: boolean
+          name?: string
+          owner_sector_id?: string | null
+          periodicity?: Database["public"]["Enums"]["periodicity"]
+          requires_approval?: boolean
+          responsible_user_id?: string | null
+          scope?: Database["public"]["Enums"]["indicator_scope"]
+          status?: Database["public"]["Enums"]["indicator_status"]
+          unit?: string | null
+          updated_at?: string
+          value_type?: Database["public"]["Enums"]["value_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicators_owner_sector_id_fkey"
+            columns: ["owner_sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          is_demo: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id: string
+          is_demo?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_demo?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sectors: {
+        Row: {
+          code: string
+          color: string
+          created_at: string
+          description: string | null
+          id: string
+          is_demo: boolean
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_demo?: boolean
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_demo?: boolean
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      targets: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          franchise_id: string | null
+          id: string
+          indicator_id: string
+          is_demo: boolean
+          max_value: number | null
+          min_value: number | null
+          period_end: string
+          period_start: string
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          franchise_id?: string | null
+          id?: string
+          indicator_id: string
+          is_demo?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          period_end: string
+          period_start: string
+          target_value: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          franchise_id?: string | null
+          id?: string
+          indicator_id?: string
+          is_demo?: boolean
+          max_value?: number | null
+          min_value?: number | null
+          period_end?: string
+          period_start?: string
+          target_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "targets_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "targets_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_franchises: {
+        Row: {
+          created_at: string
+          franchise_id: string
+          id: string
+          role: Database["public"]["Enums"]["franchise_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          franchise_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["franchise_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          franchise_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["franchise_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_franchises_franchise_id_fkey"
+            columns: ["franchise_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_sectors: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["sector_role"]
+          sector_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["sector_role"]
+          sector_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["sector_role"]
+          sector_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sectors_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_manager_of_sector: {
+        Args: { _sector_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_member_of_franchise: {
+        Args: { _franchise_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_member_of_sector: {
+        Args: { _sector_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "superadmin"
+        | "admin_corporativo"
+        | "gestor_setor"
+        | "gestor_franquia"
+        | "analista"
+        | "colaborador"
+        | "franqueado"
+        | "auditor"
+      entry_status:
+        | "rascunho"
+        | "enviado"
+        | "aprovado"
+        | "rejeitado"
+        | "atrasado"
+      franchise_role: "franqueado" | "gestor" | "operador" | "leitor"
+      indicator_direction:
+        | "maior_melhor"
+        | "menor_melhor"
+        | "faixa_ideal"
+        | "meta_exata"
+      indicator_scope: "corporativo" | "setor" | "franquia"
+      indicator_status: "rascunho" | "ativo" | "pausado" | "arquivado"
+      periodicity:
+        | "diaria"
+        | "semanal"
+        | "mensal"
+        | "trimestral"
+        | "semestral"
+        | "anual"
+      sector_role: "gestor" | "analista" | "colaborador" | "leitor"
+      value_type: "inteiro" | "decimal" | "percentual" | "moeda"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +708,43 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "superadmin",
+        "admin_corporativo",
+        "gestor_setor",
+        "gestor_franquia",
+        "analista",
+        "colaborador",
+        "franqueado",
+        "auditor",
+      ],
+      entry_status: [
+        "rascunho",
+        "enviado",
+        "aprovado",
+        "rejeitado",
+        "atrasado",
+      ],
+      franchise_role: ["franqueado", "gestor", "operador", "leitor"],
+      indicator_direction: [
+        "maior_melhor",
+        "menor_melhor",
+        "faixa_ideal",
+        "meta_exata",
+      ],
+      indicator_scope: ["corporativo", "setor", "franquia"],
+      indicator_status: ["rascunho", "ativo", "pausado", "arquivado"],
+      periodicity: [
+        "diaria",
+        "semanal",
+        "mensal",
+        "trimestral",
+        "semestral",
+        "anual",
+      ],
+      sector_role: ["gestor", "analista", "colaborador", "leitor"],
+      value_type: ["inteiro", "decimal", "percentual", "moeda"],
+    },
   },
 } as const
