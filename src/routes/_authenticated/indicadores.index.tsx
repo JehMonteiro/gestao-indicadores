@@ -28,6 +28,7 @@ function IndicatorsList() {
   const indicators = useVisibleIndicators();
   const { isAdmin } = useIsAdmin();
   const sectors = useStore((s) => s.sectors);
+  const franchises = useStore((s) => s.franchises);
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const settings = useStore((s) => s.settings);
