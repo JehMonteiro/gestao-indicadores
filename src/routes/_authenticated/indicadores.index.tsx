@@ -100,6 +100,7 @@ function IndicatorsList() {
                 <TableHead>Último resultado</TableHead>
                 <TableHead>Atingimento</TableHead>
                 <TableHead>Status</TableHead>
+                {isAdmin && <TableHead className="w-20 text-right">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -121,6 +122,18 @@ function IndicatorsList() {
                     <TableCell className="font-mono text-sm">{e ? formatValue(e.actual_value, i.value_type, i.unit) : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={cs.className}>{pct != null ? `${Math.round(pct)}% · ${cs.label}` : cs.label}</Badge></TableCell>
                     <TableCell><Badge variant="secondary" className="capitalize">{i.status}</Badge></TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button asChild size="icon" variant="ghost" title="Editar">
+                            <Link to="/indicadores/$id/editar" params={{ id: i.id }}><Pencil className="size-4" /></Link>
+                          </Button>
+                          <Button size="icon" variant="ghost" title="Excluir" onClick={() => setToDelete({ id: i.id, name: i.name })}>
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -128,6 +141,23 @@ function IndicatorsList() {
           </Table>
         </Card>
       )}
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir indicador?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O indicador "{toDelete?.name}" e seus dados relacionados serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
