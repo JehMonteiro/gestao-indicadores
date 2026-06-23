@@ -32,15 +32,12 @@ function FranchisesPage() {
         actions={canEdit && <FranchiseDialog onSave={upsert} />}
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Cidade/UF</TableHead><TableHead>Região</TableHead><TableHead>Início</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
         <TableBody>
           {franchises.map((f) => (
             <TableRow key={f.id}>
               <TableCell className="font-medium">{f.name}</TableCell>
               <TableCell className="font-mono text-xs">{f.code}</TableCell>
-              <TableCell>{f.city}/{f.state}</TableCell>
-              <TableCell>{f.region}</TableCell>
-              <TableCell>{formatDate(f.start_date)}</TableCell>
               <TableCell><Badge variant={f.status === "ativa" ? "secondary" : "outline"} className="capitalize">{f.status}</Badge></TableCell>
               <TableCell className="text-right">{canEdit && <FranchiseDialog initial={f} onSave={(x) => { upsert(x); toast.success("Atualizado"); }} onDelete={() => { remove(f.id); toast.success("Removido"); }} />}</TableCell>
             </TableRow>
