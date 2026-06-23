@@ -91,7 +91,7 @@ const initial: State = {
   settings: defaultSettings,
 };
 
-const uid = () => `id-${Math.random().toString(36).slice(2, 10)}`;
+const uid = () => newId();
 const now = () => new Date().toISOString();
 
 export const useStore = create<State & Actions>()(
