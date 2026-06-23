@@ -16,6 +16,7 @@ import type {
   UserSector,
 } from "./types";
 import { dbWrite, fireAndForget } from "@/lib/supabase-data";
+import { newId } from "@/lib/ids";
 
 type State = {
   currentUserId: string | null;
