@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil } from "lucide-react";
 import type { Franchise } from "@/mocks/types";
-import { formatDate } from "@/lib/format";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/franquias/")({
