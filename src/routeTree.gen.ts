@@ -9,38 +9,328 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedVisaoGeralRouteImport } from './routes/_authenticated/visao-geral'
+import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
+import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedMeusIndicadoresRouteImport } from './routes/_authenticated/meus-indicadores'
+import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
+import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
+import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
+import { Route as AuthenticatedAprovacoesRouteImport } from './routes/_authenticated/aprovacoes'
+import { Route as AuthenticatedSetoresIndexRouteImport } from './routes/_authenticated/setores.index'
+import { Route as AuthenticatedLancamentosIndexRouteImport } from './routes/_authenticated/lancamentos.index'
+import { Route as AuthenticatedIndicadoresIndexRouteImport } from './routes/_authenticated/indicadores.index'
+import { Route as AuthenticatedFranquiasIndexRouteImport } from './routes/_authenticated/franquias.index'
+import { Route as AuthenticatedSetoresIdRouteImport } from './routes/_authenticated/setores.$id'
+import { Route as AuthenticatedLancamentosNovoRouteImport } from './routes/_authenticated/lancamentos.novo'
+import { Route as AuthenticatedLancamentosIdRouteImport } from './routes/_authenticated/lancamentos.$id'
+import { Route as AuthenticatedIndicadoresNovoRouteImport } from './routes/_authenticated/indicadores.novo'
+import { Route as AuthenticatedIndicadoresIdRouteImport } from './routes/_authenticated/indicadores.$id'
+import { Route as AuthenticatedFranquiasIdRouteImport } from './routes/_authenticated/franquias.$id'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVisaoGeralRoute = AuthenticatedVisaoGeralRouteImport.update({
+  id: '/visao-geral',
+  path: '/visao-geral',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMeusIndicadoresRoute =
+  AuthenticatedMeusIndicadoresRouteImport.update({
+    id: '/meus-indicadores',
+    path: '/meus-indicadores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMeuPainelRoute = AuthenticatedMeuPainelRouteImport.update({
+  id: '/meu-painel',
+  path: '/meu-painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMetasRoute = AuthenticatedMetasRouteImport.update({
+  id: '/metas',
+  path: '/metas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedConfiguracoesRoute =
+  AuthenticatedConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAprovacoesRoute = AuthenticatedAprovacoesRouteImport.update({
+  id: '/aprovacoes',
+  path: '/aprovacoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSetoresIndexRoute =
+  AuthenticatedSetoresIndexRouteImport.update({
+    id: '/setores/',
+    path: '/setores/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosIndexRoute =
+  AuthenticatedLancamentosIndexRouteImport.update({
+    id: '/lancamentos/',
+    path: '/lancamentos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresIndexRoute =
+  AuthenticatedIndicadoresIndexRouteImport.update({
+    id: '/indicadores/',
+    path: '/indicadores/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFranquiasIndexRoute =
+  AuthenticatedFranquiasIndexRouteImport.update({
+    id: '/franquias/',
+    path: '/franquias/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSetoresIdRoute = AuthenticatedSetoresIdRouteImport.update({
+  id: '/setores/$id',
+  path: '/setores/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLancamentosNovoRoute =
+  AuthenticatedLancamentosNovoRouteImport.update({
+    id: '/lancamentos/novo',
+    path: '/lancamentos/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosIdRoute =
+  AuthenticatedLancamentosIdRouteImport.update({
+    id: '/lancamentos/$id',
+    path: '/lancamentos/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresNovoRoute =
+  AuthenticatedIndicadoresNovoRouteImport.update({
+    id: '/indicadores/novo',
+    path: '/indicadores/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresIdRoute =
+  AuthenticatedIndicadoresIdRouteImport.update({
+    id: '/indicadores/$id',
+    path: '/indicadores/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFranquiasIdRoute =
+  AuthenticatedFranquiasIdRouteImport.update({
+    id: '/franquias/$id',
+    path: '/franquias/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/aprovacoes': typeof AuthenticatedAprovacoesRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/metas': typeof AuthenticatedMetasRoute
+  '/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/visao-geral': typeof AuthenticatedVisaoGeralRoute
+  '/franquias/$id': typeof AuthenticatedFranquiasIdRoute
+  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
+  '/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
+  '/setores/$id': typeof AuthenticatedSetoresIdRoute
+  '/franquias/': typeof AuthenticatedFranquiasIndexRoute
+  '/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
+  '/lancamentos/': typeof AuthenticatedLancamentosIndexRoute
+  '/setores/': typeof AuthenticatedSetoresIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/aprovacoes': typeof AuthenticatedAprovacoesRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/metas': typeof AuthenticatedMetasRoute
+  '/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/visao-geral': typeof AuthenticatedVisaoGeralRoute
+  '/franquias/$id': typeof AuthenticatedFranquiasIdRoute
+  '/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
+  '/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
+  '/setores/$id': typeof AuthenticatedSetoresIdRoute
+  '/franquias': typeof AuthenticatedFranquiasIndexRoute
+  '/indicadores': typeof AuthenticatedIndicadoresIndexRoute
+  '/lancamentos': typeof AuthenticatedLancamentosIndexRoute
+  '/setores': typeof AuthenticatedSetoresIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/aprovacoes': typeof AuthenticatedAprovacoesRoute
+  '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
+  '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/_authenticated/metas': typeof AuthenticatedMetasRoute
+  '/_authenticated/meu-painel': typeof AuthenticatedMeuPainelRoute
+  '/_authenticated/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
+  '/_authenticated/visao-geral': typeof AuthenticatedVisaoGeralRoute
+  '/_authenticated/franquias/$id': typeof AuthenticatedFranquiasIdRoute
+  '/_authenticated/indicadores/$id': typeof AuthenticatedIndicadoresIdRoute
+  '/_authenticated/indicadores/novo': typeof AuthenticatedIndicadoresNovoRoute
+  '/_authenticated/lancamentos/$id': typeof AuthenticatedLancamentosIdRoute
+  '/_authenticated/lancamentos/novo': typeof AuthenticatedLancamentosNovoRoute
+  '/_authenticated/setores/$id': typeof AuthenticatedSetoresIdRoute
+  '/_authenticated/franquias/': typeof AuthenticatedFranquiasIndexRoute
+  '/_authenticated/indicadores/': typeof AuthenticatedIndicadoresIndexRoute
+  '/_authenticated/lancamentos/': typeof AuthenticatedLancamentosIndexRoute
+  '/_authenticated/setores/': typeof AuthenticatedSetoresIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/aprovacoes'
+    | '/auditoria'
+    | '/configuracoes'
+    | '/metas'
+    | '/meu-painel'
+    | '/meus-indicadores'
+    | '/perfil'
+    | '/relatorios'
+    | '/usuarios'
+    | '/visao-geral'
+    | '/franquias/$id'
+    | '/indicadores/$id'
+    | '/indicadores/novo'
+    | '/lancamentos/$id'
+    | '/lancamentos/novo'
+    | '/setores/$id'
+    | '/franquias/'
+    | '/indicadores/'
+    | '/lancamentos/'
+    | '/setores/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/aprovacoes'
+    | '/auditoria'
+    | '/configuracoes'
+    | '/metas'
+    | '/meu-painel'
+    | '/meus-indicadores'
+    | '/perfil'
+    | '/relatorios'
+    | '/usuarios'
+    | '/visao-geral'
+    | '/franquias/$id'
+    | '/indicadores/$id'
+    | '/indicadores/novo'
+    | '/lancamentos/$id'
+    | '/lancamentos/novo'
+    | '/setores/$id'
+    | '/franquias'
+    | '/indicadores'
+    | '/lancamentos'
+    | '/setores'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/aprovacoes'
+    | '/_authenticated/auditoria'
+    | '/_authenticated/configuracoes'
+    | '/_authenticated/metas'
+    | '/_authenticated/meu-painel'
+    | '/_authenticated/meus-indicadores'
+    | '/_authenticated/perfil'
+    | '/_authenticated/relatorios'
+    | '/_authenticated/usuarios'
+    | '/_authenticated/visao-geral'
+    | '/_authenticated/franquias/$id'
+    | '/_authenticated/indicadores/$id'
+    | '/_authenticated/indicadores/novo'
+    | '/_authenticated/lancamentos/$id'
+    | '/_authenticated/lancamentos/novo'
+    | '/_authenticated/setores/$id'
+    | '/_authenticated/franquias/'
+    | '/_authenticated/indicadores/'
+    | '/_authenticated/lancamentos/'
+    | '/_authenticated/setores/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +338,203 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/visao-geral': {
+      id: '/_authenticated/visao-geral'
+      path: '/visao-geral'
+      fullPath: '/visao-geral'
+      preLoaderRoute: typeof AuthenticatedVisaoGeralRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/usuarios': {
+      id: '/_authenticated/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/relatorios': {
+      id: '/_authenticated/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/meus-indicadores': {
+      id: '/_authenticated/meus-indicadores'
+      path: '/meus-indicadores'
+      fullPath: '/meus-indicadores'
+      preLoaderRoute: typeof AuthenticatedMeusIndicadoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/meu-painel': {
+      id: '/_authenticated/meu-painel'
+      path: '/meu-painel'
+      fullPath: '/meu-painel'
+      preLoaderRoute: typeof AuthenticatedMeuPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/metas': {
+      id: '/_authenticated/metas'
+      path: '/metas'
+      fullPath: '/metas'
+      preLoaderRoute: typeof AuthenticatedMetasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/configuracoes': {
+      id: '/_authenticated/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/auditoria': {
+      id: '/_authenticated/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/aprovacoes': {
+      id: '/_authenticated/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/aprovacoes'
+      preLoaderRoute: typeof AuthenticatedAprovacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/setores/': {
+      id: '/_authenticated/setores/'
+      path: '/setores'
+      fullPath: '/setores/'
+      preLoaderRoute: typeof AuthenticatedSetoresIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/': {
+      id: '/_authenticated/lancamentos/'
+      path: '/lancamentos'
+      fullPath: '/lancamentos/'
+      preLoaderRoute: typeof AuthenticatedLancamentosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores/': {
+      id: '/_authenticated/indicadores/'
+      path: '/indicadores'
+      fullPath: '/indicadores/'
+      preLoaderRoute: typeof AuthenticatedIndicadoresIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/franquias/': {
+      id: '/_authenticated/franquias/'
+      path: '/franquias'
+      fullPath: '/franquias/'
+      preLoaderRoute: typeof AuthenticatedFranquiasIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/setores/$id': {
+      id: '/_authenticated/setores/$id'
+      path: '/setores/$id'
+      fullPath: '/setores/$id'
+      preLoaderRoute: typeof AuthenticatedSetoresIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/novo': {
+      id: '/_authenticated/lancamentos/novo'
+      path: '/lancamentos/novo'
+      fullPath: '/lancamentos/novo'
+      preLoaderRoute: typeof AuthenticatedLancamentosNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/$id': {
+      id: '/_authenticated/lancamentos/$id'
+      path: '/lancamentos/$id'
+      fullPath: '/lancamentos/$id'
+      preLoaderRoute: typeof AuthenticatedLancamentosIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores/novo': {
+      id: '/_authenticated/indicadores/novo'
+      path: '/indicadores/novo'
+      fullPath: '/indicadores/novo'
+      preLoaderRoute: typeof AuthenticatedIndicadoresNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores/$id': {
+      id: '/_authenticated/indicadores/$id'
+      path: '/indicadores/$id'
+      fullPath: '/indicadores/$id'
+      preLoaderRoute: typeof AuthenticatedIndicadoresIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/franquias/$id': {
+      id: '/_authenticated/franquias/$id'
+      path: '/franquias/$id'
+      fullPath: '/franquias/$id'
+      preLoaderRoute: typeof AuthenticatedFranquiasIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAprovacoesRoute: typeof AuthenticatedAprovacoesRoute
+  AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
+  AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
+  AuthenticatedMetasRoute: typeof AuthenticatedMetasRoute
+  AuthenticatedMeuPainelRoute: typeof AuthenticatedMeuPainelRoute
+  AuthenticatedMeusIndicadoresRoute: typeof AuthenticatedMeusIndicadoresRoute
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
+  AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
+  AuthenticatedVisaoGeralRoute: typeof AuthenticatedVisaoGeralRoute
+  AuthenticatedFranquiasIdRoute: typeof AuthenticatedFranquiasIdRoute
+  AuthenticatedIndicadoresIdRoute: typeof AuthenticatedIndicadoresIdRoute
+  AuthenticatedIndicadoresNovoRoute: typeof AuthenticatedIndicadoresNovoRoute
+  AuthenticatedLancamentosIdRoute: typeof AuthenticatedLancamentosIdRoute
+  AuthenticatedLancamentosNovoRoute: typeof AuthenticatedLancamentosNovoRoute
+  AuthenticatedSetoresIdRoute: typeof AuthenticatedSetoresIdRoute
+  AuthenticatedFranquiasIndexRoute: typeof AuthenticatedFranquiasIndexRoute
+  AuthenticatedIndicadoresIndexRoute: typeof AuthenticatedIndicadoresIndexRoute
+  AuthenticatedLancamentosIndexRoute: typeof AuthenticatedLancamentosIndexRoute
+  AuthenticatedSetoresIndexRoute: typeof AuthenticatedSetoresIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAprovacoesRoute: AuthenticatedAprovacoesRoute,
+  AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
+  AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
+  AuthenticatedMetasRoute: AuthenticatedMetasRoute,
+  AuthenticatedMeuPainelRoute: AuthenticatedMeuPainelRoute,
+  AuthenticatedMeusIndicadoresRoute: AuthenticatedMeusIndicadoresRoute,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
+  AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
+  AuthenticatedVisaoGeralRoute: AuthenticatedVisaoGeralRoute,
+  AuthenticatedFranquiasIdRoute: AuthenticatedFranquiasIdRoute,
+  AuthenticatedIndicadoresIdRoute: AuthenticatedIndicadoresIdRoute,
+  AuthenticatedIndicadoresNovoRoute: AuthenticatedIndicadoresNovoRoute,
+  AuthenticatedLancamentosIdRoute: AuthenticatedLancamentosIdRoute,
+  AuthenticatedLancamentosNovoRoute: AuthenticatedLancamentosNovoRoute,
+  AuthenticatedSetoresIdRoute: AuthenticatedSetoresIdRoute,
+  AuthenticatedFranquiasIndexRoute: AuthenticatedFranquiasIndexRoute,
+  AuthenticatedIndicadoresIndexRoute: AuthenticatedIndicadoresIndexRoute,
+  AuthenticatedLancamentosIndexRoute: AuthenticatedLancamentosIndexRoute,
+  AuthenticatedSetoresIndexRoute: AuthenticatedSetoresIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
