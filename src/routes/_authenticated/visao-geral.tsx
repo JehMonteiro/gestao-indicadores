@@ -95,6 +95,44 @@ function Overview() {
     { name: "Sem info", value: totals.sem_info, fill: "oklch(0.7 0 0)" },
   ];
 
+  const annualSummary = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return indicators
+      .filter((i) => i.status === "ativo")
+      .map((ind) => {
+        const approved = entries.filter((e) => e.indicator_id === ind.id && e.status === "aprovado");
+        let accThis = 0, accLast = 0, accPrev = 0;
+        const monthsThisYear = new Set<string>();
+        for (const e of approved) {
+          const y = Number((e.period_end ?? "").slice(0, 4));
+          const v = e.actual_value ?? 0;
+          if (!y) continue;
+          if (y === currentYear) {
+            accThis += v;
+            monthsThisYear.add((e.period_end ?? "").slice(0, 7));
+          } else if (y === currentYear - 1) {
+            accLast += v;
+            accPrev += v;
+          } else if (y < currentYear) {
+            accPrev += v;
+          }
+        }
+        const months = monthsThisYear.size;
+        const avgMonth = months > 0 ? accThis / months : null;
+        const indTargets = targets.filter((t) => t.indicator_id === ind.id);
+        const targetYear = indTargets
+          .filter((t) => Number((t.period_end ?? "").slice(0, 4)) === currentYear)
+          .reduce((s, t) => s + (t.target_value ?? 0), 0);
+        const targetFallback = ind.default_target != null ? ind.default_target * 12 : 0;
+        const targetThis = targetYear > 0 ? targetYear : targetFallback;
+        const pctRealized = targetThis > 0 ? (accThis / targetThis) * 100 : null;
+        const variation = accLast > 0 ? ((accThis - accLast) / accLast) * 100 : null;
+        return { ind, accPrev, accThis, avgMonth, pctRealized, variation, currentYear };
+      });
+  }, [indicators, entries, targets]);
+
+
+
   return (
     <div>
       <PageHeader
