@@ -106,11 +106,14 @@ export function ImportIndicatorsDialog() {
     setParsing(true);
     try {
       const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, { type: "array" });
+      const wb = XLSX.read(buf, { type: "array", cellDates: true });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "", raw: false });
 
-      if (rows.length === 0) {
+      // skip fully-empty rows
+      const dataRows = rows.filter((r) => Object.values(r).some((v) => norm(v) !== ""));
+
+      if (dataRows.length === 0) {
         toast.error("Planilha vazia");
         return;
       }
@@ -118,12 +121,16 @@ export function ImportIndicatorsDialog() {
       let ok = 0;
       const errors: string[] = [];
 
-      for (const [i, row] of rows.entries()) {
+      for (const [i, row] of dataRows.entries()) {
         const line = i + 2;
         const name = norm(row.name);
         const ownerName = norm(row.owner_sector);
         if (!name) {
           errors.push(`Linha ${line}: nome vazio`);
+          continue;
+        }
+        if (!ownerName) {
+          errors.push(`Linha ${line}: setor obrigatório`);
           continue;
         }
         const owner_sector_id = findSectorId(ownerName);
@@ -136,6 +143,15 @@ export function ImportIndicatorsDialog() {
           || `IND_${Date.now().toString(36).toUpperCase()}`;
 
         const responsibleId = findProfileId(norm(row.responsible));
+        const valueType = lower(row.value_type);
+        const validValueTypes = ["inteiro", "decimal", "moeda", "percentual", "duracao", "data", "booleano"];
+        const frequency = lower(row.frequency);
+        const validFrequencies = ["diaria", "semanal", "quinzenal", "mensal", "bimestral", "trimestral", "semestral", "anual"];
+        const direction = lower(row.direction);
+        const validDirections = ["maior_melhor", "menor_melhor", "faixa_ideal", "meta_exata"];
+        const status = lower(row.status);
+        const validStatuses = ["rascunho", "ativo", "pausado", "arquivado"];
+
         const ind: Indicator = {
           id: newId(),
           name,
@@ -144,15 +160,15 @@ export function ImportIndicatorsDialog() {
           owner_sector_id,
           shared_sector_ids: [],
           franchise_id: findFranchiseId(norm(row.franchise)),
-          audience: (lower(row.audience) as Audience) || "ambos",
+          audience: mapAudience(row.audience),
           scope: "setor",
           responsible_ids: responsibleId ? [responsibleId] : [],
-          value_type: (lower(row.value_type) as ValueType) || "inteiro",
+          value_type: (validValueTypes.includes(valueType) ? valueType : "inteiro") as ValueType,
           unit: norm(row.unit) || undefined,
-          frequency: (lower(row.frequency) as Frequency) || "mensal",
-          direction: (lower(row.direction) as Direction) || "maior_melhor",
+          frequency: (validFrequencies.includes(frequency) ? frequency : "mensal") as Frequency,
+          direction: (validDirections.includes(direction) ? direction : "maior_melhor") as Direction,
           data_source: norm(row.data_source) || undefined,
-          input_method: (lower(row.input_method) as InputMethod) || "manual",
+          input_method: mapInputMethod(row.input_method),
           default_target: toNum(row.default_target, 0),
           warning_threshold: toNum(row.warning_threshold, 80),
           critical_threshold: toNum(row.critical_threshold, 60),
@@ -160,9 +176,9 @@ export function ImportIndicatorsDialog() {
           requires_approval: toBool(row.requires_approval),
           allows_attachment: toBool(row.allows_attachment),
           instructions: norm(row.instructions) || undefined,
-          start_date: norm(row.start_date) || new Date().toISOString().slice(0, 10),
-          end_date: norm(row.end_date) || undefined,
-          status: (lower(row.status) as IndicatorStatus) || "ativo",
+          start_date: toDate(row.start_date) || new Date().toISOString().slice(0, 10),
+          end_date: toDate(row.end_date),
+          status: (validStatuses.includes(status) ? status : "ativo") as IndicatorStatus,
           created_by: user?.id ?? "u-admin",
           created_at: new Date().toISOString(),
         };
