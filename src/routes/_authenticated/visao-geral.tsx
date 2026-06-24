@@ -238,6 +238,74 @@ function Overview() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle className="text-base">
+            Resumo anual por indicador
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Acumulado de anos anteriores, ano corrente, média mensal, % realizada da meta anual e variação vs. ano anterior.
+          </p>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Indicador</TableHead>
+                  <TableHead className="text-right">Acum. anos anteriores</TableHead>
+                  <TableHead className="text-right">Acum. {new Date().getFullYear()}</TableHead>
+                  <TableHead className="text-right">Média mês</TableHead>
+                  <TableHead className="text-right">% realizada</TableHead>
+                  <TableHead className="text-right">Variação % (vs. {new Date().getFullYear() - 1})</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {annualSummary.map(({ ind, accPrev, accThis, avgMonth, pctRealized, variation }) => {
+                  const cls = classify(pctRealized, settings);
+                  const cs = classificationStyles(cls);
+                  const varColor =
+                    variation == null ? "text-muted-foreground"
+                    : variation > 0 ? "text-success"
+                    : variation < 0 ? "text-destructive"
+                    : "text-muted-foreground";
+                  const VarIcon = variation == null ? Minus : variation > 0 ? ArrowUpRight : variation < 0 ? ArrowDownRight : Minus;
+                  return (
+                    <TableRow key={ind.id}>
+                      <TableCell>
+                        <div className="font-medium">{ind.name}</div>
+                        <div className="text-xs text-muted-foreground font-mono">{ind.code}</div>
+                      </TableCell>
+                      <TableCell className="text-right font-mono">{formatValue(accPrev, ind.value_type, ind.unit)}</TableCell>
+                      <TableCell className="text-right font-mono">{formatValue(accThis, ind.value_type, ind.unit)}</TableCell>
+                      <TableCell className="text-right font-mono">{avgMonth == null ? "—" : formatValue(avgMonth, ind.value_type, ind.unit)}</TableCell>
+                      <TableCell className="text-right">
+                        {pctRealized == null ? (
+                          <span className="text-muted-foreground">—</span>
+                        ) : (
+                          <Badge variant="outline" className={cs.className}>{Math.round(pctRealized)}%</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className={`text-right font-mono ${varColor}`}>
+                        <span className="inline-flex items-center gap-1 justify-end">
+                          <VarIcon className="size-3.5" />
+                          {variation == null ? "—" : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}%`}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {annualSummary.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum indicador ativo.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
