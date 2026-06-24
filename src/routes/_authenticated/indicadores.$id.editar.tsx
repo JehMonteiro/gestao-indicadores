@@ -141,6 +141,18 @@ function EditIndicator() {
                 </SelectContent>
               </Select>
             </Field>
+            <Field label="Colaborador responsável">
+              <Select
+                value={(f.responsible_ids?.[0]) || "none"}
+                onValueChange={(v) => set("responsible_ids", v === "none" ? [] : [v])}
+              >
+                <SelectTrigger><SelectValue placeholder="— Sem responsável" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem responsável</SelectItem>
+                  {profiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label="Status">
               <Select value={f.status} onValueChange={(v) => set("status", v as IndicatorStatus)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
