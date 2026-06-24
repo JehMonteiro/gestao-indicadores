@@ -24,6 +24,7 @@ function IndicatorDetail() {
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const sectors = useStore((s) => s.sectors);
+  const profiles = useStore((s) => s.profiles);
   const settings = useStore((s) => s.settings);
   const { isAdmin } = useIsAdmin();
 
