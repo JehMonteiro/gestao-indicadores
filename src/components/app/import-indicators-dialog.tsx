@@ -8,6 +8,7 @@ import { Upload, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { newId } from "@/lib/ids";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { dbWrite } from "@/lib/supabase-data";
 import type {
   Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, ValueType,
 } from "@/mocks/types";
@@ -36,8 +37,7 @@ export function ImportIndicatorsDialog() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
-  const upsert = useStore((s) => s.upsertIndicator);
-  const logAudit = useStore((s) => s.logAudit);
+  const indicators = useStore((s) => s.indicators);
   const user = useCurrentUser();
 
   const downloadTemplate = () => {
@@ -141,19 +141,20 @@ export function ImportIndicatorsDialog() {
 
         const autoCode = name.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24)
           || `IND_${Date.now().toString(36).toUpperCase()}`;
+        const existing = indicators.find((x) => x.code === autoCode || lower(x.name) === lower(name));
 
         const responsibleId = findProfileId(norm(row.responsible));
         const valueType = lower(row.value_type);
-        const validValueTypes = ["inteiro", "decimal", "moeda", "percentual", "duracao", "data", "booleano"];
+        const validValueTypes = ["inteiro", "decimal", "moeda", "percentual"];
         const frequency = lower(row.frequency);
-        const validFrequencies = ["diaria", "semanal", "quinzenal", "mensal", "bimestral", "trimestral", "semestral", "anual"];
+        const validFrequencies = ["diaria", "semanal", "mensal", "trimestral", "semestral", "anual"];
         const direction = lower(row.direction);
         const validDirections = ["maior_melhor", "menor_melhor", "faixa_ideal", "meta_exata"];
         const status = lower(row.status);
         const validStatuses = ["rascunho", "ativo", "pausado", "arquivado"];
 
         const ind: Indicator = {
-          id: newId(),
+          id: existing?.id ?? newId(),
           name,
           code: autoCode,
           objective: norm(row.objective) || undefined,
@@ -184,19 +185,24 @@ export function ImportIndicatorsDialog() {
         };
 
         try {
-          upsert(ind);
-          logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
+          const { error } = await dbWrite.indicator(ind);
+          if (error) throw error;
+          useStore.setState((st) => ({
+            indicators: [ind, ...st.indicators.filter((x) => x.id !== ind.id)],
+          }));
           ok++;
         } catch (e) {
-          errors.push(`Linha ${line}: falha ao salvar`);
+          const message = e instanceof Error ? e.message : "erro desconhecido";
+          errors.push(`Linha ${line}: falha ao salvar (${message})`);
         }
       }
 
-      if (ok > 0) toast.success(`${ok} indicador(es) importado(s)`);
       if (errors.length > 0) {
         toast.error(`${errors.length} erro(s)`, { description: errors.slice(0, 5).join(" • ") });
+      } else {
+        toast.success(`${ok} indicador(es) importado(s)`);
+        setOpen(false);
       }
-      if (ok > 0) setOpen(false);
     } catch (e) {
       toast.error("Falha ao processar planilha", { description: (e as Error).message });
     } finally {
