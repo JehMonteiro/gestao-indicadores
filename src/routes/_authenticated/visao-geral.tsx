@@ -8,6 +8,8 @@ import { classify, classificationStyles, computeAchievement, formatMonth, format
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/visao-geral")({
   head: () => ({ meta: [{ title: "Visão geral — Gestão de Indicadores" }] }),
