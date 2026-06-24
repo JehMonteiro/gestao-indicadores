@@ -37,6 +37,7 @@ export function ImportIndicatorsDialog() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
+  const indicators = useStore((s) => s.indicators);
   const user = useCurrentUser();
 
   const downloadTemplate = () => {
@@ -140,6 +141,7 @@ export function ImportIndicatorsDialog() {
 
         const autoCode = name.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24)
           || `IND_${Date.now().toString(36).toUpperCase()}`;
+        const existing = indicators.find((x) => x.code === autoCode || lower(x.name) === lower(name));
 
         const responsibleId = findProfileId(norm(row.responsible));
         const valueType = lower(row.value_type);
@@ -152,7 +154,7 @@ export function ImportIndicatorsDialog() {
         const validStatuses = ["rascunho", "ativo", "pausado", "arquivado"];
 
         const ind: Indicator = {
-          id: newId(),
+          id: existing?.id ?? newId(),
           name,
           code: autoCode,
           objective: norm(row.objective) || undefined,
