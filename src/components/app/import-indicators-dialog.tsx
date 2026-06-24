@@ -13,20 +13,19 @@ import type {
 } from "@/mocks/types";
 
 const TEMPLATE_HEADERS = [
-  "name", "code", "description", "objective", "owner_sector",
-  "franchise", "category", "strategic_pillar", "audience", "scope",
-  "value_type", "unit", "frequency", "direction", "input_method",
-  "default_target", "warning_threshold", "critical_threshold",
+  "name", "objective", "owner_sector", "franchise", "audience",
+  "responsible", "status", "value_type", "unit", "frequency",
+  "direction", "input_method", "default_target", "warning_threshold",
+  "critical_threshold", "start_date", "end_date",
   "requires_approval", "allows_attachment", "instructions", "data_source",
-  "start_date", "status",
 ];
 
 const TEMPLATE_EXAMPLE = [
-  "Faturamento mensal", "FAT_MENS", "Receita bruta do mês", "Atingir meta de receita",
-  "Comercial", "", "", "Crescimento", "ambos", "setor",
-  "moeda", "R$", "mensal", "maior_melhor", "manual",
-  100000, 80, 60, "sim", "nao", "Lançar até o dia 5", "ERP",
-  "2026-01-01", "ativo",
+  "Faturamento mensal", "Atingir meta de receita", "Comercial", "", "ambos",
+  "", "ativo", "moeda", "R$", "mensal",
+  "maior_melhor", "manual", 100000, 80,
+  60, "2026-01-01", "",
+  "sim", "nao", "Lançar até o dia 5", "ERP",
 ];
 
 export function ImportIndicatorsDialog() {
