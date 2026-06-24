@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import type { Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, Scope, ValueType } from "@/mocks/types";
+import type { Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
 import { ShieldAlert } from "lucide-react";
 
@@ -24,7 +24,7 @@ function EditIndicator() {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
-  const categories = useStore((s) => s.categories);
+  
   const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
@@ -88,7 +88,6 @@ function EditIndicator() {
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-1 gap-3">
             <Field label="Nome"><Input value={f.name} onChange={(e) => set("name", e.target.value)} required /></Field>
-            <Field label="Descrição"><Textarea value={f.description ?? ""} onChange={(e) => set("description", e.target.value)} /></Field>
             <Field label="Objetivo"><Textarea value={f.objective ?? ""} onChange={(e) => set("objective", e.target.value)} /></Field>
           </CardContent>
         </Card>
@@ -96,7 +95,7 @@ function EditIndicator() {
         <Card>
           <CardHeader><CardTitle className="text-base">Classificação</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-3 gap-3">
-            <Field label="Setor proprietário">
+            <Field label="Setor">
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
@@ -111,16 +110,6 @@ function EditIndicator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Categoria">
-              <Select value={f.category_id || "none"} onValueChange={(v) => set("category_id", v === "none" ? "" : v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— Sem categoria</SelectItem>
-                  {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Pilar estratégico"><Input value={f.strategic_pillar ?? ""} onChange={(e) => set("strategic_pillar", e.target.value)} /></Field>
             <Field label="Público">
               <Select value={f.audience} onValueChange={(v) => set("audience", v as Audience)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -128,16 +117,6 @@ function EditIndicator() {
                   <SelectItem value="interno">Colaboradores internos</SelectItem>
                   <SelectItem value="franqueado">Franqueados</SelectItem>
                   <SelectItem value="ambos">Ambos</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Abrangência">
-              <Select value={f.scope} onValueChange={(v) => set("scope", v as Scope)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="corporativo">Corporativo</SelectItem>
-                  <SelectItem value="setor">Setor</SelectItem>
-                  <SelectItem value="franquia">Franquia</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -226,6 +205,7 @@ function EditIndicator() {
             <Field label="Limite de atenção (%)"><Input type="number" value={f.warning_threshold ?? 80} onChange={(e) => set("warning_threshold", Number(e.target.value))} /></Field>
             <Field label="Limite crítico (%)"><Input type="number" value={f.critical_threshold ?? 60} onChange={(e) => set("critical_threshold", Number(e.target.value))} /></Field>
             <Field label="Data de início"><Input type="date" value={f.start_date ?? ""} onChange={(e) => set("start_date", e.target.value)} /></Field>
+            <Field label="Data de encerramento"><Input type="date" value={f.end_date ?? ""} onChange={(e) => set("end_date", e.target.value || undefined)} /></Field>
           </CardContent>
         </Card>
 

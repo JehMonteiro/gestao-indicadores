@@ -9,24 +9,23 @@ import { toast } from "sonner";
 import { newId } from "@/lib/ids";
 import { useStore, useCurrentUser } from "@/mocks/store";
 import type {
-  Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, Scope, ValueType,
+  Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, ValueType,
 } from "@/mocks/types";
 
 const TEMPLATE_HEADERS = [
-  "name", "code", "description", "objective", "owner_sector",
-  "franchise", "category", "strategic_pillar", "audience", "scope",
-  "value_type", "unit", "frequency", "direction", "input_method",
-  "default_target", "warning_threshold", "critical_threshold",
+  "name", "objective", "owner_sector", "franchise", "audience",
+  "responsible", "status", "value_type", "unit", "frequency",
+  "direction", "input_method", "default_target", "warning_threshold",
+  "critical_threshold", "start_date", "end_date",
   "requires_approval", "allows_attachment", "instructions", "data_source",
-  "start_date", "status",
 ];
 
 const TEMPLATE_EXAMPLE = [
-  "Faturamento mensal", "FAT_MENS", "Receita bruta do mês", "Atingir meta de receita",
-  "Comercial", "", "", "Crescimento", "ambos", "setor",
-  "moeda", "R$", "mensal", "maior_melhor", "manual",
-  100000, 80, 60, "sim", "nao", "Lançar até o dia 5", "ERP",
-  "2026-01-01", "ativo",
+  "Faturamento mensal", "Atingir meta de receita", "Comercial", "", "ambos",
+  "", "ativo", "moeda", "R$", "mensal",
+  "maior_melhor", "manual", 100000, 80,
+  60, "2026-01-01", "",
+  "sim", "nao", "Lançar até o dia 5", "ERP",
 ];
 
 export function ImportIndicatorsDialog() {
@@ -36,7 +35,7 @@ export function ImportIndicatorsDialog() {
 
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
-  const categories = useStore((s) => s.categories);
+  const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
@@ -68,10 +67,10 @@ export function ImportIndicatorsDialog() {
     const s = v.toLowerCase();
     return franchises.find((x) => x.name.toLowerCase() === s || x.code.toLowerCase() === s)?.id;
   };
-  const findCategoryId = (v: string) => {
+  const findProfileId = (v: string) => {
     if (!v) return undefined;
     const s = v.toLowerCase();
-    return categories.find((x) => x.name.toLowerCase() === s)?.id;
+    return profiles.find((x) => x.full_name.toLowerCase() === s || x.email.toLowerCase() === s)?.id;
   };
 
   const handleFile = async (file: File) => {
@@ -107,20 +106,18 @@ export function ImportIndicatorsDialog() {
         const autoCode = name.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24)
           || `IND_${Date.now().toString(36).toUpperCase()}`;
 
+        const responsibleId = findProfileId(norm(row.responsible));
         const ind: Indicator = {
           id: newId(),
           name,
-          code: norm(row.code) || autoCode,
-          description: norm(row.description) || undefined,
+          code: autoCode,
           objective: norm(row.objective) || undefined,
           owner_sector_id,
           shared_sector_ids: [],
           franchise_id: findFranchiseId(norm(row.franchise)),
-          category_id: findCategoryId(norm(row.category)),
-          strategic_pillar: norm(row.strategic_pillar) || undefined,
           audience: (lower(row.audience) as Audience) || "ambos",
-          scope: (lower(row.scope) as Scope) || "setor",
-          responsible_ids: [],
+          scope: "setor",
+          responsible_ids: responsibleId ? [responsibleId] : [],
           value_type: (lower(row.value_type) as ValueType) || "inteiro",
           unit: norm(row.unit) || undefined,
           frequency: (lower(row.frequency) as Frequency) || "mensal",
@@ -135,6 +132,7 @@ export function ImportIndicatorsDialog() {
           allows_attachment: toBool(row.allows_attachment),
           instructions: norm(row.instructions) || undefined,
           start_date: norm(row.start_date) || new Date().toISOString().slice(0, 10),
+          end_date: norm(row.end_date) || undefined,
           status: (lower(row.status) as IndicatorStatus) || "ativo",
           created_by: user?.id ?? "u-admin",
           created_at: new Date().toISOString(),
@@ -199,7 +197,7 @@ export function ImportIndicatorsDialog() {
           </label>
 
           <p className="text-xs text-muted-foreground">
-            Campos aceitos: name, code, description, objective, owner_sector, franchise, category, strategic_pillar, audience, scope, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, requires_approval, allows_attachment, instructions, data_source, start_date, status.
+            Campos aceitos: name, objective, owner_sector, franchise, audience, responsible, status, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, start_date, end_date, requires_approval, allows_attachment, instructions, data_source.
           </p>
         </div>
 
