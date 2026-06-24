@@ -24,7 +24,7 @@ function EditIndicator() {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
-  const categories = useStore((s) => s.categories);
+  
   const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
@@ -205,6 +205,7 @@ function EditIndicator() {
             <Field label="Limite de atenção (%)"><Input type="number" value={f.warning_threshold ?? 80} onChange={(e) => set("warning_threshold", Number(e.target.value))} /></Field>
             <Field label="Limite crítico (%)"><Input type="number" value={f.critical_threshold ?? 60} onChange={(e) => set("critical_threshold", Number(e.target.value))} /></Field>
             <Field label="Data de início"><Input type="date" value={f.start_date ?? ""} onChange={(e) => set("start_date", e.target.value)} /></Field>
+            <Field label="Data de encerramento"><Input type="date" value={f.end_date ?? ""} onChange={(e) => set("end_date", e.target.value || undefined)} /></Field>
           </CardContent>
         </Card>
 
