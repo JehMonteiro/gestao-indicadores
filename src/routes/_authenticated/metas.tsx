@@ -25,6 +25,7 @@ function TargetsPage() {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
+  const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertTarget);
   const user = useCurrentUser();
   return (
