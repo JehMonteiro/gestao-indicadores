@@ -25,6 +25,7 @@ function EditIndicator() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const categories = useStore((s) => s.categories);
+  const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
