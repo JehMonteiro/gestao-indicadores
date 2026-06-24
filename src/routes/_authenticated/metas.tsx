@@ -25,6 +25,7 @@ function TargetsPage() {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
+  const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertTarget);
   const user = useCurrentUser();
   return (
@@ -35,7 +36,7 @@ function TargetsPage() {
         }
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Escopo</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Setor</TableHead><TableHead>Responsável</TableHead><TableHead>Escopo</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead></TableRow></TableHeader>
         <TableBody>
           {targets.slice(0, 50).map((t) => {
             const ind = indicators.find((i) => i.id === t.indicator_id);
@@ -44,12 +45,18 @@ function TargetsPage() {
               : ind?.franchise_id
                 ? franchises.find((f) => f.id === ind.franchise_id)?.name ?? "Corporativo"
                 : "Corporativo";
+            const sectorId = t.sector_id ?? ind?.owner_sector_id;
+            const setorName = sectorId ? sectors.find((s) => s.id === sectorId)?.name ?? "—" : "—";
+            const respId = t.user_id ?? ind?.responsible_ids?.[0];
+            const respName = respId ? profiles.find((p) => p.id === respId)?.full_name ?? "—" : "—";
             const ctx = t.sector_id ? sectors.find((s) => s.id === t.sector_id)?.name
               : t.franchise_id ? franchises.find((f) => f.id === t.franchise_id)?.name : "Empresa";
             return (
               <TableRow key={t.id}>
                 <TableCell className="font-medium">{ind?.name}</TableCell>
                 <TableCell className="text-sm">{empresa}</TableCell>
+                <TableCell className="text-sm">{setorName}</TableCell>
+                <TableCell className="text-sm">{respName}</TableCell>
                 <TableCell><span className="capitalize text-sm">{t.scope_type}</span> · <span className="text-xs text-muted-foreground">{ctx}</span></TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
                 <TableCell className="font-mono">{ind && formatValue(t.target_value, ind.value_type, ind.unit)}</TableCell>
@@ -66,6 +73,7 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
+  const profiles = useStore((s) => s.profiles);
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<IndicatorTarget>({
     id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "setor",
@@ -85,8 +93,28 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
+            <div><Label>Setor</Label>
+              <Select value={f.sector_id ?? "none"} onValueChange={(v) => setF({ ...f, sector_id: v === "none" ? undefined : v })}>
+                <SelectTrigger><SelectValue placeholder="— Sem setor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem setor</SelectItem>
+                  {sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Colaborador responsável</Label>
+              <Select value={f.user_id ?? "none"} onValueChange={(v) => setF({ ...f, user_id: v === "none" ? undefined : v })}>
+                <SelectTrigger><SelectValue placeholder="— Sem responsável" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem responsável</SelectItem>
+                  {profiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div><Label>Escopo</Label>
-              <Select value={f.scope_type} onValueChange={(v) => setF({ ...f, scope_type: v as Scope, sector_id: undefined, franchise_id: undefined })}>
+              <Select value={f.scope_type} onValueChange={(v) => setF({ ...f, scope_type: v as Scope })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="corporativo">Empresa</SelectItem>
@@ -97,17 +125,13 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
             </div>
             <div><Label>Peso</Label><Input type="number" value={f.weight} onChange={(e) => setF({ ...f, weight: Number(e.target.value) })} /></div>
           </div>
-          {f.scope_type === "setor" && (
-            <Select value={f.sector_id ?? ""} onValueChange={(v) => setF({ ...f, sector_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione setor" /></SelectTrigger>
-              <SelectContent>{sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-            </Select>
-          )}
           {f.scope_type === "franquia" && (
-            <Select value={f.franchise_id ?? ""} onValueChange={(v) => setF({ ...f, franchise_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione franquia" /></SelectTrigger>
-              <SelectContent>{franchises.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-            </Select>
+            <div><Label>Franquia</Label>
+              <Select value={f.franchise_id ?? ""} onValueChange={(v) => setF({ ...f, franchise_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione franquia" /></SelectTrigger>
+                <SelectContent>{franchises.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
           )}
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Início</Label><Input type="date" value={f.period_start} onChange={(e) => setF({ ...f, period_start: e.target.value })} /></div>

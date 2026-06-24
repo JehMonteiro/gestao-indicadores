@@ -25,6 +25,7 @@ function NewIndicator() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const categories = useStore((s) => s.categories);
+  const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
@@ -35,6 +36,7 @@ function NewIndicator() {
     name: "", code: "", description: "", objective: "",
     owner_sector_id: sectors[0]?.id ?? "", franchise_id: "", category_id: "",
     strategic_pillar: "", audience: "ambos" as Audience, scope: "setor" as Scope,
+    responsible_id: "",
     value_type: "inteiro" as ValueType, unit: "",
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     input_method: "manual" as InputMethod, data_source: "",
@@ -55,11 +57,12 @@ function NewIndicator() {
     }
     const autoCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
     f.code = f.code || autoCode;
+    const { responsible_id, ...rest } = f;
     const ind: Indicator = {
       id: newId(),
-      shared_sector_ids: [], responsible_ids: [],
+      shared_sector_ids: [], responsible_ids: responsible_id ? [responsible_id] : [],
       created_by: user?.id ?? "u-admin", created_at: new Date().toISOString(),
-      ...f,
+      ...rest,
     };
     upsert(ind);
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
@@ -139,6 +142,15 @@ function NewIndicator() {
                   <SelectItem value="setor">Setor</SelectItem>
                   <SelectItem value="franquia">Franquia</SelectItem>
                   
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Colaborador responsável">
+              <Select value={f.responsible_id || "none"} onValueChange={(v) => set("responsible_id", v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="— Sem responsável" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem responsável</SelectItem>
+                  {profiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>

@@ -24,6 +24,7 @@ function IndicatorDetail() {
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const sectors = useStore((s) => s.sectors);
+  const profiles = useStore((s) => s.profiles);
   const settings = useStore((s) => s.settings);
   const { isAdmin } = useIsAdmin();
 
@@ -76,6 +77,8 @@ function IndicatorDetail() {
             <Item k="Tipo de valor" v={`${ind.value_type}${ind.unit ? ` (${ind.unit})` : ""}`} />
             <Item k="Regra" v={ind.direction.replace("_", " ")} />
             <Item k="Forma de preenchimento" v={ind.input_method} />
+            <Item k="Responsável" v={ind.responsible_ids?.length ? ind.responsible_ids.map((rid) => profiles.find((p) => p.id === rid)?.full_name ?? "—").join(", ") : "—"} />
+            
             
             <Item k="Necessita aprovação" v={ind.requires_approval ? "Sim" : "Não"} />
             <Item k="Permite anexo" v={ind.allows_attachment ? "Sim" : "Não"} />

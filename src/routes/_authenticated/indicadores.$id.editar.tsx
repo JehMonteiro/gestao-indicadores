@@ -25,6 +25,7 @@ function EditIndicator() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const categories = useStore((s) => s.categories);
+  const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
@@ -137,6 +138,18 @@ function EditIndicator() {
                   <SelectItem value="corporativo">Corporativo</SelectItem>
                   <SelectItem value="setor">Setor</SelectItem>
                   <SelectItem value="franquia">Franquia</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Colaborador responsável">
+              <Select
+                value={(f.responsible_ids?.[0]) || "none"}
+                onValueChange={(v) => set("responsible_ids", v === "none" ? [] : [v])}
+              >
+                <SelectTrigger><SelectValue placeholder="— Sem responsável" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem responsável</SelectItem>
+                  {profiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
