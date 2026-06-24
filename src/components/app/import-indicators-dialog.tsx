@@ -47,8 +47,12 @@ export function ImportIndicatorsDialog() {
     XLSX.writeFile(wb, "modelo-indicadores.xlsx");
   };
 
-  const norm = (v: unknown) => String(v ?? "").trim();
-  const lower = (v: unknown) => norm(v).toLowerCase();
+  const norm = (v: unknown) => {
+    if (v instanceof Date) return v.toISOString().slice(0, 10);
+    return String(v ?? "").trim();
+  };
+  const stripAccents = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const lower = (v: unknown) => stripAccents(norm(v).toLowerCase());
   const toBool = (v: unknown) => {
     const s = lower(v);
     return s === "sim" || s === "true" || s === "1" || s === "yes" || s === "y";
@@ -56,6 +60,31 @@ export function ImportIndicatorsDialog() {
   const toNum = (v: unknown, def = 0) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : def;
+  };
+  const toDate = (v: unknown): string | undefined => {
+    if (!v) return undefined;
+    if (v instanceof Date) return v.toISOString().slice(0, 10);
+    const s = String(v).trim();
+    if (!s) return undefined;
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    return s;
+  };
+  const mapAudience = (v: unknown): Audience => {
+    const s = lower(v);
+    if (!s) return "ambos";
+    if (s.includes("franq")) return "franqueado";
+    if (s.includes("intern") || s.includes("colab")) return "interno";
+    if (s === "interno" || s === "externo") return s === "interno" ? "interno" : "ambos";
+    if (["interno", "franqueado", "ambos"].includes(s)) return s as Audience;
+    return "ambos";
+  };
+  const mapInputMethod = (v: unknown): InputMethod => {
+    const s = lower(v);
+    if (s.startsWith("import")) return "importacao";
+    if (s.startsWith("integ")) return "integracao";
+    if (s.startsWith("calc")) return "calculo";
+    return "manual";
   };
 
   const findSectorId = (v: string) => {
