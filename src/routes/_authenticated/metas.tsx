@@ -73,6 +73,7 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
+  const profiles = useStore((s) => s.profiles);
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<IndicatorTarget>({
     id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "setor",
@@ -92,8 +93,28 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
+            <div><Label>Setor</Label>
+              <Select value={f.sector_id ?? "none"} onValueChange={(v) => setF({ ...f, sector_id: v === "none" ? undefined : v })}>
+                <SelectTrigger><SelectValue placeholder="— Sem setor" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem setor</SelectItem>
+                  {sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Colaborador responsável</Label>
+              <Select value={f.user_id ?? "none"} onValueChange={(v) => setF({ ...f, user_id: v === "none" ? undefined : v })}>
+                <SelectTrigger><SelectValue placeholder="— Sem responsável" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem responsável</SelectItem>
+                  {profiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div><Label>Escopo</Label>
-              <Select value={f.scope_type} onValueChange={(v) => setF({ ...f, scope_type: v as Scope, sector_id: undefined, franchise_id: undefined })}>
+              <Select value={f.scope_type} onValueChange={(v) => setF({ ...f, scope_type: v as Scope })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="corporativo">Empresa</SelectItem>
@@ -104,17 +125,13 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
             </div>
             <div><Label>Peso</Label><Input type="number" value={f.weight} onChange={(e) => setF({ ...f, weight: Number(e.target.value) })} /></div>
           </div>
-          {f.scope_type === "setor" && (
-            <Select value={f.sector_id ?? ""} onValueChange={(v) => setF({ ...f, sector_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione setor" /></SelectTrigger>
-              <SelectContent>{sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-            </Select>
-          )}
           {f.scope_type === "franquia" && (
-            <Select value={f.franchise_id ?? ""} onValueChange={(v) => setF({ ...f, franchise_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione franquia" /></SelectTrigger>
-              <SelectContent>{franchises.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-            </Select>
+            <div><Label>Franquia</Label>
+              <Select value={f.franchise_id ?? ""} onValueChange={(v) => setF({ ...f, franchise_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione franquia" /></SelectTrigger>
+                <SelectContent>{franchises.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
           )}
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Início</Label><Input type="date" value={f.period_start} onChange={(e) => setF({ ...f, period_start: e.target.value })} /></div>
