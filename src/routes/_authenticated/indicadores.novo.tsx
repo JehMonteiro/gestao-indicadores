@@ -25,6 +25,7 @@ function NewIndicator() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const categories = useStore((s) => s.categories);
+  const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
@@ -35,6 +36,7 @@ function NewIndicator() {
     name: "", code: "", description: "", objective: "",
     owner_sector_id: sectors[0]?.id ?? "", franchise_id: "", category_id: "",
     strategic_pillar: "", audience: "ambos" as Audience, scope: "setor" as Scope,
+    responsible_id: "",
     value_type: "inteiro" as ValueType, unit: "",
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     input_method: "manual" as InputMethod, data_source: "",
