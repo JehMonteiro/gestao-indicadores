@@ -57,11 +57,12 @@ function NewIndicator() {
     }
     const autoCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
     f.code = f.code || autoCode;
+    const { responsible_id, ...rest } = f;
     const ind: Indicator = {
       id: newId(),
-      shared_sector_ids: [], responsible_ids: [],
+      shared_sector_ids: [], responsible_ids: responsible_id ? [responsible_id] : [],
       created_by: user?.id ?? "u-admin", created_at: new Date().toISOString(),
-      ...f,
+      ...rest,
     };
     upsert(ind);
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
