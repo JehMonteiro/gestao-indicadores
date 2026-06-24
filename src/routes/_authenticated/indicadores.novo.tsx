@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import type { Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, Scope, ValueType } from "@/mocks/types";
+import type { Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/app/page-header";
 import { ShieldAlert } from "lucide-react";
@@ -24,7 +24,6 @@ export const Route = createFileRoute("/_authenticated/indicadores/novo")({
 function NewIndicator() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
-  const categories = useStore((s) => s.categories);
   const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
@@ -33,17 +32,18 @@ function NewIndicator() {
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
   const [f, setF] = useState({
-    name: "", code: "", description: "", objective: "",
-    owner_sector_id: sectors[0]?.id ?? "", franchise_id: "", category_id: "",
-    strategic_pillar: "", audience: "ambos" as Audience, scope: "setor" as Scope,
+    name: "", objective: "",
+    owner_sector_id: sectors[0]?.id ?? "", franchise_id: "",
+    audience: "ambos" as Audience,
     responsible_id: "",
     value_type: "inteiro" as ValueType, unit: "",
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     input_method: "manual" as InputMethod, data_source: "",
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
-    warning_threshold: 80, critical_threshold: 60, weight: 1,
+    warning_threshold: 80, critical_threshold: 60,
     requires_approval: true, allows_attachment: false, instructions: "",
     start_date: new Date().toISOString().slice(0, 10),
+    end_date: "",
     status: "ativo" as IndicatorStatus,
   });
 
@@ -56,13 +56,18 @@ function NewIndicator() {
       return;
     }
     const autoCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
-    f.code = f.code || autoCode;
     const { responsible_id, ...rest } = f;
     const ind: Indicator = {
       id: newId(),
-      shared_sector_ids: [], responsible_ids: responsible_id ? [responsible_id] : [],
-      created_by: user?.id ?? "u-admin", created_at: new Date().toISOString(),
+      code: autoCode,
+      shared_sector_ids: [],
+      responsible_ids: responsible_id ? [responsible_id] : [],
+      scope: "setor",
+      weight: 1,
+      created_by: user?.id ?? "u-admin",
+      created_at: new Date().toISOString(),
       ...rest,
+      end_date: rest.end_date || undefined,
     };
     upsert(ind);
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
@@ -91,7 +96,6 @@ function NewIndicator() {
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-1 gap-3">
             <Field label="Nome"><Input value={f.name} onChange={(e) => set("name", e.target.value)} required /></Field>
-            <Field label="Descrição"><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></Field>
             <Field label="Objetivo"><Textarea value={f.objective} onChange={(e) => set("objective", e.target.value)} /></Field>
           </CardContent>
         </Card>
@@ -99,7 +103,7 @@ function NewIndicator() {
         <Card>
           <CardHeader><CardTitle className="text-base">Classificação</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-3 gap-3">
-            <Field label="Setor proprietário">
+            <Field label="Setor">
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
@@ -114,16 +118,6 @@ function NewIndicator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Categoria">
-              <Select value={f.category_id || "none"} onValueChange={(v) => set("category_id", v === "none" ? "" : v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— Sem categoria</SelectItem>
-                  {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Pilar estratégico"><Input value={f.strategic_pillar} onChange={(e) => set("strategic_pillar", e.target.value)} /></Field>
             <Field label="Público">
               <Select value={f.audience} onValueChange={(v) => set("audience", v as Audience)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -131,17 +125,6 @@ function NewIndicator() {
                   <SelectItem value="interno">Colaboradores internos</SelectItem>
                   <SelectItem value="franqueado">Franqueados</SelectItem>
                   <SelectItem value="ambos">Ambos</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Abrangência">
-              <Select value={f.scope} onValueChange={(v) => set("scope", v as Scope)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="corporativo">Corporativo</SelectItem>
-                  <SelectItem value="setor">Setor</SelectItem>
-                  <SelectItem value="franquia">Franquia</SelectItem>
-                  
                 </SelectContent>
               </Select>
             </Field>
@@ -210,7 +193,6 @@ function NewIndicator() {
                 </SelectContent>
               </Select>
             </Field>
-            
           </CardContent>
         </Card>
 
@@ -227,6 +209,7 @@ function NewIndicator() {
             <Field label="Limite de atenção (%)"><Input type="number" value={f.warning_threshold ?? 80} onChange={(e) => set("warning_threshold", Number(e.target.value))} /></Field>
             <Field label="Limite crítico (%)"><Input type="number" value={f.critical_threshold ?? 60} onChange={(e) => set("critical_threshold", Number(e.target.value))} /></Field>
             <Field label="Data de início"><Input type="date" value={f.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
+            <Field label="Data de encerramento"><Input type="date" value={f.end_date} onChange={(e) => set("end_date", e.target.value)} /></Field>
           </CardContent>
         </Card>
 
