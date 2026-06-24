@@ -197,7 +197,7 @@ export function ImportIndicatorsDialog() {
           </label>
 
           <p className="text-xs text-muted-foreground">
-            Campos aceitos: name, code, description, objective, owner_sector, franchise, category, strategic_pillar, audience, scope, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, requires_approval, allows_attachment, instructions, data_source, start_date, status.
+            Campos aceitos: name, objective, owner_sector, franchise, audience, responsible, status, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, start_date, end_date, requires_approval, allows_attachment, instructions, data_source.
           </p>
         </div>
 
