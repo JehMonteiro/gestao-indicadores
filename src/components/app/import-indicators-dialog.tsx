@@ -22,7 +22,7 @@ const TEMPLATE_HEADERS = [
 ];
 
 const TEMPLATE_EXAMPLE = [
-  "Faturamento mensal", "Atingir meta de receita", "Comercial", "", "ambos",
+  "Faturamento mensal", "Atingir meta de receita", "Comercial", "Nocta Seguros e Benefícios", "ambos",
   "", "ativo", "moeda", "R$", "mensal",
   "maior_melhor", "manual", 100000, 80,
   60, "2026-01-01", "",
@@ -53,6 +53,8 @@ export function ImportIndicatorsDialog() {
   };
   const stripAccents = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const lower = (v: unknown) => stripAccents(norm(v).toLowerCase());
+  const lookupKey = (v: unknown) => lower(v).replace(/[^a-z0-9]+/g, " ").trim();
+  const codeKey = (v: unknown) => lower(v).replace(/[^a-z0-9]+/g, "");
   const toBool = (v: unknown) => {
     const s = lower(v);
     return s === "sim" || s === "true" || s === "1" || s === "yes" || s === "y";
@@ -75,7 +77,6 @@ export function ImportIndicatorsDialog() {
     if (!s) return "ambos";
     if (s.includes("franq")) return "franqueado";
     if (s.includes("intern") || s.includes("colab")) return "interno";
-    if (s === "interno" || s === "externo") return s === "interno" ? "interno" : "ambos";
     if (["interno", "franqueado", "ambos"].includes(s)) return s as Audience;
     return "ambos";
   };
@@ -88,18 +89,49 @@ export function ImportIndicatorsDialog() {
   };
 
   const findSectorId = (v: string) => {
-    const s = v.toLowerCase();
-    return sectors.find((x) => x.name.toLowerCase() === s || x.code.toLowerCase() === s)?.id;
+    const s = lookupKey(v);
+    const c = codeKey(v);
+    return sectors.find((x) => lookupKey(x.name) === s || codeKey(x.code) === c)?.id;
   };
-  const findFranchiseId = (v: string) => {
+  const findFranchise = (v: string) => {
     if (!v) return undefined;
-    const s = v.toLowerCase();
-    return franchises.find((x) => x.name.toLowerCase() === s || x.code.toLowerCase() === s)?.id;
+    const s = lookupKey(v);
+    const c = codeKey(v);
+    return franchises.find((x) => lookupKey(x.name) === s || codeKey(x.code) === c);
   };
   const findProfileId = (v: string) => {
     if (!v) return undefined;
-    const s = v.toLowerCase();
-    return profiles.find((x) => x.full_name.toLowerCase() === s || x.email.toLowerCase() === s)?.id;
+    const s = lookupKey(v);
+    const email = lower(v);
+    return profiles.find((x) => lookupKey(x.full_name) === s || lower(x.email) === email)?.id;
+  };
+
+  const slug = (s: string, max: number) =>
+    stripAccents(s).toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, max);
+
+  const makeIndicatorCode = (name: string, franchiseRef: string) => {
+    const base = slug(name, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
+    const suffix = slug(franchiseRef, 10);
+    return suffix ? `${base}_${suffix}` : base;
+  };
+
+  const getErrorMessage = (e: unknown) => {
+    if (!e) return "erro desconhecido";
+    if (typeof e === "string") return e;
+    if (e instanceof Error && e.message) return e.message;
+    if (typeof e === "object") {
+      const anyE = e as { message?: unknown; details?: unknown; hint?: unknown; code?: unknown };
+      const parts = [anyE.message, anyE.details, anyE.hint, anyE.code]
+        .filter((p) => typeof p === "string" && p)
+        .map(String);
+      if (parts.length) return parts.join(" — ");
+      try {
+        return JSON.stringify(e);
+      } catch {
+        return "erro desconhecido";
+      }
+    }
+    return "erro desconhecido";
   };
 
   const handleFile = async (file: File) => {
@@ -110,7 +142,6 @@ export function ImportIndicatorsDialog() {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "", raw: false });
 
-      // skip fully-empty rows
       const dataRows = rows.filter((r) => Object.values(r).some((v) => norm(v) !== ""));
 
       if (dataRows.length === 0) {
@@ -120,11 +151,13 @@ export function ImportIndicatorsDialog() {
 
       let ok = 0;
       const errors: string[] = [];
+      const knownIndicators = [...indicators];
 
       for (const [i, row] of dataRows.entries()) {
         const line = i + 2;
         const name = norm(row.name);
         const ownerName = norm(row.owner_sector);
+        const franchiseName = norm(row.franchise);
         if (!name) {
           errors.push(`Linha ${line}: nome vazio`);
           continue;
@@ -138,10 +171,21 @@ export function ImportIndicatorsDialog() {
           errors.push(`Linha ${line}: setor "${ownerName}" não encontrado`);
           continue;
         }
+        if (!franchiseName) {
+          errors.push(`Linha ${line}: empresa obrigatória`);
+          continue;
+        }
+        const franchise = findFranchise(franchiseName);
+        if (!franchise) {
+          errors.push(`Linha ${line}: empresa "${franchiseName}" não encontrada`);
+          continue;
+        }
 
-        const autoCode = name.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24)
-          || `IND_${Date.now().toString(36).toUpperCase()}`;
-        const existing = indicators.find((x) => x.code === autoCode || lower(x.name) === lower(name));
+        const autoCode = makeIndicatorCode(name, franchise.code || franchise.name);
+        const nameKey = lookupKey(name);
+        const existing =
+          knownIndicators.find((x) => x.code === autoCode) ??
+          knownIndicators.find((x) => lookupKey(x.name) === nameKey && x.franchise_id === franchise.id);
 
         const responsibleId = findProfileId(norm(row.responsible));
         const valueType = lower(row.value_type);
@@ -160,7 +204,7 @@ export function ImportIndicatorsDialog() {
           objective: norm(row.objective) || undefined,
           owner_sector_id,
           shared_sector_ids: [],
-          franchise_id: findFranchiseId(norm(row.franchise)),
+          franchise_id: franchise.id,
           audience: mapAudience(row.audience),
           scope: "setor",
           responsible_ids: responsibleId ? [responsibleId] : [],
@@ -181,30 +225,35 @@ export function ImportIndicatorsDialog() {
           end_date: toDate(row.end_date),
           status: (validStatuses.includes(status) ? status : "ativo") as IndicatorStatus,
           created_by: user?.id ?? "u-admin",
-          created_at: new Date().toISOString(),
+          created_at: existing?.created_at ?? new Date().toISOString(),
         };
 
         try {
           const { error } = await dbWrite.indicator(ind);
           if (error) throw error;
+          const idx = knownIndicators.findIndex((x) => x.id === ind.id);
+          if (idx >= 0) knownIndicators[idx] = ind;
+          else knownIndicators.unshift(ind);
           useStore.setState((st) => ({
             indicators: [ind, ...st.indicators.filter((x) => x.id !== ind.id)],
           }));
           ok++;
         } catch (e) {
-          const message = e instanceof Error ? e.message : "erro desconhecido";
-          errors.push(`Linha ${line}: falha ao salvar (${message})`);
+          errors.push(`Linha ${line}: falha ao salvar (${getErrorMessage(e)})`);
         }
       }
 
       if (errors.length > 0) {
-        toast.error(`${errors.length} erro(s)`, { description: errors.slice(0, 5).join(" • ") });
+        toast.error(`${errors.length} erro(s) na importação`, {
+          description: errors.slice(0, 6).join(" • "),
+        });
+        if (ok > 0) toast.success(`${ok} indicador(es) importado(s)`);
       } else {
         toast.success(`${ok} indicador(es) importado(s)`);
         setOpen(false);
       }
     } catch (e) {
-      toast.error("Falha ao processar planilha", { description: (e as Error).message });
+      toast.error("Falha ao processar planilha", { description: getErrorMessage(e) });
     } finally {
       setParsing(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -220,7 +269,7 @@ export function ImportIndicatorsDialog() {
         <DialogHeader>
           <DialogTitle>Importar indicadores via Excel</DialogTitle>
           <DialogDescription>
-            Baixe o modelo, preencha as linhas e envie o arquivo .xlsx. Setor é obrigatório e deve corresponder ao nome ou código já cadastrado.
+            Baixe o modelo, preencha as linhas e envie o arquivo .xlsx. Setor e empresa são obrigatórios e devem corresponder ao nome ou código cadastrado.
           </DialogDescription>
         </DialogHeader>
 
@@ -248,7 +297,7 @@ export function ImportIndicatorsDialog() {
           </label>
 
           <p className="text-xs text-muted-foreground">
-            Campos aceitos: name, objective, owner_sector, franchise, audience, responsible, status, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, start_date, end_date, requires_approval, allows_attachment, instructions, data_source.
+            Campos aceitos: name, objective, owner_sector, franchise, audience, responsible, status, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, start_date, end_date, requires_approval, allows_attachment, instructions, data_source. A coluna franchise deve conter uma empresa cadastrada.
           </p>
         </div>
 
