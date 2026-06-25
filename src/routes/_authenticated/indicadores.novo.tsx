@@ -55,7 +55,16 @@ function NewIndicator() {
       toast.error("Preencha nome e setor proprietário");
       return;
     }
-    const autoCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
+    if (!f.franchise_id) {
+      toast.error("Selecione a empresa do indicador");
+      return;
+    }
+    const franchiseRef = franchises.find((fr) => fr.id === f.franchise_id);
+    const baseCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
+    const suffix = (franchiseRef?.code || franchiseRef?.name || "")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 10);
+    const autoCode = suffix ? `${baseCode}_${suffix}` : baseCode;
     const { responsible_id, ...rest } = f;
     const ind: Indicator = {
       id: newId(),
@@ -110,10 +119,9 @@ function NewIndicator() {
               </Select>
             </Field>
             <Field label="Empresa">
-              <Select value={f.franchise_id || "none"} onValueChange={(v) => set("franchise_id", v === "none" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="— Corporativo" /></SelectTrigger>
+              <Select value={f.franchise_id} onValueChange={(v) => set("franchise_id", v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Corporativo (todas)</SelectItem>
                   {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
                 </SelectContent>
               </Select>

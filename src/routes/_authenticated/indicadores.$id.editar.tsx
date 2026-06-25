@@ -74,6 +74,10 @@ function EditIndicator() {
       toast.error("Preencha nome e setor proprietário");
       return;
     }
+    if (!f.franchise_id) {
+      toast.error("Selecione a empresa do indicador");
+      return;
+    }
     upsert(f);
     logAudit({ user_id: user?.id ?? "", action: "update", entity_type: "indicator", entity_id: f.id });
     toast.success("Indicador atualizado");
@@ -102,10 +106,9 @@ function EditIndicator() {
               </Select>
             </Field>
             <Field label="Empresa">
-              <Select value={f.franchise_id || "none"} onValueChange={(v) => set("franchise_id", v === "none" ? undefined : v)}>
-                <SelectTrigger><SelectValue placeholder="— Corporativo" /></SelectTrigger>
+              <Select value={f.franchise_id ?? ""} onValueChange={(v) => set("franchise_id", v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Corporativo (todas)</SelectItem>
                   {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
                 </SelectContent>
               </Select>
