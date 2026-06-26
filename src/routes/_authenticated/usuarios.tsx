@@ -1,4 +1,8 @@
 import { newId } from "@/lib/ids";
+import { useServerFn } from "@tanstack/react-start";
+import { inviteUser } from "@/lib/users.functions";
+import { useSession } from "@/hooks/use-auth";
+import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
@@ -154,13 +158,16 @@ function AddFranchiseRow({ userId, onAdd }: { userId: string; onAdd: (fid: strin
   );
 }
 
-function ProfileDialog({ onSave }: { onSave: (p: Profile) => void }) {
+function ProfileDialog({ onSave: _onSave }: { onSave: (p: Profile) => void }) {
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState<Profile>({
-    id: newId(), full_name: "", email: "", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: new Date().toISOString(),
-  });
+  const [saving, setSaving] = useState(false);
+  const empty = { full_name: "", email: "", global_role: "colaborador" as GlobalRole, user_type: "interno" as Profile["user_type"] };
+  const [f, setF] = useState(empty);
+  const invite = useServerFn(inviteUser);
+  const { user } = useSession();
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setF(empty); }}>
       <DialogTrigger asChild><Button><Plus className="size-4" />Novo usuário</Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Novo usuário</DialogTitle></DialogHeader>
@@ -181,13 +188,37 @@ function ProfileDialog({ onSave }: { onSave: (p: Profile) => void }) {
               </Select>
             </div>
           </div>
+          <p className="text-xs text-muted-foreground">
+            O usuário receberá acesso imediato. Oriente-o a usar “Esqueci minha senha” no login para definir uma senha.
+          </p>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => {
-          onSave({ ...f, id: newId() });
-          setOpen(false);
-          setF({ id: newId(), full_name: "", email: "", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: new Date().toISOString() });
-        }}>Salvar</Button></DialogFooter>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancelar</Button>
+          <Button
+            disabled={saving || !f.full_name.trim() || !f.email.trim()}
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await invite({ data: { full_name: f.full_name.trim(), email: f.email.trim(), global_role: f.global_role } });
+                toast.success("Usuário criado");
+                setOpen(false);
+                setF(empty);
+                if (user) {
+                  const data = await loadAllFromSupabase(user.id);
+                  useStore.getState().hydrate(data);
+                }
+              } catch (err: any) {
+                toast.error("Não foi possível criar o usuário", { description: err?.message });
+              } finally {
+                setSaving(false);
+              }
+            }}
+          >
+            {saving ? "Criando..." : "Salvar"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
