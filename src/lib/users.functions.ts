@@ -20,17 +20,16 @@ export const inviteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => inviteSchema.parse(input))
   .handler(async ({ data, context }) => {
-    // Authorize caller
-    const { data: isAdmin, error: roleErr } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin_corporativo",
-    });
-    const { data: isSuper } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "superadmin",
-    });
+    // Authorize caller: must be superadmin or admin_corporativo
+    const { data: callerRoles, error: roleErr } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
     if (roleErr) throw new Error("Forbidden");
-    if (!isAdmin && !isSuper) throw new Error("Forbidden");
+    const roles = (callerRoles ?? []).map((r) => r.role);
+    if (!roles.includes("superadmin") && !roles.includes("admin_corporativo")) {
+      throw new Error("Forbidden");
+    }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
