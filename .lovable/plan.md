@@ -1,37 +1,42 @@
-Plano para corrigir os erros na importação de indicadores:
+## Problema
 
-1. Ajustar o importador de Excel
-- Tornar a coluna `franchise`/Empresa obrigatória.
-- Validar se o nome ou código da empresa existe em Empresas antes de salvar.
-- Melhorar a busca ignorando acentos, maiúsculas/minúsculas e pequenas diferenças como “Beneficios” versus “Benefícios”.
-- Se a empresa não existir, exibir erro claro: `Linha X: empresa "..." não encontrada`.
+Em **Usuários → Novo usuário**, o formulário chama `upsertProfile`, que apenas atualiza o estado local (Zustand). Não há gravação no Supabase, e mesmo se houvesse, não é possível inserir diretamente em `public.profiles`: essa tabela é populada automaticamente pelo trigger `handle_new_user` quando um usuário é criado em `auth.users`. Resultado: os dois usuários "somem" no próximo refresh.
 
-2. Corrigir o salvamento da empresa
-- Salvar sempre o `franchise_id` correspondente à empresa encontrada.
-- Não permitir que indicador importado fique sem empresa.
-- Atualizar indicadores existentes considerando nome + empresa, evitando que linhas de empresas diferentes sobrescrevam umas às outras.
+## Solução
 
-3. Corrigir o erro das linhas 4 e 5
-- O arquivo enviado tem indicadores com o mesmo nome para empresas diferentes.
-- Hoje o código automático fica igual para linhas repetidas, causando conflito no banco.
-- Vou gerar código interno incluindo a empresa, por exemplo:
-  - `VISUALIZACOES_QUANTIDADE_NOCTA_FRANQUIA`
-  - `VISUALIZACOES_QUANTIDADE_CEO`
-- Isso evita substituição ou falha ao salvar.
+Criar usuários via Auth Admin API (service role) numa server function protegida, e gravar o papel global em `user_roles` no mesmo fluxo.
 
-4. Melhorar a mensagem de erro
-- Quando o Supabase retornar erro em formato de objeto, exibir a mensagem real em vez de `erro desconhecido`.
+### 1. Server function `inviteUser` (`src/lib/users.functions.ts`)
 
-5. Remover “Corporativo” de Indicadores
-- Remover a opção `— Corporativo (todas)` do campo Empresa em:
-  - Novo indicador
-  - Editar indicador
-- Exigir seleção de uma empresa.
-- Trocar exibições de lista que mostram `Corporativo` quando não há empresa para `Empresa não informada`, apenas como fallback para dados antigos.
+- `createServerFn({ method: "POST" })`
+- `.middleware([requireSupabaseAuth])`
+- `.inputValidator` (zod): `full_name`, `email`, `global_role`, `user_type`
+- Handler:
+  1. Verifica se o chamador é `superadmin` ou `admin_corporativo` via `has_role` (RPC) — senão `403`.
+  2. `await import("@/integrations/supabase/client.server")` para usar `supabaseAdmin`.
+  3. `supabaseAdmin.auth.admin.createUser({ email, email_confirm: true, user_metadata: { full_name } })` (cria usuário; trigger `handle_new_user` cria o perfil automaticamente).
+  4. `supabaseAdmin.from("profiles").update({ full_name }).eq("id", newUser.id)` (garante nome).
+  5. Se `global_role` ≠ `colaborador` (padrão do trigger): `delete` em `user_roles` daquele user + `insert` com o papel escolhido.
+  6. Retorna `{ id, email }`.
 
-Arquivos a alterar:
-- `src/components/app/import-indicators-dialog.tsx`
-- `src/routes/_authenticated/indicadores.novo.tsx`
-- `src/routes/_authenticated/indicadores.$id.editar.tsx`
-- `src/routes/_authenticated/indicadores.index.tsx`
-- `src/routes/_authenticated/meus-indicadores.tsx`, se necessário para remover o rótulo Corporativo nas visualizações.
+### 2. UI `src/routes/_authenticated/usuarios.tsx`
+
+- `ProfileDialog` passa a chamar `useServerFn(inviteUser)` em vez de `upsertProfile` local.
+- Em caso de sucesso: toast "Usuário convidado" + `queryClient.invalidateQueries()` para recarregar a lista; hidratar store a partir do Supabase (já existe fluxo em `auth-sync`/`supabase-data`).
+- Em caso de erro: toast genérico ("Não foi possível criar o usuário").
+- Remover o uso de `upsertProfile` para criação (mantém apenas para edições locais futuras, se houver).
+
+### 3. Sem alterações de schema
+
+`profiles`, `user_roles` e o trigger `handle_new_user` já existem e estão corretos. Não há migração.
+
+### Detalhes técnicos
+
+- `supabaseAdmin` só pode ser importado dinamicamente dentro do handler (regra `tanstack-supabase-import-graph`).
+- A criação por `createUser` com `email_confirm: true` evita exigir confirmação por e-mail (consistente com a configuração atual da plataforma).
+- A senha inicial pode ser omitida; usuário define via "Esqueci minha senha" — ou adicionamos campo opcional de senha temporária no diálogo (pergunto abaixo se necessário).
+- O bearer já é anexado pelo `functionMiddleware` existente em `src/start.ts`.
+
+## Resultado esperado
+
+Novo usuário criado pelo admin aparece imediatamente na lista e persiste após refresh, com o papel global correto em `user_roles`.
