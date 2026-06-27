@@ -38,6 +38,23 @@ function AuthPage() {
     navigate({ to: "/meu-painel", replace: true });
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Digite seu e-mail acima para recuperar a senha.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/definir-senha`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error("Não foi possível enviar o e-mail de recuperação.");
+      return;
+    }
+    toast.success("E-mail de recuperação enviado. Verifique sua caixa de entrada.");
+  };
+
 
 
   return (
