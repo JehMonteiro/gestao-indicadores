@@ -82,6 +82,15 @@ function AuthPage() {
                   <Input id="password-l" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-xs text-primary underline hover:text-primary/80"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
                 <p className="text-xs text-muted-foreground text-center">
                   Apenas administradores podem cadastrar novos usuários. Solicite acesso ao seu gestor.
                 </p>
