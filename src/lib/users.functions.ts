@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getRequest } from "@tanstack/react-start/server";
+
 
 const inviteSchema = z.object({
   full_name: z.string().trim().min(1),
@@ -34,10 +34,13 @@ export const inviteUser = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Build the public app URL from the request origin so the invite link works
-    // in both preview and published environments.
-    const request = getRequest();
-    const appUrl = request?.headers.get("origin") ?? process.env.PUBLIC_APP_URL ?? "http://localhost:8080";
+    // Build redirect URL from a trusted server-side allowlist, NOT the request Origin header.
+    // PUBLIC_APP_URL is set by the platform; falls back to a known published URL.
+    const ALLOWED_APP_URLS = [
+      process.env.PUBLIC_APP_URL,
+      "https://gestao-indicadores.lovable.app",
+    ].filter(Boolean) as string[];
+    const appUrl = ALLOWED_APP_URLS[0] ?? "https://gestao-indicadores.lovable.app";
 
     const { data: created, error: createErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(
       data.email,
@@ -47,7 +50,9 @@ export const inviteUser = createServerFn({ method: "POST" })
       }
     );
     if (createErr || !created?.user) {
-      throw new Error(createErr?.message ?? "Falha ao convidar usuário");
+      // Do not leak raw admin API errors (account existence, internal codes) to the client.
+      console.error("[inviteUser] admin invite failed", createErr);
+      throw new Error("Não foi possível convidar este usuário. Verifique os dados e tente novamente.");
     }
 
     const newId = created.user.id;
@@ -64,8 +69,10 @@ export const inviteUser = createServerFn({ method: "POST" })
       .from("user_roles")
       .insert({ user_id: newId, role: data.global_role });
     if (roleInsertErr) {
-      throw new Error(roleInsertErr.message);
+      console.error("[inviteUser] role assignment failed", roleInsertErr);
+      throw new Error("Usuário criado, mas não foi possível atribuir o papel. Tente novamente.");
     }
 
     return { id: newId, email: data.email };
   });
+
