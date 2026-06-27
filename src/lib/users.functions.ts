@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getRequest } from "@tanstack/react-start/server";
 
 const inviteSchema = z.object({
   full_name: z.string().trim().min(1),
@@ -33,13 +34,20 @@ export const inviteUser = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email: data.email,
-      email_confirm: true,
-      user_metadata: { full_name: data.full_name },
-    });
+    // Build the public app URL from the request origin so the invite link works
+    // in both preview and published environments.
+    const request = getRequest();
+    const appUrl = request?.headers.get("origin") ?? process.env.PUBLIC_APP_URL ?? "http://localhost:8080";
+
+    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      data.email,
+      {
+        data: { full_name: data.full_name },
+        redirectTo: `${appUrl}/definir-senha`,
+      }
+    );
     if (createErr || !created?.user) {
-      throw new Error(createErr?.message ?? "Falha ao criar usuário");
+      throw new Error(createErr?.message ?? "Falha ao convidar usuário");
     }
 
     const newId = created.user.id;

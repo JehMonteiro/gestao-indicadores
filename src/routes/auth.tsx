@@ -38,6 +38,23 @@ function AuthPage() {
     navigate({ to: "/meu-painel", replace: true });
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Digite seu e-mail acima para recuperar a senha.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/definir-senha`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error("Não foi possível enviar o e-mail de recuperação.");
+      return;
+    }
+    toast.success("E-mail de recuperação enviado. Verifique sua caixa de entrada.");
+  };
+
 
 
   return (
@@ -82,6 +99,15 @@ function AuthPage() {
                   <Input id="password-l" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-xs text-primary underline hover:text-primary/80"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
                 <p className="text-xs text-muted-foreground text-center">
                   Apenas administradores podem cadastrar novos usuários. Solicite acesso ao seu gestor.
                 </p>
