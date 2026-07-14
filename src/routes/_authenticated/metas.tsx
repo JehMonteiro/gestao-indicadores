@@ -104,25 +104,40 @@ function TargetsPage() {
 }
 
 
-function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<boolean> | boolean | void }) {
+function TargetDialog({
+  onSave,
+  initialValue,
+  openControlled,
+  onOpenChange,
+}: {
+  onSave: (t: IndicatorTarget) => Promise<boolean> | boolean | void;
+  initialValue?: IndicatorTarget;
+  openControlled?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
-  const [open, setOpen] = useState(false);
   const { user: authUser } = useSession();
-  const initial = (): IndicatorTarget => ({
+  const isEdit = !!initialValue;
+  const [open, setOpen] = useState(!!openControlled);
+  const makeInitial = (): IndicatorTarget => initialValue ?? ({
     id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "franquia",
     franchise_id: franchises[0]?.id,
     period_start: new Date().toISOString().slice(0,10), period_end: new Date().toISOString().slice(0,10),
     target_value: 0, weight: 1, created_by: authUser?.id ?? "", created_at: new Date().toISOString(),
   });
-  const [f, setF] = useState<IndicatorTarget>(initial);
+  const [f, setF] = useState<IndicatorTarget>(makeInitial);
+  const setDialog = (o: boolean) => {
+    setOpen(o);
+    onOpenChange?.(o);
+  };
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button><Plus className="size-4" />Nova meta</Button></DialogTrigger>
+    <Dialog open={open} onOpenChange={setDialog}>
+      {!isEdit && <DialogTrigger asChild><Button><Plus className="size-4" />Nova meta</Button></DialogTrigger>}
       <DialogContent>
-        <DialogHeader><DialogTitle>Nova meta</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Editar meta" : "Nova meta"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Indicador</Label>
             <Select value={f.indicator_id} onValueChange={(v) => setF({ ...f, indicator_id: v })}>
@@ -162,16 +177,18 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<bool
           </div>
           <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={async () => {
+        <DialogFooter><Button variant="outline" onClick={() => setDialog(false)}>Cancelar</Button><Button onClick={async () => {
           if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
           if (!f.franchise_id) { toast.error("Selecione uma empresa"); return; }
-          const ok = await onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
+          const payload = isEdit ? { ...f, created_by: f.created_by || authUser?.id || "" } : { ...f, id: newId(), created_by: authUser?.id ?? "" };
+          const ok = await onSave(payload);
           if (ok !== false) {
-            setOpen(false);
-            setF(initial());
+            setDialog(false);
+            if (!isEdit) setF(makeInitial());
           }
         }}>Salvar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
