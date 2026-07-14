@@ -189,7 +189,7 @@ function ProfileDialog({ onSave: _onSave }: { onSave: (p: Profile) => void }) {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            O usuário receberá acesso imediato. Oriente-o a usar “Esqueci minha senha” no login para definir uma senha.
+            Enviaremos um e-mail com link para o usuário criar a senha e acessar a plataforma.
           </p>
         </div>
         <DialogFooter>
@@ -200,7 +200,7 @@ function ProfileDialog({ onSave: _onSave }: { onSave: (p: Profile) => void }) {
               setSaving(true);
               try {
                 await invite({ data: { full_name: f.full_name.trim(), email: f.email.trim(), global_role: f.global_role } });
-                toast.success("Usuário criado");
+                toast.success(`Convite enviado para ${f.email.trim()}`);
                 setOpen(false);
                 setF(empty);
                 if (user) {

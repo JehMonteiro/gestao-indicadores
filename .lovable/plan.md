@@ -1,42 +1,39 @@
-## Problema
+## Situação
 
-Em **Usuários → Novo usuário**, o formulário chama `upsertProfile`, que apenas atualiza o estado local (Zustand). Não há gravação no Supabase, e mesmo se houvesse, não é possível inserir diretamente em `public.profiles`: essa tabela é populada automaticamente pelo trigger `handle_new_user` quando um usuário é criado em `auth.users`. Resultado: os dois usuários "somem" no próximo refresh.
+O fluxo já existe:
 
-## Solução
+- `inviteUser` (server function) chama `supabaseAdmin.auth.admin.inviteUserByEmail(email, { redirectTo: ".../definir-senha" })`.
+- A página `/definir-senha` aceita o token do convite e chama `supabase.auth.updateUser({ password })`.
 
-Criar usuários via Auth Admin API (service role) numa server function protegida, e gravar o papel global em `user_roles` no mesmo fluxo.
+O que falta: **o e-mail em si não é entregue de forma confiável**, porque o projeto não tem domínio de e-mail configurado. Sem domínio, o backend usa o remetente padrão compartilhado, que tem limite estrito (poucos e-mails/hora), sem branding, e frequentemente cai em spam. Além disso, a UI ainda instrui o usuário a usar "Esqueci minha senha", como se o convite não fosse suficiente.
 
-### 1. Server function `inviteUser` (`src/lib/users.functions.ts`)
+## Plano
 
-- `createServerFn({ method: "POST" })`
-- `.middleware([requireSupabaseAuth])`
-- `.inputValidator` (zod): `full_name`, `email`, `global_role`, `user_type`
-- Handler:
-  1. Verifica se o chamador é `superadmin` ou `admin_corporativo` via `has_role` (RPC) — senão `403`.
-  2. `await import("@/integrations/supabase/client.server")` para usar `supabaseAdmin`.
-  3. `supabaseAdmin.auth.admin.createUser({ email, email_confirm: true, user_metadata: { full_name } })` (cria usuário; trigger `handle_new_user` cria o perfil automaticamente).
-  4. `supabaseAdmin.from("profiles").update({ full_name }).eq("id", newUser.id)` (garante nome).
-  5. Se `global_role` ≠ `colaborador` (padrão do trigger): `delete` em `user_roles` daquele user + `insert` com o papel escolhido.
-  6. Retorna `{ id, email }`.
+### 1. Configurar domínio de e-mail do projeto
 
-### 2. UI `src/routes/_authenticated/usuarios.tsx`
+Abrir o diálogo de configuração de domínio para o usuário conectar um domínio próprio (ex.: `notify.seudominio.com`). Isso é pré-requisito para envio confiável.
 
-- `ProfileDialog` passa a chamar `useServerFn(inviteUser)` em vez de `upsertProfile` local.
-- Em caso de sucesso: toast "Usuário convidado" + `queryClient.invalidateQueries()` para recarregar a lista; hidratar store a partir do Supabase (já existe fluxo em `auth-sync`/`supabase-data`).
-- Em caso de erro: toast genérico ("Não foi possível criar o usuário").
-- Remover o uso de `upsertProfile` para criação (mantém apenas para edições locais futuras, se houver).
+<presentation-actions>
+<presentation-open-email-setup>Configurar domínio de e-mail</presentation-open-email-setup>
+</presentation-actions>
 
-### 3. Sem alterações de schema
+### 2. Provisionar infraestrutura de e-mail e templates de auth
 
-`profiles`, `user_roles` e o trigger `handle_new_user` já existem e estão corretos. Não há migração.
+Após o domínio estar configurado:
 
-### Detalhes técnicos
+- Rodar `setup_email_infra` (filas pgmq, cron, tabelas de log/suppression).
+- Rodar `scaffold_auth_email_templates` — gera os templates de auth (inclusive **invite** e **recovery**) usando a marca do app, e a webhook `/lovable/email/auth/webhook` que passa a interceptar os e-mails do Supabase Auth. A partir daí, todo `inviteUserByEmail` e todo `resetPasswordForEmail` sairão pelo domínio configurado, com template branded, sem limite baixo.
+- Aplicar cores/tipografia do app (`src/styles.css`) nos templates gerados; corpo do e-mail continua com fundo `#ffffff`.
 
-- `supabaseAdmin` só pode ser importado dinamicamente dentro do handler (regra `tanstack-supabase-import-graph`).
-- A criação por `createUser` com `email_confirm: true` evita exigir confirmação por e-mail (consistente com a configuração atual da plataforma).
-- A senha inicial pode ser omitida; usuário define via "Esqueci minha senha" — ou adicionamos campo opcional de senha temporária no diálogo (pergunto abaixo se necessário).
-- O bearer já é anexado pelo `functionMiddleware` existente em `src/start.ts`.
+### 3. Ajustes de UI em `src/routes/_authenticated/usuarios.tsx`
+
+- Trocar o texto explicativo do diálogo "Novo usuário" de "Oriente-o a usar 'Esqueci minha senha'" para: **"Enviaremos um e-mail com link para o usuário criar a senha e acessar a plataforma."**
+- No toast de sucesso, indicar: `"Convite enviado para {email}"` em vez de apenas "Usuário criado".
+
+### 4. Sem alterações no backend/server function
+
+`inviteUser` e a página `/definir-senha` já estão corretos. Não há migração, não há mudança em RLS.
 
 ## Resultado esperado
 
-Novo usuário criado pelo admin aparece imediatamente na lista e persiste após refresh, com o papel global correto em `user_roles`.
+Ao cadastrar um novo usuário em Usuários → Novo usuário, ele recebe um e-mail (do domínio do projeto, com marca) contendo link para `/definir-senha`, define a senha e entra na plataforma. O mesmo pipeline também melhora o e-mail de "Esqueci minha senha".
