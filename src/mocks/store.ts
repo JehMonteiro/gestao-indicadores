@@ -52,6 +52,7 @@ type Actions = {
   upsertIndicator: (i: Indicator) => void;
   deleteIndicator: (id: string) => void;
   upsertTarget: (t: IndicatorTarget) => void;
+  deleteTarget: (id: string) => void;
   upsertEntry: (e: IndicatorEntry) => void;
   setEntryStatus: (id: string, status: IndicatorEntry["status"], extra?: Partial<IndicatorEntry>) => void;
 
