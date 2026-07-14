@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import noctaIcon from "@/assets/nocta-icon.png.asset.json";
+import noctaLogo from "@/assets/nocta-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -61,15 +62,14 @@ function AuthPage() {
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-auth-panel to-auth-panel-deep text-white p-12">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-md bg-white/20 grid place-items-center">
-            <ShieldCheck className="size-5" />
-          </div>
+          <img src={noctaIcon.url} alt="Nocta" className="size-10 object-contain" />
           <div>
             <p className="font-semibold">Gestão de Indicadores</p>
             <p className="text-xs opacity-70">Plataforma corporativa</p>
           </div>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-6">
+          <img src={noctaLogo.url} alt="Nocta" className="h-40 w-auto" />
           <h1 className="text-3xl font-semibold leading-tight">
             Indicadores, metas e resultados em um só lugar.
           </h1>
