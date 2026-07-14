@@ -143,6 +143,46 @@ function UsersPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir usuário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleting && (
+                <>
+                  Esta ação é permanente. O usuário <strong>{deleting.full_name}</strong> ({deleting.email}) perderá o acesso à plataforma imediatamente. Lançamentos e registros históricos serão mantidos, mas sem vínculo com este usuário.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!deleting) return;
+                const target = deleting;
+                try {
+                  await deleteFn({ data: { user_id: target.id } });
+                  toast.success(`Usuário ${target.full_name} excluído`);
+                  setDeleting(null);
+                  if (currentUserId) {
+                    const data = await loadAllFromSupabase(currentUserId);
+                    useStore.getState().hydrate(data);
+                  }
+                } catch (err: any) {
+                  toast.error("Não foi possível excluir", { description: err?.message });
+                }
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }
