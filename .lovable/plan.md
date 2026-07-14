@@ -1,25 +1,15 @@
-## Plano: Renomear botão de envio em Lançamentos
+## Mudanças em `src/routes/_authenticated/metas.tsx`
 
-### Alteração proposta
-Na tela de criação de lançamentos (`src/routes/_authenticated/lancamentos.novo.tsx`), renomear o botão principal:
+**Tabela (listagem):**
+- Remover a coluna **Escopo**.
+- Manter a coluna **Empresa** (que já existe e mostra a franquia/Corporativo).
 
-- **De:** `Enviar para aprovação`
-- **Para:** `Cadastrar`
+**Diálogo "Nova meta":**
+- Remover o campo **Peso**.
+- Remover o campo **Escopo** (select com Empresa/Setor/Franquia).
+- Substituir por um campo **Empresa** (select de franquias), obrigatório, indicando de qual empresa é a meta. Esse valor será gravado em `franchise_id`.
+- O `scope_type` passa a ser derivado automaticamente: `"franquia"` quando `franchise_id` estiver preenchido (comportamento padrão agora que toda meta tem empresa).
 
-### Detalhe técnico
-Atualmente o botão possui duas variações de texto:
-```text
-{ind?.requires_approval ? "Enviar para aprovação" : "Confirmar lançamento"}
-```
-
-A mudança afeta apenas a primeira variação, deixando:
-```text
-{ind?.requires_approval ? "Cadastrar" : "Confirmar lançamento"}
-```
-
-### Verificação
-- `bun run build` passar.
-- Abrir `/lancamentos/novo`, selecionar um indicador que exige aprovação e confirmar que o botão exibe **Cadastrar**.
-
-### Dúvida rápida
-Deseja que a segunda variação (`Confirmar lançamento`) também vire **Cadastrar**, ou mantém diferenciada?
+**Observações:**
+- Não altero o schema do banco — os campos `weight` e `scope_type` continuam existindo no tipo/tabela, apenas deixam de ser expostos na UI. `weight` será salvo com valor padrão `1`.
+- Nenhuma outra tela é afetada (verifiquei que Metas vive somente neste arquivo).
