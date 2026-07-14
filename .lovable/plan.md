@@ -1,39 +1,36 @@
-## Situação
+## Diagnóstico
 
-O fluxo já existe:
+A tela `/definir-senha` mostra "Não foi possível definir a senha. O link pode ter expirado." porque a página **nunca troca o token do link por uma sessão**. Hoje ela apenas escuta `onAuthStateChange` e chama `getSession()`, o que só cobre o fluxo antigo com `#access_token` no hash.
 
-- `inviteUser` (server function) chama `supabaseAdmin.auth.admin.inviteUserByEmail(email, { redirectTo: ".../definir-senha" })`.
-- A página `/definir-senha` aceita o token do convite e chama `supabase.auth.updateUser({ password })`.
+Os e-mails atuais do Supabase (invite, recovery, magiclink) chegam como:
 
-O que falta: **o e-mail em si não é entregue de forma confiável**, porque o projeto não tem domínio de e-mail configurado. Sem domínio, o backend usa o remetente padrão compartilhado, que tem limite estrito (poucos e-mails/hora), sem branding, e frequentemente cai em spam. Além disso, a UI ainda instrui o usuário a usar "Esqueci minha senha", como se o convite não fosse suficiente.
+```
+/definir-senha?token_hash=pkce_xxx&type=invite
+```
+
+ou, no fluxo PKCE:
+
+```
+/definir-senha?code=xxx
+```
+
+Nenhum desses formatos gera sessão sozinho — precisa chamar `supabase.auth.verifyOtp({ token_hash, type })` (para `token_hash`) ou `supabase.auth.exchangeCodeForSession(code)` (para `code`). Como isso não é feito, `updateUser({ password })` roda sem sessão e devolve erro, o que a UI traduz como "link expirado".
 
 ## Plano
 
-### 1. Configurar domínio de e-mail do projeto
+Alterar apenas `src/routes/definir-senha.tsx`:
 
-Abrir o diálogo de configuração de domínio para o usuário conectar um domínio próprio (ex.: `notify.seudominio.com`). Isso é pré-requisito para envio confiável.
+1. No `useEffect` de bootstrap, ler a URL logo na montagem:
+   - Se houver `?token_hash=...&type=...` (invite | recovery | magiclink | signup | email_change), chamar `supabase.auth.verifyOtp({ token_hash, type })`.
+   - Senão, se houver `?code=...`, chamar `supabase.auth.exchangeCodeForSession(code)`.
+   - Senão, cair no comportamento atual (hash com `#access_token` → `getSession()` / `onAuthStateChange`).
+   - Após sucesso, limpar os parâmetros da URL com `window.history.replaceState` para evitar reuso.
+2. Enquanto o token está sendo trocado, manter `sessionReady=false` e o botão desabilitado ("Validando convite...").
+3. Se a troca falhar, marcar um estado `linkInvalid=true` e exibir a mensagem já existente de link inválido/expirado — sem mostrar toast de erro genérico antes do usuário clicar em "Definir senha".
+4. Só habilitar o submit quando `sessionReady=true`. O `handleSetPassword` continua igual (`supabase.auth.updateUser({ password })` + redirect para `/meu-painel`).
 
-<presentation-actions>
-<presentation-open-email-setup>Configurar domínio de e-mail</presentation-open-email-setup>
-</presentation-actions>
-
-### 2. Provisionar infraestrutura de e-mail e templates de auth
-
-Após o domínio estar configurado:
-
-- Rodar `setup_email_infra` (filas pgmq, cron, tabelas de log/suppression).
-- Rodar `scaffold_auth_email_templates` — gera os templates de auth (inclusive **invite** e **recovery**) usando a marca do app, e a webhook `/lovable/email/auth/webhook` que passa a interceptar os e-mails do Supabase Auth. A partir daí, todo `inviteUserByEmail` e todo `resetPasswordForEmail` sairão pelo domínio configurado, com template branded, sem limite baixo.
-- Aplicar cores/tipografia do app (`src/styles.css`) nos templates gerados; corpo do e-mail continua com fundo `#ffffff`.
-
-### 3. Ajustes de UI em `src/routes/_authenticated/usuarios.tsx`
-
-- Trocar o texto explicativo do diálogo "Novo usuário" de "Oriente-o a usar 'Esqueci minha senha'" para: **"Enviaremos um e-mail com link para o usuário criar a senha e acessar a plataforma."**
-- No toast de sucesso, indicar: `"Convite enviado para {email}"` em vez de apenas "Usuário criado".
-
-### 4. Sem alterações no backend/server function
-
-`inviteUser` e a página `/definir-senha` já estão corretos. Não há migração, não há mudança em RLS.
+Sem mudanças em backend, migrações, `inviteUser`, ou templates de e-mail — o link já é válido; falta apenas consumi-lo no cliente.
 
 ## Resultado esperado
 
-Ao cadastrar um novo usuário em Usuários → Novo usuário, ele recebe um e-mail (do domínio do projeto, com marca) contendo link para `/definir-senha`, define a senha e entra na plataforma. O mesmo pipeline também melhora o e-mail de "Esqueci minha senha".
+Ao clicar no link do e-mail de convite (ou de "esqueci minha senha"), a página valida o token, cria a sessão, o usuário define a senha e é redirecionado para `/meu-painel` sem o falso "link expirado".
