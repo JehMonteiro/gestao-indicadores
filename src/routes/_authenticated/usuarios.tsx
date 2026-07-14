@@ -189,7 +189,7 @@ function ProfileDialog({ onSave: _onSave }: { onSave: (p: Profile) => void }) {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            O usuário receberá acesso imediato. Oriente-o a usar “Esqueci minha senha” no login para definir uma senha.
+            Enviaremos um e-mail com link para o usuário criar a senha e acessar a plataforma.
           </p>
         </div>
         <DialogFooter>
