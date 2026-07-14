@@ -91,7 +91,12 @@ function UsersPage() {
                 <TableCell className="capitalize text-sm">{p.user_type}</TableCell>
                 <TableCell className="text-xs">{ss.map((u) => sectors.find((s) => s.id === u.sector_id)?.code).filter(Boolean).join(", ") || "—"}</TableCell>
                 <TableCell className="text-xs">{ff.map((u) => franchises.find((s) => s.id === u.franchise_id)?.code).filter(Boolean).join(", ") || "—"}</TableCell>
-                <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={() => setEditing(p)}><Pencil className="size-4" /></Button></TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="icon" onClick={() => setEditing(p)}><Pencil className="size-4" /></Button>
+                  {isSuperadmin && p.id !== currentUserId && (
+                    <Button variant="ghost" size="icon" onClick={() => setDeleting(p)} className="text-destructive hover:text-destructive"><Trash2 className="size-4" /></Button>
+                  )}
+                </TableCell>
               </TableRow>
             );
           })}
