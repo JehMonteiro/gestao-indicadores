@@ -2,6 +2,7 @@ import { newId } from "@/lib/ids";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { useSession } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
