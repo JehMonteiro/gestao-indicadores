@@ -134,6 +134,10 @@ export const useStore = create<State & Actions>()(
         set((st) => ({ targets: upsert(st.targets, t) }));
         fireAndForget("target", dbWrite.target(t));
       },
+      deleteTarget: (id) => {
+        set((st) => ({ targets: st.targets.filter((x) => x.id !== id) }));
+        fireAndForget("deleteTarget", dbWrite.deleteTarget(id));
+      },
       upsertEntry: (e) => {
         set((st) => ({ entries: upsert(st.entries, e) }));
         fireAndForget("entry", dbWrite.entry(e));
