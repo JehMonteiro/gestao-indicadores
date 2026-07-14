@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { formatDate, formatValue } from "@/lib/format";
 import type { IndicatorTarget } from "@/mocks/types";
 import { dbWrite } from "@/lib/supabase-data";
@@ -29,26 +29,36 @@ function TargetsPage() {
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertTarget);
+  const removeTarget = useStore((s) => s.deleteTarget);
   const user = useCurrentUser();
+  const [editing, setEditing] = useState<IndicatorTarget | null>(null);
+  const handleSave = async (t: IndicatorTarget) => {
+    const { error } = await dbWrite.target(t);
+    if (error) {
+      toast.error("Não foi possível salvar", { description: error.message });
+      return false;
+    }
+    upsert(t);
+    toast.success("Meta salva");
+    return true;
+  };
+  const handleDelete = async (t: IndicatorTarget) => {
+    if (!confirm("Excluir esta meta?")) return;
+    const { error } = await dbWrite.deleteTarget(t.id);
+    if (error) {
+      toast.error("Não foi possível excluir", { description: error.message });
+      return;
+    }
+    removeTarget(t.id);
+    toast.success("Meta excluída");
+  };
   return (
     <div>
-      <PageHeader title="Metas" description="Defina metas por escopo, período e indicador."
-        actions={
-          <TargetDialog onSave={async (t) => {
-            const { error } = await dbWrite.target(t);
-            if (error) {
-              toast.error("Não foi possível salvar", { description: error.message });
-              return false;
-            }
-            upsert(t);
-            toast.success("Meta salva");
-            return true;
-          }} />
-        
-        }
+      <PageHeader title="Metas" description="Defina metas por período e indicador."
+        actions={<TargetDialog onSave={handleSave} />}
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Setor</TableHead><TableHead>Responsável</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Setor</TableHead><TableHead>Responsável</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead><TableHead className="w-[100px]">Ações</TableHead></TableRow></TableHeader>
         <TableBody>
           {targets.slice(0, 50).map((t) => {
             const ind = indicators.find((i) => i.id === t.indicator_id);
@@ -69,34 +79,65 @@ function TargetsPage() {
                 <TableCell className="text-sm">{respName}</TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
                 <TableCell className="font-mono">{ind && formatValue(t.target_value, ind.value_type, ind.unit)}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => setEditing(t)} aria-label="Editar"><Pencil className="size-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(t)} aria-label="Excluir"><Trash2 className="size-4" /></Button>
+                  </div>
+                </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table></Card>
+      {editing && (
+        <TargetDialog
+          key={editing.id}
+          initialValue={editing}
+          openControlled
+          onOpenChange={(o) => { if (!o) setEditing(null); }}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 }
 
-function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<boolean> | boolean | void }) {
+
+function TargetDialog({
+  onSave,
+  initialValue,
+  openControlled,
+  onOpenChange,
+}: {
+  onSave: (t: IndicatorTarget) => Promise<boolean> | boolean | void;
+  initialValue?: IndicatorTarget;
+  openControlled?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
-  const [open, setOpen] = useState(false);
   const { user: authUser } = useSession();
-  const initial = (): IndicatorTarget => ({
+  const isEdit = !!initialValue;
+  const [open, setOpen] = useState(!!openControlled);
+  const makeInitial = (): IndicatorTarget => initialValue ?? ({
     id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "franquia",
     franchise_id: franchises[0]?.id,
     period_start: new Date().toISOString().slice(0,10), period_end: new Date().toISOString().slice(0,10),
     target_value: 0, weight: 1, created_by: authUser?.id ?? "", created_at: new Date().toISOString(),
   });
-  const [f, setF] = useState<IndicatorTarget>(initial);
+  const [f, setF] = useState<IndicatorTarget>(makeInitial);
+  const setDialog = (o: boolean) => {
+    setOpen(o);
+    onOpenChange?.(o);
+  };
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button><Plus className="size-4" />Nova meta</Button></DialogTrigger>
+    <Dialog open={open} onOpenChange={setDialog}>
+      {!isEdit && <DialogTrigger asChild><Button><Plus className="size-4" />Nova meta</Button></DialogTrigger>}
       <DialogContent>
-        <DialogHeader><DialogTitle>Nova meta</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Editar meta" : "Nova meta"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Indicador</Label>
             <Select value={f.indicator_id} onValueChange={(v) => setF({ ...f, indicator_id: v })}>
@@ -136,16 +177,18 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<bool
           </div>
           <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={async () => {
+        <DialogFooter><Button variant="outline" onClick={() => setDialog(false)}>Cancelar</Button><Button onClick={async () => {
           if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
           if (!f.franchise_id) { toast.error("Selecione uma empresa"); return; }
-          const ok = await onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
+          const payload = isEdit ? { ...f, created_by: f.created_by || authUser?.id || "" } : { ...f, id: newId(), created_by: authUser?.id ?? "" };
+          const ok = await onSave(payload);
           if (ok !== false) {
-            setOpen(false);
-            setF(initial());
+            setDialog(false);
+            if (!isEdit) setF(makeInitial());
           }
         }}>Salvar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

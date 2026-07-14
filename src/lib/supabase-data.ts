@@ -351,6 +351,9 @@ export const dbWrite = {
       created_by: t.created_by || null,
     });
   },
+  async deleteTarget(id: string) {
+    return supabase.from("targets").delete().eq("id", id);
+  },
   async entry(e: IndicatorEntry) {
     return supabase.from("indicator_entries").upsert({
       id: e.id,
