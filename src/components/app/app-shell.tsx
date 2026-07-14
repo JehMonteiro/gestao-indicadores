@@ -53,9 +53,9 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const role = user?.global_role;
   return (
-    <aside className="h-full flex flex-col bg-sidebar text-sidebar-foreground w-64 border-r border-sidebar-border">
-      <div className="px-5 py-4 flex items-center gap-2 border-b border-sidebar-border">
-        <div className="size-8 rounded-md bg-sidebar-primary grid place-items-center">
+    <aside className="h-full flex flex-col bg-gradient-to-br from-auth-panel to-auth-panel-deep text-white w-64 border-r border-white/20">
+      <div className="px-5 py-4 flex items-center gap-2 border-b border-white/20">
+        <div className="size-8 rounded-md bg-white/20 grid place-items-center">
           <ShieldCheck className="size-4" />
         </div>
         <div className="leading-tight">
@@ -81,8 +81,8 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         className={cn(
                           "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition",
                           active
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                            : "hover:bg-sidebar-accent/60",
+                            ? "bg-white/20 text-white font-medium"
+                            : "hover:bg-white/15",
                         )}
                       >
                         <it.icon className="size-4 shrink-0" />
@@ -96,7 +96,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
-      <div className="p-3 border-t border-sidebar-border text-[11px] opacity-60">
+      <div className="p-3 border-t border-white/20 text-[11px] opacity-60">
         v1.0 · Demonstração
       </div>
     </aside>
@@ -261,7 +261,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Sidebar />
       </div>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="p-0 w-64 bg-sidebar">
+        <SheetContent side="left" className="p-0 w-64 bg-gradient-to-br from-auth-panel to-auth-panel-deep text-white">
           <Sidebar onNavigate={() => setOpen(false)} />
         </SheetContent>
         <div className="flex-1 min-w-0 flex flex-col">
