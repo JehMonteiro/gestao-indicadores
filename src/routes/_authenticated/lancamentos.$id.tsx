@@ -33,7 +33,7 @@ function EntryDetail() {
   const pct = computeAchievement(entry, target, ind?.direction ?? "maior_melhor");
   const cs = classificationStyles(classify(pct, settings));
 
-  const canApprove = user && (user.global_role === "superadmin" || user.global_role === "admin_corporativo" || user.global_role === "gestor_setor" || user.global_role === "gestor_franquia");
+  const canApprove = !!user;
   const revisions = entries.filter((e) => e.indicator_id === entry.indicator_id && e.period_start === entry.period_start).sort((a, b) => a.revision_number - b.revision_number);
 
   const approve = () => {
