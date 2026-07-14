@@ -78,7 +78,7 @@ function TargetsPage() {
   );
 }
 
-function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
+function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<boolean> | boolean | void }) {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
