@@ -200,7 +200,7 @@ function ProfileDialog({ onSave: _onSave }: { onSave: (p: Profile) => void }) {
               setSaving(true);
               try {
                 await invite({ data: { full_name: f.full_name.trim(), email: f.email.trim(), global_role: f.global_role } });
-                toast.success("Usuário criado");
+                toast.success(`Convite enviado para ${f.email.trim()}`);
                 setOpen(false);
                 setF(empty);
                 if (user) {
