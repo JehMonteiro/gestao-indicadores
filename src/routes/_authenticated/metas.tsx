@@ -175,7 +175,39 @@ function TargetDialog({
             <div><Label>Início</Label><Input type="date" value={f.period_start} onChange={(e) => setF({ ...f, period_start: e.target.value })} /></div>
             <div><Label>Fim</Label><Input type="date" value={f.period_end} onChange={(e) => setF({ ...f, period_end: e.target.value })} /></div>
           </div>
-          <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
+          {(() => {
+            const ind = indicators.find((i) => i.id === f.indicator_id);
+            const vt = ind?.value_type;
+            const label = vt === "moeda" ? "Valor da meta (R$)"
+              : vt === "percentual" ? "Valor da meta (%)"
+              : vt === "inteiro" || vt === "quantidade" ? "Valor da meta (número inteiro)"
+              : vt === "tempo" ? `Valor da meta${ind?.unit ? ` (${ind.unit})` : " (tempo)"}`
+              : vt === "nota" ? "Valor da meta (nota)"
+              : `Valor da meta${ind?.unit ? ` (${ind.unit})` : ""}`;
+            const step = vt === "inteiro" || vt === "quantidade" ? "1"
+              : vt === "moeda" ? "0.01"
+              : vt === "percentual" ? "0.1"
+              : "0.01";
+            const isInt = vt === "inteiro" || vt === "quantidade";
+            const min = vt === "percentual" ? 0 : undefined;
+            const max = vt === "percentual" ? 100 : undefined;
+            return (
+              <div><Label>{label}</Label>
+                <Input
+                  type="number"
+                  step={step}
+                  min={min}
+                  max={max}
+                  value={f.target_value}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const n = raw === "" ? 0 : Number(raw);
+                    setF({ ...f, target_value: isInt ? Math.trunc(n) : n });
+                  }}
+                />
+              </div>
+            );
+          })()}
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setDialog(false)}>Cancelar</Button><Button onClick={async () => {
           if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
