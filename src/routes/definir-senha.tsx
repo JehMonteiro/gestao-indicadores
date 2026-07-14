@@ -20,23 +20,70 @@ function SetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
+  const [linkInvalid, setLinkInvalid] = useState(false);
+  const [verifying, setVerifying] = useState(true);
 
   useEffect(() => {
-    // Supabase places the invite/recovery token in the URL hash.
-    // onAuthStateChange handles the implicit session automatically.
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        setSessionReady(true);
-      } else if (event === "PASSWORD_RECOVERY") {
-        setSessionReady(true);
+    let cancelled = false;
+
+    const clearUrl = () => {
+      try {
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch {
+        // ignore
       }
+    };
+
+    const bootstrap = async () => {
+      const url = new URL(window.location.href);
+      const tokenHash = url.searchParams.get("token_hash");
+      const type = url.searchParams.get("type");
+      const code = url.searchParams.get("code");
+      const hash = window.location.hash;
+
+      try {
+        if (tokenHash && type) {
+          const validTypes = ["invite", "recovery", "magiclink", "signup", "email_change"] as const;
+          const t = validTypes.includes(type as (typeof validTypes)[number])
+            ? (type as (typeof validTypes)[number])
+            : "invite";
+          const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: t });
+          if (error) throw error;
+          clearUrl();
+        } else if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          clearUrl();
+        } else if (hash.includes("access_token")) {
+          // Implicit flow: supabase-js auto-detects the hash.
+          await new Promise((r) => setTimeout(r, 100));
+        }
+
+        const { data } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (data.session) {
+          setSessionReady(true);
+        } else {
+          setLinkInvalid(true);
+        }
+      } catch (err) {
+        console.error("[definir-senha] token exchange failed", err);
+        if (!cancelled) setLinkInvalid(true);
+      } finally {
+        if (!cancelled) setVerifying(false);
+      }
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) setSessionReady(true);
     });
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setSessionReady(true);
-    });
+    bootstrap();
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const handleSetPassword = async (e: React.FormEvent) => {
@@ -118,9 +165,15 @@ function SetPasswordPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading || !sessionReady}>
-                  {loading ? "Salvando..." : sessionReady ? "Definir senha e entrar" : "Carregando convite..."}
+                  {loading
+                    ? "Salvando..."
+                    : verifying
+                      ? "Validando convite..."
+                      : sessionReady
+                        ? "Definir senha e entrar"
+                        : "Link inválido"}
                 </Button>
-                {!sessionReady && (
+                {!verifying && linkInvalid && (
                   <p className="text-xs text-muted-foreground text-center">
                     O link de convite parece inválido ou expirado. Peça um novo convite ou use "Esqueci minha senha" no login.
                   </p>
