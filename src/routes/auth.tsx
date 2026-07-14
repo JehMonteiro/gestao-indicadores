@@ -68,7 +68,8 @@ function AuthPage() {
             <p className="text-xs opacity-70">Plataforma corporativa</p>
           </div>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-6">
+          <img src={noctaLogo.url} alt="Nocta" className="h-40 w-auto" />
           <h1 className="text-3xl font-semibold leading-tight">
             Indicadores, metas e resultados em um só lugar.
           </h1>
