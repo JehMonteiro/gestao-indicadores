@@ -1,38 +1,37 @@
 ## Objetivo
-Traduzir o email de convite de novo usuário para português do Brasil, ajustando o template padrão do Supabase (assunto + corpo), sem configurar domínio customizado.
 
-## Escopo
-Apenas o template de convite (`invite`). Recuperação de senha e demais emails ficam como estão, salvo pedido posterior.
+Remover todas as restrições de permissão do módulo **Lançamentos**, para que qualquer usuário autenticado consiga ver o menu, listar, criar, editar e aprovar/rejeitar lançamentos, sem verificação de papel (role) ou de vínculo com setor/franquia.
 
-## Alterações
+## Mudanças
 
-### 1. Configurar template de convite em PT-BR
-Via `supabase--configure_auth`, definir:
+### 1. Menu lateral — liberar item "Lançamentos" para todos
+`src/mocks/store.ts` (função `canSeeRoute`)
+- Adicionar `"auditor"` ao array de `/lancamentos`, deixando todos os papéis com acesso. (Os demais papéis já estão listados.)
 
-- **Assunto:** `Você foi convidado para a Gestão de Indicadores`
-- **Corpo (HTML):** mensagem em português com saudação, explicação e botão/link `{{ .ConfirmationURL }}` apontando para `/definir-senha`, mantendo as variáveis do Supabase (`{{ .Email }}`, `{{ .ConfirmationURL }}`).
+### 2. Lista de lançamentos — mostrar todos
+`src/routes/_authenticated/lancamentos.index.tsx`
+- Deixar de filtrar `entries` por `useVisibleIndicators`. Passar a listar `useStore((s) => s.entries)` na íntegra.
+- Ao renderizar cada linha, buscar o indicador diretamente em `useStore((s) => s.indicators)` (não mais restrito à visibilidade).
+- Remover o `import { useVisibleIndicators }` deste arquivo.
 
-Texto proposto do corpo:
+### 3. Novo lançamento — permitir escolher qualquer indicador/franquia
+`src/routes/_authenticated/lancamentos.novo.tsx`
+- Trocar `useVisibleIndicators()` por `useStore((s) => s.indicators)` para popular o select de indicadores.
+- Trocar `myFranchises` (filtrado por `userFranchises`) por a lista completa de `franchises`, permitindo selecionar qualquer franquia quando o indicador for de escopo "franquia".
+- Remover o `import { useVisibleIndicators }`.
 
-```
-Olá,
+### 4. Detalhe do lançamento — liberar aprovação/rejeição
+`src/routes/_authenticated/lancamentos.$id.tsx`
+- Remover a variável `canApprove` (que restringia a superadmin/admin/gestor).
+- Trocar a condição `entry.status === "enviado" && canApprove` por apenas `entry.status === "enviado"`, de forma que qualquer usuário autenticado possa aprovar/rejeitar.
 
-Você foi convidado(a) para acessar a plataforma Gestão de Indicadores.
+## Fora de escopo
 
-Para criar sua senha e ativar seu acesso, clique no link abaixo:
+- Regras de visibilidade em outras telas (Visão geral, Meus indicadores, Aprovações, etc.) permanecem inalteradas.
+- Nenhuma alteração no banco/RLS — o app hoje usa store mockada; regras futuras de RLS ficam para outro momento.
+- Estilo/UI não muda.
 
-[Definir minha senha]({{ .ConfirmationURL }})
+## Verificação
 
-Se você não esperava este convite, ignore este email.
-
-Equipe Gestão de Indicadores
-```
-
-O link `{{ .ConfirmationURL }}` já direciona para `/definir-senha`, que trata `token_hash` e cria a sessão (correção anterior).
-
-### 2. Sem alterações de código
-Nenhuma mudança em rotas, componentes ou funções server — a página `/definir-senha` já está preparada.
-
-## Observações
-- Emails continuam sendo enviados pelo remetente padrão do Supabase (não `marketing@nocta.com.br`), pois isso exige domínio verificado.
-- Se depois quiser remetente próprio + template com marca, seria necessário configurar domínio de email.
+- `bun run build` deve passar.
+- Trocar de usuário (ex.: `colaborador`, `auditor`, `franqueado`) e confirmar que o item "Lançamentos" aparece no menu, a listagem exibe todos os registros, o formulário lista todos os indicadores e o botão de aprovar/rejeitar aparece em lançamentos com status "enviado".

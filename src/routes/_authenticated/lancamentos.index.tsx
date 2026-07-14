@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
-import { useVisibleIndicators } from "@/lib/permissions";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,9 +25,8 @@ const statusColors: Record<string, string> = {
 };
 
 function EntriesList() {
-  const indicators = useVisibleIndicators();
-  const indIds = indicators.map((i) => i.id);
-  const entries = useStore((s) => s.entries).filter((e) => indIds.includes(e.indicator_id));
+  const indicators = useStore((s) => s.indicators);
+  const entries = useStore((s) => s.entries);
   const [status, setStatus] = useState("all");
   const filtered = entries.filter((e) => status === "all" || e.status === status)
     .sort((a, b) => b.period_end.localeCompare(a.period_end));

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore, useCurrentUser } from "@/mocks/store";
-import { useVisibleIndicators } from "@/lib/permissions";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,9 +26,8 @@ export const Route = createFileRoute("/_authenticated/lancamentos/novo")({
 
 function NewEntry() {
   const search = useSearch({ from: "/_authenticated/lancamentos/novo" });
-  const indicators = useVisibleIndicators();
+  const indicators = useStore((s) => s.indicators);
   const franchises = useStore((s) => s.franchises);
-  const userFranchises = useStore((s) => s.userFranchises);
   const targets = useStore((s) => s.targets);
   const upsertEntry = useStore((s) => s.upsertEntry);
   const logAudit = useStore((s) => s.logAudit);
@@ -38,7 +37,7 @@ function NewEntry() {
   const [indId, setIndId] = useState(search.indicator ?? indicators[0]?.id ?? "");
   const ind = indicators.find((i) => i.id === indId);
 
-  const myFranchises = franchises.filter((f) => userFranchises.some((uf) => uf.user_id === user?.id && uf.franchise_id === f.id));
+  const myFranchises = franchises;
   const [franchiseId, setFranchiseId] = useState<string>(myFranchises[0]?.id ?? "");
   const [periodStart, setPeriodStart] = useState(formatISO(startOfMonth(new Date()), { representation: "date" }));
   const [periodEnd, setPeriodEnd] = useState(formatISO(endOfMonth(new Date()), { representation: "date" }));
