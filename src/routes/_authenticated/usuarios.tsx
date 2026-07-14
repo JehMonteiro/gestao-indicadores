@@ -1,7 +1,7 @@
 import { newId } from "@/lib/ids";
 import { useServerFn } from "@tanstack/react-start";
-import { inviteUser } from "@/lib/users.functions";
-import { useSession } from "@/hooks/use-auth";
+import { inviteUser, deleteUser } from "@/lib/users.functions";
+import { useSession, useAuthProfile } from "@/hooks/use-auth";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
@@ -14,13 +14,15 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Pencil, Plus, UserMinus, UserPlus } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Pencil, Plus, Trash2, UserMinus, UserPlus } from "lucide-react";
 import { useState } from "react";
 import type { Profile, SectorRole, FranchiseRole, GlobalRole } from "@/mocks/types";
 import { toast } from "sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { EmptyState } from "@/components/app/page-header";
 import { ShieldAlert } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({ meta: [{ title: "Usuários" }] }),
