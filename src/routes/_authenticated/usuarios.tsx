@@ -52,8 +52,8 @@ function UsersPage() {
   const { data: authProfile } = useAuthProfile();
   const isSuperadmin = authProfile?.role === "superadmin";
   const currentUserId = authProfile?.user?.id;
-  const removeProfile = useStore((s) => s.removeProfile);
   const deleteFn = useServerFn(deleteUser);
+
 
 
   if (!adminLoading && !isAdmin) {
