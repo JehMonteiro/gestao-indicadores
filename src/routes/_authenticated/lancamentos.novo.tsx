@@ -26,9 +26,8 @@ export const Route = createFileRoute("/_authenticated/lancamentos/novo")({
 
 function NewEntry() {
   const search = useSearch({ from: "/_authenticated/lancamentos/novo" });
-  const indicators = useVisibleIndicators();
+  const indicators = useStore((s) => s.indicators);
   const franchises = useStore((s) => s.franchises);
-  const userFranchises = useStore((s) => s.userFranchises);
   const targets = useStore((s) => s.targets);
   const upsertEntry = useStore((s) => s.upsertEntry);
   const logAudit = useStore((s) => s.logAudit);
