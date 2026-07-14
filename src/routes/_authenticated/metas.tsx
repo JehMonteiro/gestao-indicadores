@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { formatDate, formatValue } from "@/lib/format";
 import type { IndicatorTarget } from "@/mocks/types";
+import { dbWrite } from "@/lib/supabase-data";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/metas")({
