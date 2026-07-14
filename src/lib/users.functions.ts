@@ -76,3 +76,38 @@ export const inviteUser = createServerFn({ method: "POST" })
     return { id: newId, email: data.email };
   });
 
+const deleteSchema = z.object({
+  user_id: z.string().uuid(),
+});
+
+export const deleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => deleteSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    if (data.user_id === context.userId) {
+      throw new Error("Você não pode excluir a si mesmo.");
+    }
+
+    // Only superadmin may delete users
+    const { data: callerRoles, error: roleErr } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    if (roleErr) throw new Error("Forbidden");
+    const roles = (callerRoles ?? []).map((r) => r.role);
+    if (!roles.includes("superadmin")) {
+      throw new Error("Apenas superadmin pode excluir usuários.");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
+    if (delErr) {
+      console.error("[deleteUser] admin delete failed", delErr);
+      throw new Error("Não foi possível excluir o usuário.");
+    }
+
+    return { id: data.user_id };
+  });
+
+
