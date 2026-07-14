@@ -29,26 +29,36 @@ function TargetsPage() {
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertTarget);
+  const removeTarget = useStore((s) => s.deleteTarget);
   const user = useCurrentUser();
+  const [editing, setEditing] = useState<IndicatorTarget | null>(null);
+  const handleSave = async (t: IndicatorTarget) => {
+    const { error } = await dbWrite.target(t);
+    if (error) {
+      toast.error("Não foi possível salvar", { description: error.message });
+      return false;
+    }
+    upsert(t);
+    toast.success("Meta salva");
+    return true;
+  };
+  const handleDelete = async (t: IndicatorTarget) => {
+    if (!confirm("Excluir esta meta?")) return;
+    const { error } = await dbWrite.deleteTarget(t.id);
+    if (error) {
+      toast.error("Não foi possível excluir", { description: error.message });
+      return;
+    }
+    removeTarget(t.id);
+    toast.success("Meta excluída");
+  };
   return (
     <div>
-      <PageHeader title="Metas" description="Defina metas por escopo, período e indicador."
-        actions={
-          <TargetDialog onSave={async (t) => {
-            const { error } = await dbWrite.target(t);
-            if (error) {
-              toast.error("Não foi possível salvar", { description: error.message });
-              return false;
-            }
-            upsert(t);
-            toast.success("Meta salva");
-            return true;
-          }} />
-        
-        }
+      <PageHeader title="Metas" description="Defina metas por período e indicador."
+        actions={<TargetDialog onSave={handleSave} />}
       />
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Setor</TableHead><TableHead>Responsável</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Setor</TableHead><TableHead>Responsável</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead><TableHead className="w-[100px]">Ações</TableHead></TableRow></TableHeader>
         <TableBody>
           {targets.slice(0, 50).map((t) => {
             const ind = indicators.find((i) => i.id === t.indicator_id);
@@ -69,14 +79,30 @@ function TargetsPage() {
                 <TableCell className="text-sm">{respName}</TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
                 <TableCell className="font-mono">{ind && formatValue(t.target_value, ind.value_type, ind.unit)}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => setEditing(t)} aria-label="Editar"><Pencil className="size-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(t)} aria-label="Excluir"><Trash2 className="size-4" /></Button>
+                  </div>
+                </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table></Card>
+      {editing && (
+        <TargetDialog
+          key={editing.id}
+          initialValue={editing}
+          openControlled
+          onOpenChange={(o) => { if (!o) setEditing(null); }}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 }
+
 
 function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<boolean> | boolean | void }) {
   const indicators = useStore((s) => s.indicators);
