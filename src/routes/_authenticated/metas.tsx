@@ -73,11 +73,12 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
   const [open, setOpen] = useState(false);
+  const { user: authUser } = useSession();
   const initial = (): IndicatorTarget => ({
     id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "franquia",
     franchise_id: franchises[0]?.id,
     period_start: new Date().toISOString().slice(0,10), period_end: new Date().toISOString().slice(0,10),
-    target_value: 0, weight: 1, created_by: "u-admin", created_at: new Date().toISOString(),
+    target_value: 0, weight: 1, created_by: authUser?.id ?? "", created_at: new Date().toISOString(),
   });
   const [f, setF] = useState<IndicatorTarget>(initial);
   return (
