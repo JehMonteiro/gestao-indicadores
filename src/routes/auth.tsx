@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import noctaIcon from "@/assets/nocta-icon.png.asset.json";
+import noctaLogo from "@/assets/nocta-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
