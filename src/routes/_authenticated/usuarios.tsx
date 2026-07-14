@@ -47,7 +47,14 @@ function UsersPage() {
   const removeUF = useStore((s) => s.removeUserFranchise);
 
   const [editing, setEditing] = useState<Profile | null>(null);
+  const [deleting, setDeleting] = useState<Profile | null>(null);
   const { isAdmin, loading: adminLoading } = useIsAdmin();
+  const { data: authProfile } = useAuthProfile();
+  const isSuperadmin = authProfile?.role === "superadmin";
+  const currentUserId = authProfile?.user?.id;
+  const removeProfile = useStore((s) => s.removeProfile);
+  const deleteFn = useServerFn(deleteUser);
+
 
   if (!adminLoading && !isAdmin) {
     return (
