@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { formatDate, formatValue } from "@/lib/format";
 import type { IndicatorTarget } from "@/mocks/types";
+import { dbWrite } from "@/lib/supabase-data";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/metas")({
@@ -33,7 +34,17 @@ function TargetsPage() {
     <div>
       <PageHeader title="Metas" description="Defina metas por escopo, período e indicador."
         actions={
-          <TargetDialog onSave={(t) => { upsert(t); toast.success("Meta salva"); }} />
+          <TargetDialog onSave={async (t) => {
+            const { error } = await dbWrite.target(t);
+            if (error) {
+              toast.error("Não foi possível salvar", { description: error.message });
+              return false;
+            }
+            upsert(t);
+            toast.success("Meta salva");
+            return true;
+          }} />
+        
         }
       />
       <Card><Table>
@@ -67,7 +78,7 @@ function TargetsPage() {
   );
 }
 
-function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
+function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<boolean> | boolean | void }) {
   const indicators = useStore((s) => s.indicators);
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
@@ -125,10 +136,14 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
           </div>
           <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => {
-          onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
-          setOpen(false);
-          setF(initial());
+        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={async () => {
+          if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
+          if (!f.franchise_id) { toast.error("Selecione uma empresa"); return; }
+          const ok = await onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
+          if (ok !== false) {
+            setOpen(false);
+            setF(initial());
+          }
         }}>Salvar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
