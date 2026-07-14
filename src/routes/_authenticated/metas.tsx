@@ -2,6 +2,7 @@ import { newId } from "@/lib/ids";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { useSession } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,11 +73,12 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
   const [open, setOpen] = useState(false);
+  const { user: authUser } = useSession();
   const initial = (): IndicatorTarget => ({
     id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "franquia",
     franchise_id: franchises[0]?.id,
     period_start: new Date().toISOString().slice(0,10), period_end: new Date().toISOString().slice(0,10),
-    target_value: 0, weight: 1, created_by: "u-admin", created_at: new Date().toISOString(),
+    target_value: 0, weight: 1, created_by: authUser?.id ?? "", created_at: new Date().toISOString(),
   });
   const [f, setF] = useState<IndicatorTarget>(initial);
   return (
@@ -124,7 +126,7 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
           <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => {
-          onSave({ ...f, id: newId() });
+          onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
           setOpen(false);
           setF(initial());
         }}>Salvar</Button></DialogFooter>
