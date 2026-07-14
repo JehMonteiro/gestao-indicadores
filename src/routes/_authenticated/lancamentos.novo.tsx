@@ -37,7 +37,7 @@ function NewEntry() {
   const [indId, setIndId] = useState(search.indicator ?? indicators[0]?.id ?? "");
   const ind = indicators.find((i) => i.id === indId);
 
-  const myFranchises = franchises.filter((f) => userFranchises.some((uf) => uf.user_id === user?.id && uf.franchise_id === f.id));
+  const myFranchises = franchises;
   const [franchiseId, setFranchiseId] = useState<string>(myFranchises[0]?.id ?? "");
   const [periodStart, setPeriodStart] = useState(formatISO(startOfMonth(new Date()), { representation: "date" }));
   const [periodEnd, setPeriodEnd] = useState(formatISO(endOfMonth(new Date()), { representation: "date" }));
