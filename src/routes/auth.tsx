@@ -59,9 +59,9 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="hidden lg:flex flex-col justify-between bg-sidebar text-sidebar-foreground p-12">
+      <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-auth-panel to-auth-panel-deep text-white p-12">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-md bg-sidebar-primary grid place-items-center">
+          <div className="size-10 rounded-md bg-white/20 grid place-items-center">
             <ShieldCheck className="size-5" />
           </div>
           <div>
