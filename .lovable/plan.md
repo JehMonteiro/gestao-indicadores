@@ -1,36 +1,38 @@
-## Diagnóstico
+## Objetivo
+Traduzir o email de convite de novo usuário para português do Brasil, ajustando o template padrão do Supabase (assunto + corpo), sem configurar domínio customizado.
 
-A tela `/definir-senha` mostra "Não foi possível definir a senha. O link pode ter expirado." porque a página **nunca troca o token do link por uma sessão**. Hoje ela apenas escuta `onAuthStateChange` e chama `getSession()`, o que só cobre o fluxo antigo com `#access_token` no hash.
+## Escopo
+Apenas o template de convite (`invite`). Recuperação de senha e demais emails ficam como estão, salvo pedido posterior.
 
-Os e-mails atuais do Supabase (invite, recovery, magiclink) chegam como:
+## Alterações
+
+### 1. Configurar template de convite em PT-BR
+Via `supabase--configure_auth`, definir:
+
+- **Assunto:** `Você foi convidado para a Gestão de Indicadores`
+- **Corpo (HTML):** mensagem em português com saudação, explicação e botão/link `{{ .ConfirmationURL }}` apontando para `/definir-senha`, mantendo as variáveis do Supabase (`{{ .Email }}`, `{{ .ConfirmationURL }}`).
+
+Texto proposto do corpo:
 
 ```
-/definir-senha?token_hash=pkce_xxx&type=invite
+Olá,
+
+Você foi convidado(a) para acessar a plataforma Gestão de Indicadores.
+
+Para criar sua senha e ativar seu acesso, clique no link abaixo:
+
+[Definir minha senha]({{ .ConfirmationURL }})
+
+Se você não esperava este convite, ignore este email.
+
+Equipe Gestão de Indicadores
 ```
 
-ou, no fluxo PKCE:
+O link `{{ .ConfirmationURL }}` já direciona para `/definir-senha`, que trata `token_hash` e cria a sessão (correção anterior).
 
-```
-/definir-senha?code=xxx
-```
+### 2. Sem alterações de código
+Nenhuma mudança em rotas, componentes ou funções server — a página `/definir-senha` já está preparada.
 
-Nenhum desses formatos gera sessão sozinho — precisa chamar `supabase.auth.verifyOtp({ token_hash, type })` (para `token_hash`) ou `supabase.auth.exchangeCodeForSession(code)` (para `code`). Como isso não é feito, `updateUser({ password })` roda sem sessão e devolve erro, o que a UI traduz como "link expirado".
-
-## Plano
-
-Alterar apenas `src/routes/definir-senha.tsx`:
-
-1. No `useEffect` de bootstrap, ler a URL logo na montagem:
-   - Se houver `?token_hash=...&type=...` (invite | recovery | magiclink | signup | email_change), chamar `supabase.auth.verifyOtp({ token_hash, type })`.
-   - Senão, se houver `?code=...`, chamar `supabase.auth.exchangeCodeForSession(code)`.
-   - Senão, cair no comportamento atual (hash com `#access_token` → `getSession()` / `onAuthStateChange`).
-   - Após sucesso, limpar os parâmetros da URL com `window.history.replaceState` para evitar reuso.
-2. Enquanto o token está sendo trocado, manter `sessionReady=false` e o botão desabilitado ("Validando convite...").
-3. Se a troca falhar, marcar um estado `linkInvalid=true` e exibir a mensagem já existente de link inválido/expirado — sem mostrar toast de erro genérico antes do usuário clicar em "Definir senha".
-4. Só habilitar o submit quando `sessionReady=true`. O `handleSetPassword` continua igual (`supabase.auth.updateUser({ password })` + redirect para `/meu-painel`).
-
-Sem mudanças em backend, migrações, `inviteUser`, ou templates de e-mail — o link já é válido; falta apenas consumi-lo no cliente.
-
-## Resultado esperado
-
-Ao clicar no link do e-mail de convite (ou de "esqueci minha senha"), a página valida o token, cria a sessão, o usuário define a senha e é redirecionado para `/meu-painel` sem o falso "link expirado".
+## Observações
+- Emails continuam sendo enviados pelo remetente padrão do Supabase (não `marketing@nocta.com.br`), pois isso exige domínio verificado.
+- Se depois quiser remetente próprio + template com marca, seria necessário configurar domínio de email.
