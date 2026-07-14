@@ -34,7 +34,17 @@ function TargetsPage() {
     <div>
       <PageHeader title="Metas" description="Defina metas por escopo, período e indicador."
         actions={
-          <TargetDialog onSave={(t) => { upsert(t); toast.success("Meta salva"); }} />
+          <TargetDialog onSave={async (t) => {
+            const { error } = await dbWrite.target(t);
+            if (error) {
+              toast.error("Não foi possível salvar", { description: error.message });
+              return false;
+            }
+            upsert(t);
+            toast.success("Meta salva");
+            return true;
+          }} />
+        
         }
       />
       <Card><Table>
