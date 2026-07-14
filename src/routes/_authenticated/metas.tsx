@@ -126,7 +126,7 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => void }) {
           <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => {
-          onSave({ ...f, id: newId() });
+          onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
           setOpen(false);
           setF(initial());
         }}>Salvar</Button></DialogFooter>
