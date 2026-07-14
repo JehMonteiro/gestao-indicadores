@@ -136,10 +136,14 @@ function TargetDialog({ onSave }: { onSave: (t: IndicatorTarget) => Promise<bool
           </div>
           <div><Label>Valor da meta</Label><Input type="number" step="0.01" value={f.target_value} onChange={(e) => setF({ ...f, target_value: Number(e.target.value) })} /></div>
         </div>
-        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={() => {
-          onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
-          setOpen(false);
-          setF(initial());
+        <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button onClick={async () => {
+          if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
+          if (!f.franchise_id) { toast.error("Selecione uma empresa"); return; }
+          const ok = await onSave({ ...f, id: newId(), created_by: authUser?.id ?? "" });
+          if (ok !== false) {
+            setOpen(false);
+            setF(initial());
+          }
         }}>Salvar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
