@@ -61,15 +61,15 @@ function AuthPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-auth-panel to-auth-panel-deep text-white p-12">
-        <div className="flex items-center gap-3">
-          <img src={noctaIcon.url} alt="Nocta" className="size-10 object-contain" />
-          <div>
-            <p className="font-semibold">Gestão de Indicadores</p>
-            <p className="text-xs opacity-70">Plataforma corporativa</p>
-          </div>
+        <div>
+          <p className="font-semibold">Gestão de Indicadores</p>
+          <p className="text-xs opacity-70">Plataforma corporativa</p>
         </div>
         <div className="space-y-6">
-          <img src={noctaLogo.url} alt="Nocta" className="h-40 w-auto" />
+          <div className="flex items-center justify-center gap-6">
+            <img src={noctaIcon.url} alt="Nocta Seguros e Benefícios" className="h-32 w-auto object-contain" />
+            <img src={noctaLogo.url} alt="Nocta Franquia" className="h-32 w-auto object-contain" />
+          </div>
           <h1 className="text-3xl font-semibold leading-tight">
             Indicadores, metas e resultados em um só lugar.
           </h1>
