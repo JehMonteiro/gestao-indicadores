@@ -165,9 +165,15 @@ function SetPasswordPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading || !sessionReady}>
-                  {loading ? "Salvando..." : sessionReady ? "Definir senha e entrar" : "Carregando convite..."}
+                  {loading
+                    ? "Salvando..."
+                    : verifying
+                      ? "Validando convite..."
+                      : sessionReady
+                        ? "Definir senha e entrar"
+                        : "Link inválido"}
                 </Button>
-                {!sessionReady && (
+                {!verifying && linkInvalid && (
                   <p className="text-xs text-muted-foreground text-center">
                     O link de convite parece inválido ou expirado. Peça um novo convite ou use "Esqueci minha senha" no login.
                   </p>
