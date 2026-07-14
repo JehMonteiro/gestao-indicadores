@@ -61,7 +61,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-auth-panel to-auth-panel-deep text-white p-12">
-        <div className="flex items-center gap-3">
+        <div>
           <p className="font-semibold">Gestão de Indicadores</p>
           <p className="text-xs opacity-70">Plataforma corporativa</p>
         </div>
