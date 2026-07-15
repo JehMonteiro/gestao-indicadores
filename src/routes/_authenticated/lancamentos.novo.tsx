@@ -1,6 +1,6 @@
 import { newId } from "@/lib/ids";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore, useCurrentUser } from "@/mocks/store";
@@ -39,7 +39,10 @@ function NewEntry() {
   const [indId, setIndId] = useState(search.indicator ?? indicators[0]?.id ?? "");
   const ind = indicators.find((i) => i.id === indId);
 
-  const myFranchises = franchises;
+  const myFranchises = useMemo(() => {
+    if (ind?.franchise_id) return franchises.filter((f) => f.id === ind.franchise_id);
+    return franchises;
+  }, [franchises, ind?.franchise_id]);
   const [franchiseId, setFranchiseId] = useState<string>(myFranchises[0]?.id ?? "");
   const [periodStart, setPeriodStart] = useState(formatISO(startOfMonth(new Date()), { representation: "date" }));
   const [periodEnd, setPeriodEnd] = useState(formatISO(endOfMonth(new Date()), { representation: "date" }));
@@ -48,9 +51,21 @@ function NewEntry() {
   const [justification, setJustification] = useState("");
   const [saving, setSaving] = useState<"rascunho" | "enviado" | null>(null);
 
+  useEffect(() => {
+    if (!indId && indicators.length > 0) setIndId(search.indicator ?? indicators[0].id);
+  }, [indId, indicators, search.indicator]);
+
+  useEffect(() => {
+    const nextFranchiseId = ind?.franchise_id ?? myFranchises[0]?.id ?? "";
+    if (nextFranchiseId && franchiseId !== nextFranchiseId) setFranchiseId(nextFranchiseId);
+  }, [franchiseId, ind?.franchise_id, myFranchises]);
+
+  const effectiveFranchiseId = ind?.scope === "franquia" ? franchiseId : ind?.franchise_id;
+
   const target = useMemo(() => {
-    return targets.find((t) => t.indicator_id === indId && t.period_start === periodStart && (!ind || ind.scope !== "franquia" || t.franchise_id === franchiseId));
-  }, [targets, indId, periodStart, franchiseId, ind]);
+    const sameIndicatorPeriod = targets.filter((t) => t.indicator_id === indId && t.period_start === periodStart);
+    return sameIndicatorPeriod.find((t) => !effectiveFranchiseId || t.franchise_id === effectiveFranchiseId) ?? sameIndicatorPeriod[0];
+  }, [targets, indId, periodStart, effectiveFranchiseId]);
 
   const preview = useMemo(() => {
     if (!ind || !target || actual === "") return null;
@@ -59,14 +74,16 @@ function NewEntry() {
 
   const save = async (status: "rascunho" | "enviado") => {
     if (!ind) { toast.error("Selecione um indicador"); return; }
-    const userId = user?.id ?? authUser?.id;
+    const userId = authUser?.id;
     if (authLoading || !userId) { toast.error("Aguarde seu usuário carregar antes de salvar"); return; }
-    if (ind.scope === "franquia" && !franchiseId) { toast.error("Selecione uma franquia"); return; }
+    const entryFranchiseId = effectiveFranchiseId ?? target?.franchise_id;
+    const entrySectorId = target?.sector_id ?? (ind.owner_sector_id || undefined);
+    if (ind.scope === "franquia" && !entryFranchiseId) { toast.error("Selecione uma franquia"); return; }
     if (actual === "" || isNaN(Number(actual))) { toast.error("Informe um valor numérico"); return; }
     const entry: IndicatorEntry = {
       id: newId(),
       indicator_id: ind.id, target_id: target?.id,
-      user_id: userId, sector_id: ind.owner_sector_id || undefined, franchise_id: ind.scope === "franquia" ? franchiseId : undefined,
+      user_id: userId, sector_id: entrySectorId, franchise_id: entryFranchiseId,
       period_start: periodStart, period_end: periodEnd,
       actual_value: Number(actual), comment, justification,
       status: ind.requires_approval && status === "enviado" ? "enviado" : (status === "enviado" ? "aprovado" : "rascunho"),
@@ -82,7 +99,8 @@ function NewEntry() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[lancamentos:save]", err);
-      toast.error("Não foi possível salvar o lançamento", { description: "Verifique seus dados e tente novamente." });
+      const message = err instanceof Error && err.message ? err.message : "Verifique se indicador, período e franquia estão corretos.";
+      toast.error("Não foi possível salvar o lançamento", { description: message });
     } finally {
       setSaving(null);
     }
