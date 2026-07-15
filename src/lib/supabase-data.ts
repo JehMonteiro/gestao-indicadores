@@ -384,6 +384,23 @@ export const dbWrite = {
     if (!data) throw new Error("Lançamento não foi salvo");
     return mapEntry(data);
   },
+  async updateEntryStatus(id: string, patch: Partial<IndicatorEntry>) {
+    const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (patch.status !== undefined) payload.status = patch.status;
+    if (patch.approved_by !== undefined) payload.approved_by = patch.approved_by;
+    if (patch.approved_at !== undefined) payload.approved_at = patch.approved_at;
+    if (patch.rejection_reason !== undefined) payload.rejection_reason = patch.rejection_reason;
+    if (patch.submitted_at !== undefined) payload.submitted_at = patch.submitted_at;
+    const { data, error } = await supabase
+      .from("indicator_entries")
+      .update(payload as any)
+      .eq("id", id)
+      .select("*")
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("Lançamento não foi atualizado");
+    return mapEntry(data);
+  },
   async userSector(us: UserSector) {
     return supabase.from("user_sectors").upsert({
       id: us.id,
