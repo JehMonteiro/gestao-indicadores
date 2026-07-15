@@ -145,3 +145,49 @@ export function approvedEntriesForIndicator(indicator: Indicator, entries: Indic
     ),
   );
 }
+
+function defaultTargetFallback(indicator: Indicator): EffectiveTarget | null {
+  if (indicator.default_target == null || indicator.default_target <= 0) return null;
+  return {
+    target_value: indicator.default_target,
+    minimum_value: indicator.minimum_value,
+    maximum_value: indicator.maximum_value,
+  };
+}
+
+/**
+ * Effective target for an approved entry, resolving in order:
+ *  1. explicit target row (via `target_id`, then period+company, then company),
+ *     prorated when the target period is longer than the entry period.
+ *  2. `indicator.default_target` when no target row applies.
+ * Returns `null` when neither is available.
+ */
+export function resolveTargetForEntry(
+  indicator: Indicator,
+  entry: IndicatorEntry,
+  targets: IndicatorTarget[],
+): EffectiveTarget | null {
+  const explicit = findTargetForEntry(entry, targets);
+  if (explicit) return prorate(explicit, entry, indicator);
+  return defaultTargetFallback(indicator);
+}
+
+/**
+ * Effective target for an indicator without an associated entry (used when
+ * displaying a row that has no approved lançamento yet). Falls back to
+ * `default_target` when no meaningful target row exists.
+ */
+export function resolveTargetForIndicator(
+  indicator: Indicator,
+  targets: IndicatorTarget[],
+): EffectiveTarget | null {
+  const latest = latestTargetForIndicator(indicator, targets);
+  if (latest) {
+    return {
+      target_value: latest.target_value,
+      minimum_value: latest.minimum_value,
+      maximum_value: latest.maximum_value,
+    };
+  }
+  return defaultTargetFallback(indicator);
+}
