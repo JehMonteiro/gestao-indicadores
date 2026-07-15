@@ -436,8 +436,10 @@ export type Database = {
           min_value: number | null
           period_end: string
           period_start: string
+          sector_id: string | null
           target_value: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -450,8 +452,10 @@ export type Database = {
           min_value?: number | null
           period_end: string
           period_start: string
+          sector_id?: string | null
           target_value: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -464,8 +468,10 @@ export type Database = {
           min_value?: number | null
           period_end?: string
           period_start?: string
+          sector_id?: string | null
           target_value?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -480,6 +486,13 @@ export type Database = {
             columns: ["indicator_id"]
             isOneToOne: false
             referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "targets_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
             referencedColumns: ["id"]
           },
         ]
