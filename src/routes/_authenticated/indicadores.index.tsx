@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { classify, classificationStyles, computeAchievement, formatValue, indicatorPeriodLabel } from "@/lib/format";
-import { approvedEntriesForIndicator, findTargetForEntry, latestTargetForIndicator } from "@/lib/metrics";
+import { approvedEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
 import { Plus, Search, Target, Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
