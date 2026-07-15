@@ -65,7 +65,6 @@ function Approvals() {
       // eslint-disable-next-line no-console
       console.error("[aprovacoes:reject]", err);
       toast.error("Não foi possível rejeitar", { description: "Tente novamente em instantes." });
-      throw err;
     } finally {
       setSavingId(null);
     }
