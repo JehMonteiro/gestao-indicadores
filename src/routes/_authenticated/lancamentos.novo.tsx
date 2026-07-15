@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import type { IndicatorEntry } from "@/mocks/types";
 import { startOfMonth, endOfMonth, formatISO } from "date-fns";
 import { computeAchievement, formatValue } from "@/lib/format";
+import { useSession } from "@/hooks/use-auth";
 
 const searchSchema = z.object({ indicator: z.string().optional() });
 
@@ -32,6 +33,7 @@ function NewEntry() {
   const upsertEntry = useStore((s) => s.upsertEntry);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
+  const { user: authUser, loading: authLoading } = useSession();
   const navigate = useNavigate();
 
   const [indId, setIndId] = useState(search.indicator ?? indicators[0]?.id ?? "");
@@ -44,6 +46,7 @@ function NewEntry() {
   const [actual, setActual] = useState<string>("");
   const [comment, setComment] = useState("");
   const [justification, setJustification] = useState("");
+  const [saving, setSaving] = useState<"rascunho" | "enviado" | null>(null);
 
   const target = useMemo(() => {
     return targets.find((t) => t.indicator_id === indId && t.period_start === periodStart && (!ind || ind.scope !== "franquia" || t.franchise_id === franchiseId));
@@ -54,23 +57,35 @@ function NewEntry() {
     return computeAchievement({ actual_value: Number(actual) }, target, ind.direction);
   }, [ind, target, actual]);
 
-  const save = (status: "rascunho" | "enviado") => {
+  const save = async (status: "rascunho" | "enviado") => {
     if (!ind) { toast.error("Selecione um indicador"); return; }
+    const userId = user?.id ?? authUser?.id;
+    if (authLoading || !userId) { toast.error("Aguarde seu usuário carregar antes de salvar"); return; }
+    if (ind.scope === "franquia" && !franchiseId) { toast.error("Selecione uma franquia"); return; }
     if (actual === "" || isNaN(Number(actual))) { toast.error("Informe um valor numérico"); return; }
     const entry: IndicatorEntry = {
       id: newId(),
       indicator_id: ind.id, target_id: target?.id,
-      user_id: user?.id ?? "u-colab", sector_id: ind.owner_sector_id, franchise_id: ind.scope === "franquia" ? franchiseId : undefined,
+      user_id: userId, sector_id: ind.owner_sector_id || undefined, franchise_id: ind.scope === "franquia" ? franchiseId : undefined,
       period_start: periodStart, period_end: periodEnd,
       actual_value: Number(actual), comment, justification,
       status: ind.requires_approval && status === "enviado" ? "enviado" : (status === "enviado" ? "aprovado" : "rascunho"),
       submitted_at: status === "enviado" ? new Date().toISOString() : undefined,
       revision_number: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     };
-    upsertEntry(entry);
-    logAudit({ user_id: user?.id ?? "", action: status === "enviado" ? "submit" : "draft", entity_type: "entry", entity_id: entry.id });
-    toast.success(status === "enviado" ? "Lançamento enviado" : "Rascunho salvo");
-    navigate({ to: "/lancamentos" });
+    setSaving(status);
+    try {
+      const saved = await upsertEntry(entry);
+      logAudit({ user_id: userId, action: status === "enviado" ? "submit" : "draft", entity_type: "entry", entity_id: saved.id });
+      toast.success(status === "enviado" ? "Lançamento enviado" : "Rascunho salvo");
+      navigate({ to: "/lancamentos" });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[lancamentos:save]", err);
+      toast.error("Não foi possível salvar o lançamento", { description: "Verifique seus dados e tente novamente." });
+    } finally {
+      setSaving(null);
+    }
   };
 
   return (
@@ -107,8 +122,8 @@ function NewEntry() {
               </div>
             )}
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => save("rascunho")}>Salvar rascunho</Button>
-              <Button onClick={() => save("enviado")}>{ind?.requires_approval ? "Cadastrar" : "Confirmar lançamento"}</Button>
+              <Button variant="outline" disabled={!!saving || authLoading} onClick={() => save("rascunho")}>{saving === "rascunho" ? "Salvando..." : "Salvar rascunho"}</Button>
+              <Button disabled={!!saving || authLoading} onClick={() => save("enviado")}>{saving === "enviado" ? "Salvando..." : ind?.requires_approval ? "Cadastrar" : "Confirmar lançamento"}</Button>
             </div>
           </CardContent>
         </Card>

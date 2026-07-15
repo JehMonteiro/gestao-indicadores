@@ -359,7 +359,7 @@ export const dbWrite = {
     return supabase.from("targets").delete().eq("id", id);
   },
   async entry(e: IndicatorEntry) {
-    return supabase.from("indicator_entries").upsert({
+    const { data, error } = await supabase.from("indicator_entries").upsert({
       id: e.id,
       indicator_id: e.indicator_id,
       target_id: e.target_id ?? null,
@@ -377,7 +377,12 @@ export const dbWrite = {
       approved_at: e.approved_at ?? null,
       rejection_reason: e.rejection_reason ?? null,
       revision_number: e.revision_number,
-    });
+      updated_at: e.updated_at,
+    }).select("*").maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("Lançamento não foi salvo");
+    return mapEntry(data);
   },
   async userSector(us: UserSector) {
     return supabase.from("user_sectors").upsert({
