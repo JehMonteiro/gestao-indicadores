@@ -174,10 +174,22 @@ export function AuthSync() {
     const onVisibility = () => {
       if (document.visibilityState !== "visible") return;
       if (!currentUserId) return;
-      // Force a fresh pull and make sure the channel is alive.
+      // Force a fresh pull, verify against the DB and make sure the channel is alive.
       scheduleRefresh(currentUserId);
+      void verifyConsistency(currentUserId);
     };
     document.addEventListener("visibilitychange", onVisibility);
+
+    // Periodic consistency probe — catches any realtime event dropped due
+    // to transient network issues or RLS visibility changes.
+    const startConsistencyLoop = (userId: string) => {
+      if (consistencyInterval) clearInterval(consistencyInterval);
+      consistencyInterval = setInterval(() => {
+        if (!mounted || document.visibilityState !== "visible") return;
+        void verifyConsistency(userId);
+      }, 60000);
+    };
+
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
