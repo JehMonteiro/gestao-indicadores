@@ -1,36 +1,36 @@
-## Validação do cálculo automático dos KPIs
+## Por que `Indicadores` e `Meus indicadores` ficam em "Sem informação"
 
-Revisei `src/lib/metrics.ts`, `src/lib/format.ts` e todas as telas que consomem esses helpers (`visao-geral`, `meu-painel`, `meus-indicadores`, `indicadores/index`, `indicadores/$id`). O caminho feliz está correto — meta e período casam via `findTargetForEntry` (target_id → período+empresa → período → empresa → indicador) e o realtime já reidrata. Mas encontrei quatro pontos que produzem KPI errado em cenários específicos:
+Olhando os dados atuais, identifiquei duas lacunas no cálculo — nenhuma delas foi coberta pelas correções anteriores. Elas explicam por que o % e a classificação não aparecem mesmo com lançamentos aprovados.
 
-### Problemas encontrados
+### Problema 1 — `indicator.default_target` é ignorado
 
-1. **`findTargetForEntry` cai numa meta de outra empresa quando não há meta para a empresa do lançamento.**
-   Um lançamento da franquia A sem meta cadastrada acaba usando a meta da franquia B pelo fallback final `latestTarget(sameIndicator)`. O % exibido fica errado sem sinalizar o problema.
-   **Correção:** para lançamentos com `franchise_id`, nunca cair em metas de outra franquia — retornar `undefined` (KPI mostra "Sem meta") em vez de uma meta alheia.
+Há indicadores com meta padrão cadastrada no próprio indicador (`default_target = 100000`, por exemplo) **sem** nenhuma linha correspondente na tabela `targets`. Hoje `findTargetForEntry` e `latestTargetForIndicator` olham só a tabela `targets`, então devolvem `undefined`, `computeAchievement` recebe `target=null` e o % vira `null` → linha classifica como "Sem informação".
 
-2. **`latestTargetForIndicator` (usado quando ainda não há lançamento) pode retornar meta de outra empresa.**
-   Para indicador com `scope="franquia"` sem `indicator.franchise_id` fixo, o filtro `!t.franchise_id` esvazia e o fallback pega qualquer meta.
-   **Correção:** só cair no fallback global quando o escopo do indicador for corporativo. Em escopo por franquia sem `franchise_id` do indicador, retornar `undefined`.
+**Correção:** quando nenhuma meta específica for encontrada, usar `indicator.default_target` (quando > 0) como meta base para o cálculo.
 
-3. **Detalhe do indicador (`indicadores.$id.tsx`) casa meta apenas por `target_id`.**
-   ```ts
-   const t = indTargets.find((t) => t.id === e.target_id);
-   ```
-   Lançamentos antigos sem `target_id` mostram meta `0` no gráfico — inconsistente com o resto do app.
-   **Correção:** trocar por `findTargetForEntry(e, indTargets)`.
+### Problema 2 — Meta anual comparada a lançamento mensal
 
-4. **Resumo anual em `visao-geral` usa `default_target * 12` como meta anual.**
-   Fórmula assume periodicidade mensal; para indicadores trimestrais/semestrais/anuais o % realizada fica distorcido.
-   **Correção:** derivar o multiplicador da `frequency` do indicador (`mensal:12, trimestral:4, semestral:2, anual:1, quinzenal:24, semanal:52, diaria:365`).
+Vários indicadores mensais têm apenas uma meta anual (período `2026-01-01 → 2026-12-31`, valor 84000). O lançamento é mensal (`2026-01-01 → 2026-01-31`, valor 15181). Hoje o código pega a meta anual inteira e faz `15181 / 84000 = 18%` — número enganoso: contra a fatia mensal (`84000/12 = 7000`) o atingimento real seria 217%.
 
-### Escopo da mudança
+**Correção:** quando o período da meta contém o período do lançamento (span maior) e o indicador é do tipo somativo (`maior_melhor`, `menor_melhor`, `inteiro/moeda/quantidade`), ratear a meta proporcionalmente aos dias do lançamento:
+`meta_efetiva = target_value * (dias_lançamento / dias_meta)`.
+Para indicadores de tipo "média/pontuação" (`meta_exata`, `faixa_ideal`, `percentual`, `nota`) não ratear — usar o valor cheio.
 
-Alterações apenas em `src/lib/metrics.ts` (itens 1–2) e `src/routes/_authenticated/indicadores.$id.tsx` + `src/routes/_authenticated/visao-geral.tsx` (itens 3–4). Sem mudança de schema, RLS, tipos ou fluxo de dados; comportamento do realtime e do store fica inalterado.
+### Escopo
+
+Somente `src/lib/metrics.ts` e `src/lib/format.ts`:
+
+- Novo helper `resolveTargetForEntry(indicator, entry, targets)` em `metrics.ts` que devolve `{ value, minimum, maximum } | null` já com fallback para `default_target` e com rateio proporcional quando aplicável.
+- Novo helper `resolveTargetForIndicator(indicator, targets)` para o caso de "ainda não tem lançamento" (usa a meta mais recente aplicável ou o `default_target`).
+- `computeAchievement` passa a aceitar esses objetos resolvidos (mantém a assinatura antiga por compatibilidade via overload — sem quebrar `visao-geral`, `meu-painel`, `indicadores.$id`).
+- Trocar as chamadas em `indicadores.index.tsx` e `meus-indicadores.tsx` para usar os helpers novos.
+
+Sem mudança de schema, RLS, componentes, gráficos ou fluxo de realtime. Os gráficos passam a refletir os valores corretos automaticamente porque leem os mesmos helpers.
 
 ### Validação após implementação
 
-Percorrer os quatro cenários no preview autenticado:
-- Indicador de franquia com meta cadastrada só para franquia B, lançamento aprovado em franquia A → KPI deve mostrar "Sem meta".
-- Indicador ativo sem nenhum lançamento aprovado → KPI "Sem informação", sem herdar meta de outra franquia.
-- Detalhe do indicador com lançamentos sem `target_id` → linha "meta" do gráfico usa a meta do mesmo período.
-- Indicador trimestral com meta anual única → % realizada bate com `acumulado / meta anual`, sem multiplicar por 12.
+1. Indicador com `default_target=100000` e sem linha em `targets` + lançamento aprovado → % aparece = actual / 100000.
+2. Indicador mensal com meta anual (84000/ano) e lançamento de janeiro (15181) → % ≈ 217% (contra 7000), classificação "Atingido".
+3. Indicador `meta_exata` (ex.: NPS) com meta anual = valor médio → não é rateado; mantém o valor cheio.
+4. Indicador sem `default_target` e sem `targets` → continua "Sem informação" (comportamento esperado).
+5. Cenários já validados no plano anterior (meta de outra franquia, gráfico do detalhe, resumo anual) seguem inalterados.
