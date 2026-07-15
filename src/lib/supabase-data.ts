@@ -453,6 +453,21 @@ function reportError(err: unknown, label: string) {
       description: "Tente novamente em instantes. Se persistir, contate o administrador.",
     });
   }).catch(() => {});
+  // Roll back optimistic local state by re-hydrating from the DB so the UI
+  // never shows a "phantom" row that was actually rejected server-side.
+  void rehydrateFromCloud();
+}
+
+async function rehydrateFromCloud() {
+  try {
+    const { useStore } = await import("@/mocks/store");
+    const uid = useStore.getState().currentUserId;
+    if (!uid) return;
+    const data = await loadAllFromSupabase(uid);
+    useStore.getState().hydrate(data);
+  } catch {
+    // best-effort; silence — user already saw the error toast
+  }
 }
 
 export function fireAndForget(label: string, p: Promise<unknown>) {
@@ -462,3 +477,4 @@ export function fireAndForget(label: string, p: Promise<unknown>) {
     }
   }).catch((err) => reportError(err, label));
 }
+
