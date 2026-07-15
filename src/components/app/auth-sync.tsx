@@ -197,7 +197,9 @@ export function AuthSync() {
         const uid = data.session.user.id;
         currentUserId = uid;
         void hydrate(uid, data.session.user.email).then(() => {
-          if (mounted) subscribeRealtime(uid);
+          if (!mounted) return;
+          subscribeRealtime(uid);
+          startConsistencyLoop(uid);
         });
       } else {
         useStore.getState().clearAll();
@@ -213,6 +215,10 @@ export function AuthSync() {
           supabase.removeChannel(realtimeChannel);
           realtimeChannel = null;
         }
+        if (consistencyInterval) {
+          clearInterval(consistencyInterval);
+          consistencyInterval = null;
+        }
         router.invalidate();
         return;
       }
@@ -222,6 +228,7 @@ export function AuthSync() {
         void hydrate(uid, session.user.email).then(() => {
           if (!mounted) return;
           subscribeRealtime(uid);
+          startConsistencyLoop(uid);
           queryClient.invalidateQueries();
           router.invalidate();
         });
@@ -232,9 +239,11 @@ export function AuthSync() {
       document.removeEventListener("visibilitychange", onVisibility);
       if (refreshTimer) clearTimeout(refreshTimer);
       if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (consistencyInterval) clearInterval(consistencyInterval);
       if (realtimeChannel) supabase.removeChannel(realtimeChannel);
       sub.subscription.unsubscribe();
     };
+
   }, [router, queryClient]);
 
   return null;
