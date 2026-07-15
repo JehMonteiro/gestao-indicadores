@@ -116,7 +116,7 @@ function IndicatorsList() {
                 const sector = sectors.find((s) => s.id === i.owner_sector_id);
                 const franchise = i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id) : null;
                 const e = approvedEntriesForIndicator(i, entries).slice(-1)[0];
-                const t = e ? findTargetForEntry(e, targets) : latestTargetForIndicator(i, targets);
+                const t = e ? resolveTargetForEntry(i, e, targets) : resolveTargetForIndicator(i, targets);
                 const pct = computeAchievement(e, t, i.direction);
                 const c = classify(pct, settings);
                 const cs = classificationStyles(c);
