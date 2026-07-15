@@ -345,6 +345,8 @@ export const dbWrite = {
       id: t.id,
       indicator_id: t.indicator_id,
       franchise_id: t.franchise_id ?? null,
+      sector_id: t.sector_id ?? null,
+      user_id: t.user_id ?? null,
       period_start: t.period_start,
       period_end: t.period_end,
       target_value: t.target_value,
