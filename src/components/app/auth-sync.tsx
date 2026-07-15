@@ -52,8 +52,13 @@ export function AuthSync() {
       }
       const channel = supabase.channel(`kpi-sync-${userId}`);
       for (const table of REALTIME_TABLES) {
-        channel.on(
-          // @ts-expect-error - postgres_changes payload typing
+        (channel as unknown as {
+          on: (
+            type: string,
+            filter: { event: string; schema: string; table: string },
+            cb: () => void,
+          ) => typeof channel;
+        }).on(
           "postgres_changes",
           { event: "*", schema: "public", table },
           () => scheduleRefresh(userId),
