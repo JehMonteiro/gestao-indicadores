@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { formatDate, formatValue } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import type { IndicatorTarget } from "@/mocks/types";
 import { dbWrite } from "@/lib/supabase-data";
 import { toast } from "sonner";
@@ -78,7 +78,7 @@ function TargetsPage() {
                 <TableCell className="text-sm">{setorName}</TableCell>
                 <TableCell className="text-sm">{respName}</TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
-                <TableCell className="font-mono">{ind && formatValue(t.target_value, ind.value_type, ind.unit)}</TableCell>
+                <TableCell className="font-mono">{new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.trunc(t.target_value))}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => setEditing(t)} aria-label="Editar"><Pencil className="size-4" /></Button>
@@ -175,39 +175,18 @@ function TargetDialog({
             <div><Label>Início</Label><Input type="date" value={f.period_start} onChange={(e) => setF({ ...f, period_start: e.target.value })} /></div>
             <div><Label>Fim</Label><Input type="date" value={f.period_end} onChange={(e) => setF({ ...f, period_end: e.target.value })} /></div>
           </div>
-          {(() => {
-            const ind = indicators.find((i) => i.id === f.indicator_id);
-            const vt = ind?.value_type;
-            const label = vt === "moeda" ? "Valor da meta (R$)"
-              : vt === "percentual" ? "Valor da meta (%)"
-              : vt === "inteiro" || vt === "quantidade" ? "Valor da meta (número inteiro)"
-              : vt === "tempo" ? `Valor da meta${ind?.unit ? ` (${ind.unit})` : " (tempo)"}`
-              : vt === "nota" ? "Valor da meta (nota)"
-              : `Valor da meta${ind?.unit ? ` (${ind.unit})` : ""}`;
-            const step = vt === "inteiro" || vt === "quantidade" ? "1"
-              : vt === "moeda" ? "0.01"
-              : vt === "percentual" ? "0.1"
-              : "0.01";
-            const isInt = vt === "inteiro" || vt === "quantidade";
-            const min = vt === "percentual" ? 0 : undefined;
-            const max = vt === "percentual" ? 100 : undefined;
-            return (
-              <div><Label>{label}</Label>
-                <Input
-                  type="number"
-                  step={step}
-                  min={min}
-                  max={max}
-                  value={f.target_value}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    const n = raw === "" ? 0 : Number(raw);
-                    setF({ ...f, target_value: isInt ? Math.trunc(n) : n });
-                  }}
-                />
-              </div>
-            );
-          })()}
+          <div><Label>Valor da meta (número inteiro)</Label>
+            <Input
+              type="number"
+              step="1"
+              value={f.target_value}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const n = raw === "" ? 0 : Number(raw);
+                setF({ ...f, target_value: Math.trunc(n) });
+              }}
+            />
+          </div>
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setDialog(false)}>Cancelar</Button><Button onClick={async () => {
           if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
