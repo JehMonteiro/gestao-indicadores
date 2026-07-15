@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { formatDate, formatValue } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import type { IndicatorTarget } from "@/mocks/types";
 import { dbWrite } from "@/lib/supabase-data";
 import { toast } from "sonner";
