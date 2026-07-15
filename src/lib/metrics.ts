@@ -41,12 +41,19 @@ export function findTargetForEntry(entry: IndicatorEntry, targets: IndicatorTarg
   if (exact) return exact;
 
   const sameIndicator = targets.filter((t) => t.indicator_id === entry.indicator_id);
-  const samePeriod = sameIndicator.filter((t) => matchesEntryPeriod(entry, t));
+  const sameCompany = sameIndicator.filter((t) => matchesEntryCompany(entry, t));
 
+  if (entry.franchise_id) {
+    // Never fall back to another franchise's target.
+    const samePeriodSameCompany = sameCompany.filter((t) => matchesEntryPeriod(entry, t));
+    return latestTarget(samePeriodSameCompany) ?? latestTarget(sameCompany);
+  }
+
+  const samePeriod = sameIndicator.filter((t) => matchesEntryPeriod(entry, t));
   return (
     latestTarget(samePeriod.filter((t) => matchesEntryCompany(entry, t))) ??
     latestTarget(samePeriod) ??
-    latestTarget(sameIndicator.filter((t) => matchesEntryCompany(entry, t))) ??
+    latestTarget(sameCompany) ??
     latestTarget(sameIndicator)
   );
 }
@@ -54,10 +61,17 @@ export function findTargetForEntry(entry: IndicatorEntry, targets: IndicatorTarg
 export function latestTargetForIndicator(indicator: Indicator, targets: IndicatorTarget[]) {
   const sameIndicator = targets.filter((t) => t.indicator_id === indicator.id);
   if (indicator.franchise_id) {
-    return latestTarget(sameIndicator.filter((t) => t.franchise_id === indicator.franchise_id)) ?? latestTarget(sameIndicator);
+    return latestTarget(sameIndicator.filter((t) => t.franchise_id === indicator.franchise_id));
+  }
+  if (indicator.scope === "franquia") {
+    // Multi-franchise indicator without a specific franchise fixed on it:
+    // there is no single canonical target — avoid returning one from an
+    // arbitrary franchise.
+    return undefined;
   }
   return latestTarget(sameIndicator.filter((t) => !t.franchise_id)) ?? latestTarget(sameIndicator);
 }
+
 
 export function approvedEntriesForIndicator(indicator: Indicator, entries: IndicatorEntry[]) {
   return entriesByPeriodAsc(
