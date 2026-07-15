@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { approvedEntriesForIndicator, entriesByPeriodAsc, findTargetForEntry, latestTarget } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/visao-geral")({
   head: () => ({ meta: [{ title: "Visão geral — Gestão de Indicadores" }] }),
@@ -28,10 +29,10 @@ function Overview() {
 
   const metricsByIndicator = useMemo(() => {
     return indicators.map((ind) => {
-      const indEntries = entries.filter((e) => e.indicator_id === ind.id && e.status === "aprovado");
+      const indEntries = approvedEntriesForIndicator(ind, entries);
       const indTargets = targets.filter((t) => t.indicator_id === ind.id);
       const monthly = indEntries.map((e) => {
-        const t = indTargets.find((t) => t.id === e.target_id) ?? indTargets[0];
+        const t = findTargetForEntry(e, indTargets);
         return {
           period: e.period_end,
           actual: e.actual_value ?? 0,
@@ -73,8 +74,9 @@ function Overview() {
     return franchises.map((f) => {
       const items = metricsByIndicator
         .map((m) => {
-          const t = targets.find((t) => t.indicator_id === m.ind.id && t.franchise_id === f.id);
-          const e = entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "aprovado").slice(-1)[0];
+          const franchiseTargets = targets.filter((t) => t.indicator_id === m.ind.id && t.franchise_id === f.id);
+          const e = entriesByPeriodAsc(entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "aprovado")).slice(-1)[0];
+          const t = e ? findTargetForEntry(e, franchiseTargets) : latestTarget(franchiseTargets);
           const pct = computeAchievement(e, t, m.ind.direction);
           return { percent: pct, weight: m.ind.weight };
         });

@@ -1,7 +1,7 @@
 import { newId } from "@/lib/ids";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app/page-header";
-import { useStore, useCurrentUser } from "@/mocks/store";
+import { useStore } from "@/mocks/store";
 import { useSession } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import type { IndicatorTarget } from "@/mocks/types";
-import { dbWrite } from "@/lib/supabase-data";
+import { dbWrite, loadAllFromSupabase } from "@/lib/supabase-data";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/metas")({
@@ -28,17 +28,27 @@ function TargetsPage() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
-  const upsert = useStore((s) => s.upsertTarget);
-  const removeTarget = useStore((s) => s.deleteTarget);
-  const user = useCurrentUser();
+  const currentUserId = useStore((s) => s.currentUserId);
+  const hydrateStore = useStore((s) => s.hydrate);
   const [editing, setEditing] = useState<IndicatorTarget | null>(null);
+  const refreshData = async () => {
+    if (!currentUserId) return;
+    const data = await loadAllFromSupabase(currentUserId);
+    hydrateStore(data);
+  };
   const handleSave = async (t: IndicatorTarget) => {
     const { error } = await dbWrite.target(t);
     if (error) {
       toast.error("Não foi possível salvar", { description: error.message });
       return false;
     }
-    upsert(t);
+    hydrateStore({ targets: [t, ...targets.filter((existing) => existing.id !== t.id)] });
+    try {
+      await refreshData();
+    } catch (refreshErr) {
+      // eslint-disable-next-line no-console
+      console.error("[metas:refresh]", refreshErr);
+    }
     toast.success("Meta salva");
     return true;
   };
@@ -49,7 +59,13 @@ function TargetsPage() {
       toast.error("Não foi possível excluir", { description: error.message });
       return;
     }
-    removeTarget(t.id);
+    hydrateStore({ targets: targets.filter((existing) => existing.id !== t.id) });
+    try {
+      await refreshData();
+    } catch (refreshErr) {
+      // eslint-disable-next-line no-console
+      console.error("[metas:refresh]", refreshErr);
+    }
     toast.success("Meta excluída");
   };
   return (
