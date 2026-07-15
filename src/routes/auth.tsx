@@ -11,7 +11,7 @@ import noctaIcon from "@/assets/nocta-icon.png.asset.json";
 import noctaLogo from "@/assets/nocta-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
-  ssr: false,
+  ssr: true,
   head: () => ({ meta: [{ title: "Entrar — Gestão de Indicadores" }] }),
   component: AuthPage,
 });

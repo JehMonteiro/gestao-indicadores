@@ -12,6 +12,7 @@ import { CheckSquare } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useSession } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/aprovacoes")({
   head: () => ({ meta: [{ title: "Aprovações" }] }),
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/aprovacoes")({
 
 function Approvals() {
   const user = useCurrentUser();
+  const { user: authUser, loading: authLoading } = useSession();
   const entries = useStore((s) => s.entries);
   const indicators = useStore((s) => s.indicators);
   const userSectors = useStore((s) => s.userSectors);
@@ -39,11 +41,11 @@ function Approvals() {
   const byStatus = (s: string) => relevant.filter((e) => e.status === s);
 
   const approveEntry = async (entryId: string) => {
-    if (!user) { toast.error("Usuário não carregado"); return; }
+    if (authLoading || !authUser?.id) { toast.error("Usuário não carregado"); return; }
     setSavingId(entryId);
     try {
-      await setStatus(entryId, "aprovado", { approved_by: user.id, approved_at: new Date().toISOString() });
-      logAudit({ user_id: user.id, action: "approve", entity_type: "entry", entity_id: entryId });
+      await setStatus(entryId, "aprovado", { approved_by: authUser.id, approved_at: new Date().toISOString() });
+      logAudit({ user_id: authUser.id, action: "approve", entity_type: "entry", entity_id: entryId });
       toast.success("Aprovado");
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -55,11 +57,11 @@ function Approvals() {
   };
 
   const rejectEntry = async (entryId: string, reason: string): Promise<boolean> => {
-    if (!user) { toast.error("Usuário não carregado"); return false; }
+    if (authLoading || !authUser?.id) { toast.error("Usuário não carregado"); return false; }
     setSavingId(entryId);
     try {
       await setStatus(entryId, "rejeitado", { rejection_reason: reason });
-      logAudit({ user_id: user.id, action: "reject", entity_type: "entry", entity_id: entryId });
+      logAudit({ user_id: authUser.id, action: "reject", entity_type: "entry", entity_id: entryId });
       toast.success("Rejeitado");
       return true;
     } catch (err) {

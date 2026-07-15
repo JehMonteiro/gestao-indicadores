@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
 import { classify, classificationStyles, computeAchievement, formatDate, formatValue } from "@/lib/format";
+import { useSession } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/lancamentos/$id")({
   head: () => ({ meta: [{ title: "Lançamento" }] }),
@@ -23,6 +24,7 @@ function EntryDetail() {
   const setStatus = useStore((s) => s.setEntryStatus);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
+  const { user: authUser, loading: authLoading } = useSession();
   const navigate = useNavigate();
   const [rejectReason, setRejectReason] = useState("");
   const [savingAction, setSavingAction] = useState<"approve" | "reject" | null>(null);
@@ -38,11 +40,11 @@ function EntryDetail() {
   const revisions = entries.filter((e) => e.indicator_id === entry.indicator_id && e.period_start === entry.period_start).sort((a, b) => a.revision_number - b.revision_number);
 
   const approve = async () => {
-    if (!user) { toast.error("Usuário não carregado"); return; }
+    if (authLoading || !authUser?.id) { toast.error("Usuário não carregado"); return; }
     setSavingAction("approve");
     try {
-      await setStatus(entry.id, "aprovado", { approved_by: user.id, approved_at: new Date().toISOString() });
-      logAudit({ user_id: user.id, action: "approve", entity_type: "entry", entity_id: entry.id });
+      await setStatus(entry.id, "aprovado", { approved_by: authUser.id, approved_at: new Date().toISOString() });
+      logAudit({ user_id: authUser.id, action: "approve", entity_type: "entry", entity_id: entry.id });
       toast.success("Lançamento aprovado");
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -54,11 +56,11 @@ function EntryDetail() {
   };
   const reject = async () => {
     if (!rejectReason) { toast.error("Informe o motivo"); return; }
-    if (!user) { toast.error("Usuário não carregado"); return; }
+    if (authLoading || !authUser?.id) { toast.error("Usuário não carregado"); return; }
     setSavingAction("reject");
     try {
       await setStatus(entry.id, "rejeitado", { rejection_reason: rejectReason });
-      logAudit({ user_id: user.id, action: "reject", entity_type: "entry", entity_id: entry.id });
+      logAudit({ user_id: authUser.id, action: "reject", entity_type: "entry", entity_id: entry.id });
       toast.success("Lançamento rejeitado");
     } catch (err) {
       // eslint-disable-next-line no-console
