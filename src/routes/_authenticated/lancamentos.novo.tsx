@@ -16,6 +16,7 @@ import type { IndicatorEntry } from "@/mocks/types";
 import { startOfMonth, endOfMonth, formatISO } from "date-fns";
 import { computeAchievement, formatValue } from "@/lib/format";
 import { useSession } from "@/hooks/use-auth";
+import { loadAllFromSupabase } from "@/lib/supabase-data";
 
 const searchSchema = z.object({ indicator: z.string().optional() });
 
@@ -31,6 +32,7 @@ function NewEntry() {
   const franchises = useStore((s) => s.franchises);
   const targets = useStore((s) => s.targets);
   const upsertEntry = useStore((s) => s.upsertEntry);
+  const hydrateStore = useStore((s) => s.hydrate);
   const logAudit = useStore((s) => s.logAudit);
   const user = useCurrentUser();
   const { user: authUser, loading: authLoading } = useSession();
@@ -97,6 +99,8 @@ function NewEntry() {
     try {
       const saved = await upsertEntry(entry);
       logAudit({ user_id: userId, action: status === "enviado" ? "submit" : "draft", entity_type: "entry", entity_id: saved.id });
+      const refreshed = await loadAllFromSupabase(userId);
+      hydrateStore(refreshed);
       toast.success(status === "enviado" ? "Lançamento enviado" : "Rascunho salvo");
       navigate({ to: "/lancamentos" });
     } catch (err) {

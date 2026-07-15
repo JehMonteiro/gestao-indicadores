@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { classify, classificationStyles, computeAchievement, formatValue } from "@/lib/format";
+import { approvedEntriesForIndicator, findTargetForEntry, latestTargetForIndicator } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/meus-indicadores")({
   head: () => ({ meta: [{ title: "Meus indicadores" }] }),
@@ -31,8 +32,8 @@ function MyIndicators() {
           {indicators.map((i) => {
             const sector = sectors.find((s) => s.id === i.owner_sector_id);
             const franchise = i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id) : null;
-            const t = targets.filter((t) => t.indicator_id === i.id).slice(-1)[0];
-            const e = entries.filter((e) => e.indicator_id === i.id && e.status === "aprovado").slice(-1)[0];
+            const e = approvedEntriesForIndicator(i, entries).slice(-1)[0];
+            const t = e ? findTargetForEntry(e, targets) : latestTargetForIndicator(i, targets);
             const pct = computeAchievement(e, t, i.direction);
             const cs = classificationStyles(classify(pct, settings));
             return (
