@@ -78,7 +78,7 @@ function TargetsPage() {
                 <TableCell className="text-sm">{setorName}</TableCell>
                 <TableCell className="text-sm">{respName}</TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
-                <TableCell className="font-mono">{ind && formatValue(t.target_value, ind.value_type, ind.unit)}</TableCell>
+                <TableCell className="font-mono">{new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.trunc(t.target_value))}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => setEditing(t)} aria-label="Editar"><Pencil className="size-4" /></Button>
