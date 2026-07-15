@@ -122,11 +122,15 @@ function NewEntry() {
                 <SelectContent>{indicators.map((i) => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            {ind?.scope === "franquia" && myFranchises.length > 0 && (
-              <Field label="Franquia">
-                <Select value={franchiseId} onValueChange={setFranchiseId}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{myFranchises.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}</SelectContent>
+            {indicatorHasCompany && (
+              <Field label="Empresa">
+                <Select
+                  value={ind?.franchise_id ?? franchiseId}
+                  onValueChange={setFranchiseId}
+                  disabled={!!ind?.franchise_id}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
+                  <SelectContent>{myFranchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}</SelectContent>
                 </Select>
               </Field>
             )}
