@@ -99,8 +99,13 @@ function NewEntry() {
     try {
       const saved = await upsertEntry(entry);
       logAudit({ user_id: userId, action: status === "enviado" ? "submit" : "draft", entity_type: "entry", entity_id: saved.id });
-      const refreshed = await loadAllFromSupabase(userId);
-      hydrateStore(refreshed);
+      try {
+        const refreshed = await loadAllFromSupabase(userId);
+        hydrateStore(refreshed);
+      } catch (refreshErr) {
+        // eslint-disable-next-line no-console
+        console.error("[lancamentos:refresh]", refreshErr);
+      }
       toast.success(status === "enviado" ? "Lançamento enviado" : "Rascunho salvo");
       navigate({ to: "/lancamentos" });
     } catch (err) {

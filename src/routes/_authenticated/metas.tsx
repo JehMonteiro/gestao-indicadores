@@ -28,6 +28,8 @@ function TargetsPage() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
+  const upsert = useStore((s) => s.upsertTarget);
+  const removeTarget = useStore((s) => s.deleteTarget);
   const currentUserId = useStore((s) => s.currentUserId);
   const hydrateStore = useStore((s) => s.hydrate);
   const [editing, setEditing] = useState<IndicatorTarget | null>(null);
@@ -42,7 +44,13 @@ function TargetsPage() {
       toast.error("Não foi possível salvar", { description: error.message });
       return false;
     }
-    await refreshData();
+    upsert(t);
+    try {
+      await refreshData();
+    } catch (refreshErr) {
+      // eslint-disable-next-line no-console
+      console.error("[metas:refresh]", refreshErr);
+    }
     toast.success("Meta salva");
     return true;
   };
@@ -53,7 +61,13 @@ function TargetsPage() {
       toast.error("Não foi possível excluir", { description: error.message });
       return;
     }
-    await refreshData();
+    removeTarget(t.id);
+    try {
+      await refreshData();
+    } catch (refreshErr) {
+      // eslint-disable-next-line no-console
+      console.error("[metas:refresh]", refreshErr);
+    }
     toast.success("Meta excluída");
   };
   return (
