@@ -60,7 +60,10 @@ function NewEntry() {
     if (nextFranchiseId && franchiseId !== nextFranchiseId) setFranchiseId(nextFranchiseId);
   }, [franchiseId, ind?.franchise_id, myFranchises]);
 
-  const effectiveFranchiseId = ind?.scope === "franquia" ? franchiseId : ind?.franchise_id;
+  // A empresa é exibida sempre que o indicador tiver empresa vinculada
+  // (indicadores de escopo "setor" também têm franchise_id no cadastro atual).
+  const indicatorHasCompany = !!ind?.franchise_id || ind?.scope === "franquia";
+  const effectiveFranchiseId = ind?.franchise_id ?? (ind?.scope === "franquia" ? franchiseId : undefined);
 
   const target = useMemo(() => {
     const sameIndicatorPeriod = targets.filter((t) => t.indicator_id === indId && t.period_start === periodStart);
