@@ -26,6 +26,7 @@ const statusColors: Record<string, string> = {
 
 function EntriesList() {
   const indicators = useStore((s) => s.indicators);
+  const franchises = useStore((s) => s.franchises);
   const entries = useStore((s) => s.entries);
   const [status, setStatus] = useState("all");
   const filtered = entries.filter((e) => status === "all" || e.status === status)
@@ -58,6 +59,7 @@ function EntriesList() {
         <Card><Table>
           <TableHeader><TableRow>
             <TableHead>Indicador</TableHead>
+            <TableHead>Empresa</TableHead>
             <TableHead>Período</TableHead>
             <TableHead>Valor</TableHead>
             <TableHead>Lançado em</TableHead>
@@ -67,9 +69,11 @@ function EntriesList() {
           <TableBody>
             {filtered.map((e) => {
               const ind = indicators.find((i) => i.id === e.indicator_id);
+              const franchise = franchises.find((f) => f.id === e.franchise_id);
               return (
                 <TableRow key={e.id}>
                   <TableCell className="font-medium">{ind?.name}</TableCell>
+                  <TableCell>{franchise?.name ?? "—"}</TableCell>
                   <TableCell>{formatDate(e.period_start)} — {formatDate(e.period_end)}</TableCell>
                   <TableCell className="font-mono">{formatValue(e.actual_value, ind?.value_type ?? "inteiro", ind?.unit)}</TableCell>
                   <TableCell>{formatDate(e.updated_at)}</TableCell>
