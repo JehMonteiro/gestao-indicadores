@@ -28,8 +28,6 @@ function TargetsPage() {
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
-  const upsert = useStore((s) => s.upsertTarget);
-  const removeTarget = useStore((s) => s.deleteTarget);
   const currentUserId = useStore((s) => s.currentUserId);
   const hydrateStore = useStore((s) => s.hydrate);
   const [editing, setEditing] = useState<IndicatorTarget | null>(null);
@@ -44,7 +42,7 @@ function TargetsPage() {
       toast.error("Não foi possível salvar", { description: error.message });
       return false;
     }
-    upsert(t);
+    hydrateStore({ targets: [t, ...targets.filter((existing) => existing.id !== t.id)] });
     try {
       await refreshData();
     } catch (refreshErr) {
@@ -61,7 +59,7 @@ function TargetsPage() {
       toast.error("Não foi possível excluir", { description: error.message });
       return;
     }
-    removeTarget(t.id);
+    hydrateStore({ targets: targets.filter((existing) => existing.id !== t.id) });
     try {
       await refreshData();
     } catch (refreshErr) {
