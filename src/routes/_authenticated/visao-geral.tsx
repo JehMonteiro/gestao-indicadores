@@ -125,7 +125,11 @@ function Overview() {
         const targetYear = indTargets
           .filter((t) => Number((t.period_end ?? "").slice(0, 4)) === currentYear)
           .reduce((s, t) => s + (t.target_value ?? 0), 0);
-        const targetFallback = ind.default_target != null ? ind.default_target * 12 : 0;
+        const periodsPerYear: Record<typeof ind.frequency, number> = {
+          diaria: 365, semanal: 52, quinzenal: 24, mensal: 12,
+          trimestral: 4, semestral: 2, anual: 1,
+        };
+        const targetFallback = ind.default_target != null ? ind.default_target * periodsPerYear[ind.frequency] : 0;
         const targetThis = targetYear > 0 ? targetYear : targetFallback;
         const pctRealized = targetThis > 0 ? (accThis / targetThis) * 100 : null;
         const variation = accLast > 0 ? ((accThis - accLast) / accLast) * 100 : null;

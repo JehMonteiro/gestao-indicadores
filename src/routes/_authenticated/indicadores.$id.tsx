@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { classify, classificationStyles, computeAchievement, formatDate, formatMonth, formatValue, indicatorPeriodLabel } from "@/lib/format";
+import { findTargetForEntry } from "@/lib/metrics";
 import { Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/indicadores/$id")({
@@ -38,7 +39,7 @@ function IndicatorDetail() {
   const sector = sectors.find((s) => s.id === ind.owner_sector_id);
 
   const chartData = indEntries.filter((e) => e.status === "aprovado").map((e) => {
-    const t = indTargets.find((t) => t.id === e.target_id);
+    const t = findTargetForEntry(e, indTargets);
     return { period: formatMonth(e.period_end), realizado: e.actual_value ?? 0, meta: t?.target_value ?? 0 };
   });
 
@@ -109,7 +110,7 @@ function IndicatorDetail() {
             <TableHeader><TableRow><TableHead>Período</TableHead><TableHead>Valor</TableHead><TableHead>Meta</TableHead><TableHead>%</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
             <TableBody>
               {indEntries.map((e) => {
-                const t = indTargets.find((x) => x.id === e.target_id);
+                const t = findTargetForEntry(e, indTargets);
                 const pct = computeAchievement(e, t, ind.direction);
                 const c = classify(pct, settings);
                 const cs = classificationStyles(c);
