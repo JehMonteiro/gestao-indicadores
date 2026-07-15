@@ -146,8 +146,7 @@ export const useStore = create<State & Actions>()(
       setEntryStatus: async (id, status, extra) => {
         const current = useStore.getState().entries.find((e) => e.id === id);
         if (!current) throw new Error("Lançamento não encontrado");
-        const updated: IndicatorEntry = { ...current, status, updated_at: now(), ...extra };
-        const saved = await dbWrite.entry(updated);
+        const saved = await dbWrite.updateEntryStatus(id, { status, ...extra });
         set((st) => ({ entries: upsert(st.entries, saved) }));
         return saved;
       },
