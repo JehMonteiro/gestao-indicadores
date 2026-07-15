@@ -110,7 +110,7 @@ function IndicatorDetail() {
             <TableHeader><TableRow><TableHead>Período</TableHead><TableHead>Valor</TableHead><TableHead>Meta</TableHead><TableHead>%</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
             <TableBody>
               {indEntries.map((e) => {
-                const t = indTargets.find((x) => x.id === e.target_id);
+                const t = findTargetForEntry(e, indTargets);
                 const pct = computeAchievement(e, t, ind.direction);
                 const c = classify(pct, settings);
                 const cs = classificationStyles(c);
