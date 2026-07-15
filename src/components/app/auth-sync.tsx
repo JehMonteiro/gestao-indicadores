@@ -37,6 +37,25 @@ const REALTIME_TABLES = [
   "app_settings",
 ] as const;
 
+// Tables whose row-count is used as a consistency signature to detect
+// missed realtime events (RLS-affected users included).
+const CONSISTENCY_TABLES = [
+  "indicators",
+  "targets",
+  "indicator_entries",
+  "sectors",
+  "franchises",
+] as const;
+
+type StoreKey = "indicators" | "targets" | "entries" | "sectors" | "franchises";
+const STORE_KEY_BY_TABLE: Record<(typeof CONSISTENCY_TABLES)[number], StoreKey> = {
+  indicators: "indicators",
+  targets: "targets",
+  indicator_entries: "entries",
+  sectors: "sectors",
+  franchises: "franchises",
+};
+
 export function AuthSync() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -46,18 +65,62 @@ export function AuthSync() {
     let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
     let refreshTimer: ReturnType<typeof setTimeout> | null = null;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let consistencyInterval: ReturnType<typeof setInterval> | null = null;
     let reconnectAttempts = 0;
     let currentUserId: string | null = null;
+
+    const applyData = (data: Awaited<ReturnType<typeof loadAllFromSupabase>>) => {
+      if (!mounted) return;
+      useStore.getState().hydrate(data);
+      queryClient.invalidateQueries();
+    };
+
+    // Compares DB row counts (respecting RLS) against the local store and
+    // forces a full reload when they diverge. Cheap: HEAD requests only.
+    const verifyConsistency = async (userId: string) => {
+      try {
+        const results = await Promise.all(
+          CONSISTENCY_TABLES.map((table) =>
+            supabase.from(table).select("*", { count: "exact", head: true }),
+          ),
+        );
+        if (!mounted) return;
+        const state = useStore.getState();
+        let diverged = false;
+        for (let i = 0; i < CONSISTENCY_TABLES.length; i += 1) {
+          const table = CONSISTENCY_TABLES[i];
+          const dbCount = results[i].count;
+          if (dbCount == null) continue;
+          const localCount = (state[STORE_KEY_BY_TABLE[table]] as unknown[]).length;
+          if (dbCount !== localCount) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `[auth-sync:consistency] mismatch on ${table}: db=${dbCount} local=${localCount}`,
+            );
+            diverged = true;
+            break;
+          }
+        }
+        if (diverged) {
+          const data = await loadAllFromSupabase(userId);
+          applyData(data);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[auth-sync:consistency]", err);
+      }
+    };
 
     const scheduleRefresh = (userId: string) => {
       if (refreshTimer) clearTimeout(refreshTimer);
       refreshTimer = setTimeout(() => {
         loadAllFromSupabase(userId)
           .then((data) => {
-            if (!mounted) return;
-            useStore.getState().hydrate(data);
-            // Wake up any React Query consumers (auth profile, etc.)
-            queryClient.invalidateQueries();
+            applyData(data);
+            // Verify shortly after the refresh so we catch payloads the
+            // realtime channel might have dropped (rare, but happens on
+            // reconnects).
+            void verifyConsistency(userId);
           })
           .catch((err) => {
             // eslint-disable-next-line no-console
@@ -65,6 +128,7 @@ export function AuthSync() {
           });
       }, 400);
     };
+
 
     const subscribeRealtime = (userId: string) => {
       if (realtimeChannel) {
