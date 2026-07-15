@@ -66,7 +66,7 @@ function NewEntry() {
     const entry: IndicatorEntry = {
       id: newId(),
       indicator_id: ind.id, target_id: target?.id,
-      user_id: userId, sector_id: ind.owner_sector_id, franchise_id: ind.scope === "franquia" ? franchiseId : undefined,
+      user_id: userId, sector_id: ind.owner_sector_id || undefined, franchise_id: ind.scope === "franquia" ? franchiseId : undefined,
       period_start: periodStart, period_end: periodEnd,
       actual_value: Number(actual), comment, justification,
       status: ind.requires_approval && status === "enviado" ? "enviado" : (status === "enviado" ? "aprovado" : "rascunho"),
