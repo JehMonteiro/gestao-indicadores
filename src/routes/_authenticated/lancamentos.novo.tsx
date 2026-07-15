@@ -60,7 +60,10 @@ function NewEntry() {
     if (nextFranchiseId && franchiseId !== nextFranchiseId) setFranchiseId(nextFranchiseId);
   }, [franchiseId, ind?.franchise_id, myFranchises]);
 
-  const effectiveFranchiseId = ind?.scope === "franquia" ? franchiseId : ind?.franchise_id;
+  // A empresa é exibida sempre que o indicador tiver empresa vinculada
+  // (indicadores de escopo "setor" também têm franchise_id no cadastro atual).
+  const indicatorHasCompany = !!ind?.franchise_id || ind?.scope === "franquia";
+  const effectiveFranchiseId = ind?.franchise_id ?? (ind?.scope === "franquia" ? franchiseId : undefined);
 
   const target = useMemo(() => {
     const sameIndicatorPeriod = targets.filter((t) => t.indicator_id === indId && t.period_start === periodStart);
@@ -78,7 +81,7 @@ function NewEntry() {
     if (authLoading || !userId) { toast.error("Aguarde seu usuário carregar antes de salvar"); return; }
     const entryFranchiseId = effectiveFranchiseId ?? target?.franchise_id;
     const entrySectorId = target?.sector_id ?? (ind.owner_sector_id || undefined);
-    if (ind.scope === "franquia" && !entryFranchiseId) { toast.error("Selecione uma franquia"); return; }
+    if (indicatorHasCompany && !entryFranchiseId) { toast.error("Selecione uma empresa"); return; }
     if (actual === "" || isNaN(Number(actual))) { toast.error("Informe um valor numérico"); return; }
     const entry: IndicatorEntry = {
       id: newId(),
@@ -119,11 +122,15 @@ function NewEntry() {
                 <SelectContent>{indicators.map((i) => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            {ind?.scope === "franquia" && myFranchises.length > 0 && (
-              <Field label="Franquia">
-                <Select value={franchiseId} onValueChange={setFranchiseId}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{myFranchises.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}</SelectContent>
+            {indicatorHasCompany && (
+              <Field label="Empresa">
+                <Select
+                  value={ind?.franchise_id ?? franchiseId}
+                  onValueChange={setFranchiseId}
+                  disabled={!!ind?.franchise_id}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
+                  <SelectContent>{myFranchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}</SelectContent>
                 </Select>
               </Field>
             )}
