@@ -54,17 +54,19 @@ function Approvals() {
     }
   };
 
-  const rejectEntry = async (entryId: string, reason: string) => {
-    if (!user) { toast.error("Usuário não carregado"); return; }
+  const rejectEntry = async (entryId: string, reason: string): Promise<boolean> => {
+    if (!user) { toast.error("Usuário não carregado"); return false; }
     setSavingId(entryId);
     try {
       await setStatus(entryId, "rejeitado", { rejection_reason: reason });
       logAudit({ user_id: user.id, action: "reject", entity_type: "entry", entity_id: entryId });
       toast.success("Rejeitado");
+      return true;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[aprovacoes:reject]", err);
       toast.error("Não foi possível rejeitar", { description: "Tente novamente em instantes." });
+      return false;
     } finally {
       setSavingId(null);
     }
@@ -123,7 +125,7 @@ function Approvals() {
   );
 }
 
-function RejectDialog({ disabled, onConfirm }: { disabled?: boolean; onConfirm: (reason: string) => Promise<void> }) {
+function RejectDialog({ disabled, onConfirm }: { disabled?: boolean; onConfirm: (reason: string) => Promise<boolean> }) {
   const [open, setOpen] = useState(false);
   const [r, setR] = useState("");
   const [saving, setSaving] = useState(false);
@@ -131,9 +133,11 @@ function RejectDialog({ disabled, onConfirm }: { disabled?: boolean; onConfirm: 
     if (!r) return;
     setSaving(true);
     try {
-      await onConfirm(r);
-      setOpen(false);
-      setR("");
+      const ok = await onConfirm(r);
+      if (ok) {
+        setOpen(false);
+        setR("");
+      }
     } finally {
       setSaving(false);
     }
