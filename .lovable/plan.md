@@ -1,35 +1,33 @@
 ## Problema
 
-Ao aprovar/rejeitar em `/aprovacoes`, o backend responde 403 com `new row violates row-level security policy for table "indicator_entries"`.
+Na lista de **Indicadores** (`/indicadores`), a coluna **Atingimento** aparece como "Sem informação" ou com valores incorretos mesmo quando existem lançamentos aprovados e metas cadastradas.
 
-Causa raiz (duas partes):
+## Causa
 
-1. **Escrita errada** – `setEntryStatus` no store chama `dbWrite.entry`, que executa `upsert` (INSERT ... ON CONFLICT UPDATE). Assim o Postgres avalia a policy de **INSERT**, que exige `user_id = auth.uid()` e proíbe inserir com `status='aprovado'` quando o indicador exige aprovação. Aprovador (Jéssica) não é o dono do lançamento → bloqueia.
-2. **Policy de UPDATE restritiva** – a policy atual só deixa transicionar status quem for admin, gestor do setor, gestor da franquia ou o próprio autor. Porém a trigger `indicator_entries_guard_status` documenta a decisão de produto: “any authenticated user may transition entry status, including approving their own entries. No role/self-approval checks.” Ou seja, o RLS está mais restritivo que a regra desejada.
+Em `src/routes/_authenticated/indicadores.index.tsx`, o cálculo do último resultado e da meta usa lógica ingênua:
 
-## Correções
+```ts
+const t = targets.filter((t) => t.indicator_id === i.id).slice(-1)[0];
+const e = entries.filter((e) => e.indicator_id === i.id && e.status === "aprovado").slice(-1)[0];
+```
 
-### 1. Backend – migration em `indicator_entries`
+Problemas:
+1. `slice(-1)` pega o último da ordem de inserção, não o mais recente por período.
+2. A meta é buscada sem considerar franquia nem casar período com o lançamento (mesma causa dos outros bugs de "não atualiza" já corrigidos em Visão geral / Meu painel / Meus indicadores via `src/lib/metrics.ts`).
+3. Para indicadores de escopo por franquia, não filtra `franchise_id` no lançamento.
 
-- `DROP POLICY "entries update own draft or manager"`.
-- Recriar duas policies alinhadas à decisão de produto (a trigger continua sendo o guard-rail):
-  - `USING`: qualquer usuário autenticado que enxergue a linha (mantém escopo de SELECT: admin, dono, gestor de setor, gestor de franquia).
-  - `WITH CHECK`: qualquer usuário autenticado, sem exigir papel/self-approval — a validação de transições segue na trigger.
-- Não mexer nas policies de INSERT/DELETE/SELECT.
+O helper correto (`approvedEntriesForIndicator`, `findTargetForEntry`, `latestTargetForIndicator`) já existe em `src/lib/metrics.ts` e é usado em `meus-indicadores.tsx`.
 
-### 2. Frontend – usar UPDATE ao mudar status
+## Correção
 
-Em `src/mocks/store.ts` → `setEntryStatus`:
+Em `src/routes/_authenticated/indicadores.index.tsx`:
 
-- Não chamar `dbWrite.entry` (upsert). Fazer um `supabase.from("indicator_entries").update({...}).eq("id", id).select().maybeSingle()` só com os campos que mudam (`status`, `approved_by`, `approved_at`, `rejection_reason`, `submitted_at`, `updated_at`).
-- Manter o retorno mapeado via o mesmo mapper de `dbWrite.entry` (extrair helper reutilizável em `src/lib/supabase-data.ts`, ex.: `dbWrite.updateEntryStatus(id, patch)`).
-- Preservar a atualização local do store como já está.
+- Importar `approvedEntriesForIndicator`, `findTargetForEntry`, `latestTargetForIndicator` de `@/lib/metrics`.
+- Substituir o cálculo por:
+  ```ts
+  const e = approvedEntriesForIndicator(i, entries).slice(-1)[0];
+  const t = e ? findTargetForEntry(e, targets) : latestTargetForIndicator(i, targets);
+  ```
+- Manter o restante da linha (badge, formatação) inalterado.
 
-Assim a policy de INSERT deixa de ser avaliada e a de UPDATE (agora relaxada) permite aprovar/rejeitar.
-
-## Validação
-
-- Fazer login como usuária não-gestora, aprovar um lançamento pendente em `/aprovacoes` e confirmar 200 + toast “Aprovado”.
-- Rejeitar com motivo e confirmar transição para “Rejeitado”.
-- Conferir no console que `indicator_entries?select=*` responde 200 (sem 403/42501).
-- Confirmar que criação de novo lançamento (fluxo `lancamentos/novo`) continua funcionando (policy de INSERT intacta).
+Somente presentação; sem mudanças de dados, RLS ou schema.
