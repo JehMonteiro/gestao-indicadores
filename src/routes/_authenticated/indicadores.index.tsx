@@ -115,8 +115,8 @@ function IndicatorsList() {
               {filtered.map((i) => {
                 const sector = sectors.find((s) => s.id === i.owner_sector_id);
                 const franchise = i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id) : null;
-                const t = targets.filter((t) => t.indicator_id === i.id).slice(-1)[0];
-                const e = entries.filter((e) => e.indicator_id === i.id && e.status === "aprovado").slice(-1)[0];
+                const e = approvedEntriesForIndicator(i, entries).slice(-1)[0];
+                const t = e ? findTargetForEntry(e, targets) : latestTargetForIndicator(i, targets);
                 const pct = computeAchievement(e, t, i.direction);
                 const c = classify(pct, settings);
                 const cs = classificationStyles(c);
