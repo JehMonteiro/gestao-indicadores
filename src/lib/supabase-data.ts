@@ -104,6 +104,8 @@ function mapTarget(row: any): IndicatorTarget {
     indicator_id: row.indicator_id,
     scope_type: row.franchise_id ? "franquia" : "corporativo",
     franchise_id: row.franchise_id ?? undefined,
+    sector_id: row.sector_id ?? undefined,
+    user_id: row.user_id ?? undefined,
     period_start: row.period_start,
     period_end: row.period_end,
     target_value: Number(row.target_value),
