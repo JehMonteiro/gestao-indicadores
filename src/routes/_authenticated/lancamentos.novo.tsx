@@ -81,7 +81,7 @@ function NewEntry() {
     if (authLoading || !userId) { toast.error("Aguarde seu usuário carregar antes de salvar"); return; }
     const entryFranchiseId = effectiveFranchiseId ?? target?.franchise_id;
     const entrySectorId = target?.sector_id ?? (ind.owner_sector_id || undefined);
-    if (ind.scope === "franquia" && !entryFranchiseId) { toast.error("Selecione uma franquia"); return; }
+    if (indicatorHasCompany && !entryFranchiseId) { toast.error("Selecione uma empresa"); return; }
     if (actual === "" || isNaN(Number(actual))) { toast.error("Informe um valor numérico"); return; }
     const entry: IndicatorEntry = {
       id: newId(),
