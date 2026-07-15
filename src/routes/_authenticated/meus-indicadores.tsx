@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { classify, classificationStyles, computeAchievement, formatValue } from "@/lib/format";
-import { approvedEntriesForIndicator, findTargetForEntry, latestTargetForIndicator } from "@/lib/metrics";
+import { approvedEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/meus-indicadores")({
   head: () => ({ meta: [{ title: "Meus indicadores" }] }),
