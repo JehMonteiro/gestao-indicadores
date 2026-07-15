@@ -25,6 +25,7 @@ function Approvals() {
   const userSectors = useStore((s) => s.userSectors);
   const setStatus = useStore((s) => s.setEntryStatus);
   const logAudit = useStore((s) => s.logAudit);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const managedSectorIds = userSectors.filter((us) => us.user_id === user?.id && us.sector_role === "gestor").map((us) => us.sector_id);
   const isAdmin = user?.global_role === "superadmin" || user?.global_role === "admin_corporativo";
@@ -36,6 +37,39 @@ function Approvals() {
   });
 
   const byStatus = (s: string) => relevant.filter((e) => e.status === s);
+
+  const approveEntry = async (entryId: string) => {
+    if (!user) { toast.error("Usuário não carregado"); return; }
+    setSavingId(entryId);
+    try {
+      await setStatus(entryId, "aprovado", { approved_by: user.id, approved_at: new Date().toISOString() });
+      logAudit({ user_id: user.id, action: "approve", entity_type: "entry", entity_id: entryId });
+      toast.success("Aprovado");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[aprovacoes:approve]", err);
+      toast.error("Não foi possível aprovar", { description: "Tente novamente em instantes." });
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const rejectEntry = async (entryId: string, reason: string) => {
+    if (!user) { toast.error("Usuário não carregado"); return; }
+    setSavingId(entryId);
+    try {
+      await setStatus(entryId, "rejeitado", { rejection_reason: reason });
+      logAudit({ user_id: user.id, action: "reject", entity_type: "entry", entity_id: entryId });
+      toast.success("Rejeitado");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[aprovacoes:reject]", err);
+      toast.error("Não foi possível rejeitar", { description: "Tente novamente em instantes." });
+      throw err;
+    } finally {
+      setSavingId(null);
+    }
+  };
 
   return (
     <div>
@@ -71,16 +105,8 @@ function Approvals() {
                           <TableCell className="text-right">
                             {st === "enviado" && (
                               <div className="flex justify-end gap-2">
-                                <Button size="sm" onClick={() => {
-                                  setStatus(e.id, "aprovado", { approved_by: user?.id, approved_at: new Date().toISOString() });
-                                  logAudit({ user_id: user?.id ?? "", action: "approve", entity_type: "entry", entity_id: e.id });
-                                  toast.success("Aprovado");
-                                }}>Aprovar</Button>
-                                <RejectDialog onConfirm={(reason) => {
-                                  setStatus(e.id, "rejeitado", { rejection_reason: reason });
-                                  logAudit({ user_id: user?.id ?? "", action: "reject", entity_type: "entry", entity_id: e.id });
-                                  toast.success("Rejeitado");
-                                }} />
+                                <Button size="sm" disabled={savingId === e.id} onClick={() => void approveEntry(e.id)}>{savingId === e.id ? "Salvando..." : "Aprovar"}</Button>
+                                <RejectDialog disabled={savingId === e.id} onConfirm={(reason) => rejectEntry(e.id, reason)} />
                               </div>
                             )}
                           </TableCell>
@@ -98,18 +124,30 @@ function Approvals() {
   );
 }
 
-function RejectDialog({ onConfirm }: { onConfirm: (reason: string) => void }) {
+function RejectDialog({ disabled, onConfirm }: { disabled?: boolean; onConfirm: (reason: string) => Promise<void> }) {
   const [open, setOpen] = useState(false);
   const [r, setR] = useState("");
+  const [saving, setSaving] = useState(false);
+  const confirm = async () => {
+    if (!r) return;
+    setSaving(true);
+    try {
+      await onConfirm(r);
+      setOpen(false);
+      setR("");
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm" variant="destructive">Rejeitar</Button></DialogTrigger>
+      <DialogTrigger asChild><Button size="sm" variant="destructive" disabled={disabled}>Rejeitar</Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Motivo da rejeição</DialogTitle></DialogHeader>
         <Textarea value={r} onChange={(e) => setR(e.target.value)} placeholder="Explique o motivo..." />
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button variant="destructive" onClick={() => { if (r) { onConfirm(r); setOpen(false); setR(""); } }}>Rejeitar</Button>
+          <Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="destructive" disabled={saving || !r} onClick={() => void confirm()}>{saving ? "Salvando..." : "Rejeitar"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -25,6 +25,7 @@ function EntryDetail() {
   const user = useCurrentUser();
   const navigate = useNavigate();
   const [rejectReason, setRejectReason] = useState("");
+  const [savingAction, setSavingAction] = useState<"approve" | "reject" | null>(null);
 
   const entry = entries.find((e) => e.id === id);
   if (!entry) throw notFound();
@@ -36,16 +37,36 @@ function EntryDetail() {
   const canApprove = !!user;
   const revisions = entries.filter((e) => e.indicator_id === entry.indicator_id && e.period_start === entry.period_start).sort((a, b) => a.revision_number - b.revision_number);
 
-  const approve = () => {
-    setStatus(entry.id, "aprovado", { approved_by: user?.id, approved_at: new Date().toISOString() });
-    logAudit({ user_id: user?.id ?? "", action: "approve", entity_type: "entry", entity_id: entry.id });
-    toast.success("Lançamento aprovado");
+  const approve = async () => {
+    if (!user) { toast.error("Usuário não carregado"); return; }
+    setSavingAction("approve");
+    try {
+      await setStatus(entry.id, "aprovado", { approved_by: user.id, approved_at: new Date().toISOString() });
+      logAudit({ user_id: user.id, action: "approve", entity_type: "entry", entity_id: entry.id });
+      toast.success("Lançamento aprovado");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[lancamentos:approve]", err);
+      toast.error("Não foi possível aprovar", { description: "Tente novamente em instantes." });
+    } finally {
+      setSavingAction(null);
+    }
   };
-  const reject = () => {
+  const reject = async () => {
     if (!rejectReason) { toast.error("Informe o motivo"); return; }
-    setStatus(entry.id, "rejeitado", { rejection_reason: rejectReason });
-    logAudit({ user_id: user?.id ?? "", action: "reject", entity_type: "entry", entity_id: entry.id });
-    toast.success("Lançamento rejeitado");
+    if (!user) { toast.error("Usuário não carregado"); return; }
+    setSavingAction("reject");
+    try {
+      await setStatus(entry.id, "rejeitado", { rejection_reason: rejectReason });
+      logAudit({ user_id: user.id, action: "reject", entity_type: "entry", entity_id: entry.id });
+      toast.success("Lançamento rejeitado");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[lancamentos:reject]", err);
+      toast.error("Não foi possível rejeitar", { description: "Tente novamente em instantes." });
+    } finally {
+      setSavingAction(null);
+    }
   };
 
   return (
@@ -72,9 +93,9 @@ function EntryDetail() {
           <CardContent className="space-y-3">
             {entry.status === "enviado" && canApprove ? (
               <>
-                <Button className="w-full" onClick={approve}>Aprovar</Button>
+                <Button className="w-full" disabled={!!savingAction} onClick={approve}>{savingAction === "approve" ? "Aprovando..." : "Aprovar"}</Button>
                 <Textarea placeholder="Motivo da rejeição" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
-                <Button variant="destructive" className="w-full" onClick={reject}>Rejeitar</Button>
+                <Button variant="destructive" className="w-full" disabled={!!savingAction} onClick={reject}>{savingAction === "reject" ? "Rejeitando..." : "Rejeitar"}</Button>
               </>
             ) : (
               <p className="text-sm text-muted-foreground">{entry.status === "aprovado" ? "Aprovado." : entry.status === "rejeitado" ? "Rejeitado — pode ser corrigido." : "Aguardando envio."}</p>

@@ -53,8 +53,8 @@ type Actions = {
   deleteIndicator: (id: string) => void;
   upsertTarget: (t: IndicatorTarget) => void;
   deleteTarget: (id: string) => void;
-  upsertEntry: (e: IndicatorEntry) => void;
-  setEntryStatus: (id: string, status: IndicatorEntry["status"], extra?: Partial<IndicatorEntry>) => void;
+  upsertEntry: (e: IndicatorEntry) => Promise<IndicatorEntry>;
+  setEntryStatus: (id: string, status: IndicatorEntry["status"], extra?: Partial<IndicatorEntry>) => Promise<IndicatorEntry>;
 
   upsertUserSector: (us: UserSector) => void;
   removeUserSector: (id: string) => void;
@@ -138,20 +138,18 @@ export const useStore = create<State & Actions>()(
         set((st) => ({ targets: st.targets.filter((x) => x.id !== id) }));
         fireAndForget("deleteTarget", dbWrite.deleteTarget(id));
       },
-      upsertEntry: (e) => {
-        set((st) => ({ entries: upsert(st.entries, e) }));
-        fireAndForget("entry", dbWrite.entry(e));
+      upsertEntry: async (e) => {
+        const saved = await dbWrite.entry(e);
+        set((st) => ({ entries: upsert(st.entries, saved) }));
+        return saved;
       },
-      setEntryStatus: (id, status, extra) => {
-        let updated: IndicatorEntry | undefined;
-        set((st) => ({
-          entries: st.entries.map((e) => {
-            if (e.id !== id) return e;
-            updated = { ...e, status, updated_at: now(), ...extra };
-            return updated;
-          }),
-        }));
-        if (updated) fireAndForget("entryStatus", dbWrite.entry(updated));
+      setEntryStatus: async (id, status, extra) => {
+        const current = useStore.getState().entries.find((e) => e.id === id);
+        if (!current) throw new Error("Lançamento não encontrado");
+        const updated: IndicatorEntry = { ...current, status, updated_at: now(), ...extra };
+        const saved = await dbWrite.entry(updated);
+        set((st) => ({ entries: upsert(st.entries, saved) }));
+        return saved;
       },
 
       upsertUserSector: (us) => {
