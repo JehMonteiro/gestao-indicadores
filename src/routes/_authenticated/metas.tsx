@@ -135,6 +135,7 @@ function TargetDialog({
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
+  const allTargets = useStore((s) => s.targets);
   const { user: authUser } = useSession();
   const isEdit = !!initialValue;
   const [open, setOpen] = useState(!!openControlled);
@@ -145,6 +146,11 @@ function TargetDialog({
     target_value: 0, weight: 1, created_by: authUser?.id ?? "", created_at: new Date().toISOString(),
   });
   const [f, setF] = useState<IndicatorTarget>(makeInitial);
+  const indicatorCompanyLabel = (i: (typeof indicators)[number]) =>
+    i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id)?.name ?? "" : "Corporativo";
+  const availableIndicators = indicators.filter(
+    (i) => !f.franchise_id || !i.franchise_id || i.franchise_id === f.franchise_id,
+  );
   const setDialog = (o: boolean) => {
     setOpen(o);
     onOpenChange?.(o);
@@ -155,16 +161,32 @@ function TargetDialog({
       <DialogContent>
         <DialogHeader><DialogTitle>{isEdit ? "Editar meta" : "Nova meta"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <div><Label>Indicador</Label>
-            <Select value={f.indicator_id} onValueChange={(v) => setF({ ...f, indicator_id: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{indicators.map((i) => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
           <div><Label>Empresa</Label>
-            <Select value={f.franchise_id ?? ""} onValueChange={(v) => setF({ ...f, franchise_id: v, scope_type: "franquia" })}>
+            <Select
+              value={f.franchise_id ?? ""}
+              onValueChange={(v) => {
+                const stillValid = indicators.some((i) => i.id === f.indicator_id && (!i.franchise_id || i.franchise_id === v));
+                setF({ ...f, franchise_id: v, scope_type: "franquia", indicator_id: stillValid ? f.indicator_id : "" });
+              }}
+            >
               <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
               <SelectContent>{franchises.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div><Label>Indicador</Label>
+            <Select value={f.indicator_id} onValueChange={(v) => setF({ ...f, indicator_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione o indicador" /></SelectTrigger>
+              <SelectContent>
+                {availableIndicators.length === 0 && (
+                  <div className="px-2 py-3 text-sm text-muted-foreground">Nenhum indicador para esta empresa.</div>
+                )}
+                {availableIndicators.map((i) => (
+                  <SelectItem key={i.id} value={i.id}>
+                    {i.name}
+                    {indicatorCompanyLabel(i) ? ` — ${indicatorCompanyLabel(i)}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -205,8 +227,24 @@ function TargetDialog({
           </div>
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setDialog(false)}>Cancelar</Button><Button onClick={async () => {
-          if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
           if (!f.franchise_id) { toast.error("Selecione uma empresa"); return; }
+          if (!f.indicator_id) { toast.error("Selecione um indicador"); return; }
+          const chosen = indicators.find((i) => i.id === f.indicator_id);
+          if (chosen?.franchise_id && chosen.franchise_id !== f.franchise_id) {
+            toast.error("O indicador selecionado pertence a outra empresa");
+            return;
+          }
+          if (f.period_end < f.period_start) { toast.error("O fim do período não pode ser antes do início"); return; }
+          const overlapping = allTargets.find(
+            (t) =>
+              t.id !== f.id &&
+              t.indicator_id === f.indicator_id &&
+              (t.franchise_id ?? "") === (f.franchise_id ?? "") &&
+              (t.sector_id ?? "") === (f.sector_id ?? "") &&
+              t.period_start <= f.period_end &&
+              t.period_end >= f.period_start,
+          );
+          if (overlapping && !confirm("Já existe uma meta para este indicador/empresa em período sobreposto. Deseja salvar mesmo assim?")) return;
           const payload = isEdit ? { ...f, created_by: f.created_by || authUser?.id || "" } : { ...f, id: newId(), created_by: authUser?.id ?? "" };
           const ok = await onSave(payload);
           if (ok !== false) {
