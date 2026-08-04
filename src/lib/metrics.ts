@@ -90,10 +90,12 @@ export function latestTarget(targets: IndicatorTarget[]) {
   return [...targets].sort(compareTargetAsc)[targets.length - 1];
 }
 
-type EntryScope = Pick<
-  IndicatorEntry,
-  "indicator_id" | "franchise_id" | "sector_id" | "user_id" | "period_start" | "period_end"
-> & { target_id?: string };
+export type EntryScope = Pick<IndicatorEntry, "indicator_id" | "period_start" | "period_end"> & {
+  franchise_id?: string;
+  sector_id?: string;
+  user_id?: string;
+  target_id?: string;
+};
 
 /**
  * Company compatibility: a target for another company is never usable.
