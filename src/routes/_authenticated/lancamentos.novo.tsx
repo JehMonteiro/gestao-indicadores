@@ -17,6 +17,8 @@ import { startOfMonth, endOfMonth, formatISO } from "date-fns";
 import { computeAchievement, formatValue } from "@/lib/format";
 import { useSession } from "@/hooks/use-auth";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
+import { resolveTargetRowForEntry, resolveTargetForEntry } from "@/lib/metrics";
+
 
 const searchSchema = z.object({ indicator: z.string().optional() });
 
