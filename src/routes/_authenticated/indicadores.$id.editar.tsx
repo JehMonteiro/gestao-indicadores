@@ -213,12 +213,8 @@ function EditIndicator() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Aprovação e instruções</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Instruções</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between border rounded-md p-3">
-              <div><p className="text-sm font-medium">Necessita aprovação</p><p className="text-xs text-muted-foreground">Lançamentos vão para o fluxo de aprovação.</p></div>
-              <Switch checked={f.requires_approval} onCheckedChange={(v) => set("requires_approval", v)} />
-            </div>
             <div className="flex items-center justify-between border rounded-md p-3">
               <div><p className="text-sm font-medium">Permite anexar comprovantes</p></div>
               <Switch checked={f.allows_attachment} onCheckedChange={(v) => set("allows_attachment", v)} />

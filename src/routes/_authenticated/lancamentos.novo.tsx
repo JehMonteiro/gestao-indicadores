@@ -51,7 +51,7 @@ function NewEntry() {
   const [actual, setActual] = useState<string>("");
   const [comment, setComment] = useState("");
   const [justification, setJustification] = useState("");
-  const [saving, setSaving] = useState<"rascunho" | "enviado" | null>(null);
+  const [saving, setSaving] = useState<"rascunho" | "registrado" | null>(null);
 
   useEffect(() => {
     if (!indId && indicators.length > 0) setIndId(search.indicator ?? indicators[0].id);
@@ -77,7 +77,7 @@ function NewEntry() {
     return computeAchievement({ actual_value: Number(actual) }, target, ind.direction);
   }, [ind, target, actual]);
 
-  const save = async (status: "rascunho" | "enviado") => {
+  const save = async (status: "rascunho" | "registrado") => {
     if (!ind) { toast.error("Selecione um indicador"); return; }
     const userId = authUser?.id;
     if (authLoading || !userId) { toast.error("Aguarde seu usuário carregar antes de salvar"); return; }
@@ -91,14 +91,14 @@ function NewEntry() {
       user_id: userId, sector_id: entrySectorId, franchise_id: entryFranchiseId,
       period_start: periodStart, period_end: periodEnd,
       actual_value: Number(actual), comment, justification,
-      status: ind.requires_approval && status === "enviado" ? "enviado" : (status === "enviado" ? "aprovado" : "rascunho"),
-      submitted_at: status === "enviado" ? new Date().toISOString() : undefined,
+      status,
+      submitted_at: status === "registrado" ? new Date().toISOString() : undefined,
       revision_number: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     };
     setSaving(status);
     try {
       const saved = await upsertEntry(entry);
-      logAudit({ user_id: userId, action: status === "enviado" ? "submit" : "draft", entity_type: "entry", entity_id: saved.id });
+      logAudit({ user_id: userId, action: status === "registrado" ? "submit" : "draft", entity_type: "entry", entity_id: saved.id });
       try {
         const refreshed = await loadAllFromSupabase(userId);
         hydrateStore(refreshed);
@@ -106,7 +106,7 @@ function NewEntry() {
         // eslint-disable-next-line no-console
         console.error("[lancamentos:refresh]", refreshErr);
       }
-      toast.success(status === "enviado" ? "Lançamento enviado" : "Rascunho salvo");
+      toast.success(status === "registrado" ? "Lançamento registrado" : "Rascunho salvo");
       navigate({ to: "/lancamentos" });
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -157,7 +157,7 @@ function NewEntry() {
             )}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" disabled={!!saving || authLoading} onClick={() => save("rascunho")}>{saving === "rascunho" ? "Salvando..." : "Salvar rascunho"}</Button>
-              <Button disabled={!!saving || authLoading} onClick={() => save("enviado")}>{saving === "enviado" ? "Salvando..." : ind?.requires_approval ? "Cadastrar" : "Confirmar lançamento"}</Button>
+              <Button disabled={!!saving || authLoading} onClick={() => save("registrado")}>{saving === "registrado" ? "Salvando..." : "Cadastrar"}</Button>
             </div>
           </CardContent>
         </Card>
