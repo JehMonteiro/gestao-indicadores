@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
-import { registeredEntriesForIndicator, entriesByPeriodAsc, findTargetForEntry, latestTarget } from "@/lib/metrics";
+import { registeredEntriesForIndicator, latestEntriesByPeriod, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/visao-geral")({
   head: () => ({ meta: [{ title: "Visão geral — Gestão de Indicadores" }] }),
