@@ -3,6 +3,7 @@
 // and write-through helpers used by the Zustand store actions.
 
 import { supabase } from "@/integrations/supabase/client";
+import { firstIntegerError } from "@/lib/value-rules";
 import type {
   AuditLog,
   Franchise,
@@ -16,6 +17,7 @@ import type {
   UserFranchise,
   UserSector,
   GlobalRole,
+  ValueType,
 } from "@/mocks/types";
 
 // ---------- Mappers (DB row → mock type) ----------
@@ -272,7 +274,8 @@ export async function loadAllFromSupabase(userId: string) {
 
 // ---------- Validação de valores inteiros (camada de aplicação) ----------
 
-function indicatorValueType(indicatorId: string): ValueType | undefined {
+async function indicatorValueType(indicatorId: string): Promise<ValueType | undefined> {
+  const { useStore } = await import("@/mocks/store");
   return useStore.getState().indicators.find((i) => i.id === indicatorId)?.value_type;
 }
 
@@ -355,7 +358,7 @@ export const dbWrite = {
     return supabase.from("indicators").delete().eq("id", id);
   },
   async target(t: IndicatorTarget) {
-    assertIntegerFields(indicatorValueType(t.indicator_id), [
+    assertIntegerFields(await indicatorValueType(t.indicator_id), [
       { label: "Valor da meta", value: t.target_value },
       { label: "Valor mínimo", value: t.minimum_value },
       { label: "Valor máximo", value: t.maximum_value },
@@ -378,7 +381,7 @@ export const dbWrite = {
     return supabase.from("targets").delete().eq("id", id);
   },
   async entry(e: IndicatorEntry) {
-    assertIntegerFields(indicatorValueType(e.indicator_id), [
+    assertIntegerFields(await indicatorValueType(e.indicator_id), [
       { label: "O valor realizado", value: e.actual_value },
     ]);
     const { data, error } = await supabase.from("indicator_entries").upsert({
