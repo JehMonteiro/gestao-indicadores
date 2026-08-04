@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/format";
 import type { IndicatorTarget } from "@/mocks/types";
 import { dbWrite, loadAllFromSupabase } from "@/lib/supabase-data";
 import { toast } from "sonner";
+import { firstIntegerError, numericStep, blockDecimalKeys, requiresInteger } from "@/lib/value-rules";
 
 export const Route = createFileRoute("/_authenticated/metas")({
   head: () => ({ meta: [{ title: "Metas" }] }),
@@ -94,7 +95,7 @@ function TargetsPage() {
                 <TableCell className="text-sm">{setorName}</TableCell>
                 <TableCell className="text-sm">{respName}</TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
-                <TableCell className="font-mono">{new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.trunc(t.target_value))}</TableCell>
+                <TableCell className="font-mono">{formatValue(t.target_value, ind?.value_type ?? "inteiro", ind?.unit)}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => setEditing(t)} aria-label="Editar"><Pencil className="size-4" /></Button>
@@ -148,6 +149,7 @@ function TargetDialog({
   const [f, setF] = useState<IndicatorTarget>(makeInitial);
   const indicatorCompanyLabel = (i: (typeof indicators)[number]) =>
     i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id)?.name ?? "" : "Corporativo";
+  const selectedIndicator = indicators.find((i) => i.id === f.indicator_id);
   const availableIndicators = indicators.filter(
     (i) => !f.franchise_id || !i.franchise_id || i.franchise_id === f.franchise_id,
   );
@@ -213,15 +215,15 @@ function TargetDialog({
             <div><Label>Início</Label><Input type="date" value={f.period_start} onChange={(e) => setF({ ...f, period_start: e.target.value })} /></div>
             <div><Label>Fim</Label><Input type="date" value={f.period_end} onChange={(e) => setF({ ...f, period_end: e.target.value })} /></div>
           </div>
-          <div><Label>Valor da meta (número inteiro)</Label>
+          <div><Label>{`Valor da meta${selectedIndicator ? (requiresInteger(selectedIndicator.value_type) ? " (número inteiro)" : " (aceita decimais)") : ""}`}</Label>
             <Input
               type="number"
-              step="1"
+              step={numericStep(selectedIndicator?.value_type)}
+              onKeyDown={blockDecimalKeys(selectedIndicator?.value_type)}
               value={f.target_value}
               onChange={(e) => {
                 const raw = e.target.value;
-                const n = raw === "" ? 0 : Number(raw);
-                setF({ ...f, target_value: Math.trunc(n) });
+                setF({ ...f, target_value: raw === "" ? 0 : Number(raw) });
               }}
             />
           </div>
@@ -235,6 +237,12 @@ function TargetDialog({
             return;
           }
           if (f.period_end < f.period_start) { toast.error("O fim do período não pode ser antes do início"); return; }
+          const intError = firstIntegerError(chosen?.value_type, [
+            { label: "Valor da meta", value: f.target_value },
+            { label: "Valor mínimo", value: f.minimum_value },
+            { label: "Valor máximo", value: f.maximum_value },
+          ]);
+          if (intError) { toast.error(intError); return; }
           const overlapping = allTargets.find(
             (t) =>
               t.id !== f.id &&
