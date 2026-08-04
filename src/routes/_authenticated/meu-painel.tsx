@@ -27,8 +27,9 @@ function MyDashboard() {
 
   const stats = useMemo(() => {
     const metrics = indicators.map((ind) => {
+      const indTargets = targets.filter((t) => t.indicator_id === ind.id);
       const e = registeredEntriesForIndicator(ind, entries).slice(-1)[0];
-      const t = e ? findTargetForEntry(e, targets) : latestTargetForIndicator(ind, targets);
+      const t = e ? resolveTargetForEntry(ind, e, indTargets) : resolveTargetForIndicator(ind, indTargets);
       const pct = computeAchievement(e, t, ind.direction);
       return { ind, pct, target: t, entry: e };
     });
