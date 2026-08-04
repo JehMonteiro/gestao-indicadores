@@ -32,11 +32,11 @@ export const seedProfiles: Profile[] = [
 
 // ===== Sectors =====
 export const seedSectors: Sector[] = [
-  { id: "s-com", name: "Comercial", code: "COM", color: "#2563eb", icon: "Briefcase", active: true, requires_approval: true, display_order: 1, created_at: iso(today), description: "Vendas e relacionamento com prospects" },
-  { id: "s-mkt", name: "Marketing", code: "MKT", color: "#db2777", icon: "Megaphone", active: true, requires_approval: false, display_order: 2, created_at: iso(today), description: "Aquisição e branding" },
-  { id: "s-ops", name: "Operações", code: "OPS", color: "#0d9488", icon: "Settings", active: true, requires_approval: true, display_order: 3, created_at: iso(today) },
-  { id: "s-fin", name: "Financeiro", code: "FIN", color: "#16a34a", icon: "DollarSign", active: true, requires_approval: true, display_order: 4, created_at: iso(today) },
-  { id: "s-sup", name: "Suporte ao Franqueado", code: "SUP", color: "#f59e0b", icon: "LifeBuoy", active: true, requires_approval: false, display_order: 5, created_at: iso(today) },
+  { id: "s-com", name: "Comercial", code: "COM", color: "#2563eb", icon: "Briefcase", active: true, display_order: 1, created_at: iso(today), description: "Vendas e relacionamento com prospects" },
+  { id: "s-mkt", name: "Marketing", code: "MKT", color: "#db2777", icon: "Megaphone", active: true, display_order: 2, created_at: iso(today), description: "Aquisição e branding" },
+  { id: "s-ops", name: "Operações", code: "OPS", color: "#0d9488", icon: "Settings", active: true, display_order: 3, created_at: iso(today) },
+  { id: "s-fin", name: "Financeiro", code: "FIN", color: "#16a34a", icon: "DollarSign", active: true, display_order: 4, created_at: iso(today) },
+  { id: "s-sup", name: "Suporte ao Franqueado", code: "SUP", color: "#f59e0b", icon: "LifeBuoy", active: true, display_order: 5, created_at: iso(today) },
 ];
 
 // ===== User <-> Sector =====
@@ -81,70 +81,70 @@ export const seedIndicators: Indicator[] = [
     category_id: "c-fin", strategic_pillar: "Resultado", audience: "ambos", scope: "franquia",
     responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "moeda", unit: "R$",
     frequency: "mensal", direction: "maior_melhor", input_method: "manual",
-    default_target: 100000, weight: 3, requires_approval: true, allows_attachment: true,
+    default_target: 100000, weight: 3, allows_attachment: true,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
   },
   {
     id: "i-novos", name: "Novos clientes", code: "NOV-CLI", owner_sector_id: "s-com", shared_sector_ids: [],
     category_id: "c-clientes", audience: "ambos", scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"],
     value_type: "inteiro", frequency: "mensal", direction: "maior_melhor", input_method: "manual",
-    default_target: 40, weight: 2, requires_approval: true, allows_attachment: false,
+    default_target: 40, weight: 2, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
     id: "i-conv", name: "Taxa de conversão", code: "CONV", owner_sector_id: "s-com", shared_sector_ids: ["s-mkt"],
     audience: "interno", scope: "setor", responsible_ids: ["u-colab"], value_type: "percentual", unit: "%",
     frequency: "mensal", direction: "maior_melhor", input_method: "manual",
-    default_target: 25, weight: 2, requires_approval: true, allows_attachment: false,
+    default_target: 25, weight: 2, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
     id: "i-ticket", name: "Ticket médio", code: "TICKET", owner_sector_id: "s-com", shared_sector_ids: [],
     audience: "ambos", scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "moeda", unit: "R$",
     frequency: "mensal", direction: "maior_melhor", input_method: "calculo",
-    default_target: 850, weight: 1, requires_approval: false, allows_attachment: false,
+    default_target: 850, weight: 1, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
     id: "i-nps", name: "Índice de satisfação (NPS)", code: "NPS", owner_sector_id: "s-sup", shared_sector_ids: [],
     audience: "ambos", scope: "franquia", responsible_ids: ["u-gest-fr"], value_type: "nota", unit: "pts",
     frequency: "mensal", direction: "maior_melhor", input_method: "integracao",
-    default_target: 75, weight: 2, requires_approval: false, allows_attachment: true,
+    default_target: 75, weight: 2, allows_attachment: true,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
   },
   {
     id: "i-tma", name: "Tempo médio de atendimento", code: "TMA", owner_sector_id: "s-ops", shared_sector_ids: [],
     audience: "interno", scope: "setor", responsible_ids: ["u-colab"], value_type: "tempo", unit: "min",
     frequency: "semanal", direction: "menor_melhor", input_method: "integracao",
-    default_target: 12, weight: 1, requires_approval: false, allows_attachment: false,
+    default_target: 12, weight: 1, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
   },
   {
     id: "i-leads", name: "Leads gerados", code: "LEADS", owner_sector_id: "s-mkt", shared_sector_ids: ["s-com"],
     audience: "interno", scope: "setor", responsible_ids: ["u-gest-mkt"], value_type: "inteiro",
     frequency: "mensal", direction: "maior_melhor", input_method: "manual",
-    default_target: 1200, weight: 2, requires_approval: false, allows_attachment: false,
+    default_target: 1200, weight: 2, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-mkt", created_at: iso(today),
   },
   {
     id: "i-renov", name: "Taxa de renovação", code: "RENOV", owner_sector_id: "s-com", shared_sector_ids: [],
     audience: "ambos", scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "percentual", unit: "%",
     frequency: "trimestral", direction: "maior_melhor", input_method: "manual",
-    default_target: 85, weight: 2, requires_approval: true, allows_attachment: false,
+    default_target: 85, weight: 2, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
     id: "i-pdv", name: "Produtos por cliente", code: "PDV", owner_sector_id: "s-com", shared_sector_ids: [],
     audience: "franqueado", scope: "franquia", responsible_ids: ["u-fr-camp"], value_type: "decimal",
     frequency: "mensal", direction: "faixa_ideal", input_method: "manual", minimum_value: 2.5, maximum_value: 4.5, default_target: 3.5,
-    weight: 1, requires_approval: false, allows_attachment: false,
+    weight: 1, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
     id: "i-pend", name: "Pendências operacionais", code: "PEND-OPS", owner_sector_id: "s-ops", shared_sector_ids: [],
     audience: "interno", scope: "setor", responsible_ids: ["u-colab"], value_type: "inteiro",
     frequency: "semanal", direction: "menor_melhor", input_method: "manual",
-    default_target: 5, weight: 1, requires_approval: false, allows_attachment: false,
+    default_target: 5, weight: 1, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
   },
 ];
@@ -197,7 +197,7 @@ export const seedTargets: IndicatorTarget[] = (() => {
 // ===== Entries =====
 export const seedEntries: IndicatorEntry[] = (() => {
   const out: IndicatorEntry[] = [];
-  const statuses: IndicatorEntry["status"][] = ["aprovado", "aprovado", "aprovado", "enviado", "rejeitado", "rascunho"];
+  const statuses: IndicatorEntry["status"][] = ["registrado", "registrado", "registrado", "registrado", "rascunho", "rascunho"];
   let seed = 1;
   const rand = () => {
     seed = (seed * 9301 + 49297) % 233280;
@@ -220,12 +220,9 @@ export const seedEntries: IndicatorEntry[] = (() => {
       period_start: t.period_start,
       period_end: t.period_end,
       actual_value: Math.round(actual * 100) / 100,
-      comment: status === "rejeitado" ? "Necessário revisar com a equipe" : undefined,
+      comment: undefined,
       status,
       submitted_at: status !== "rascunho" ? t.period_end : undefined,
-      approved_by: status === "aprovado" ? "u-gest-com" : undefined,
-      approved_at: status === "aprovado" ? t.period_end : undefined,
-      rejection_reason: status === "rejeitado" ? "Divergência com a fonte de dados" : undefined,
       revision_number: 1,
       created_at: t.period_end,
       updated_at: t.period_end,

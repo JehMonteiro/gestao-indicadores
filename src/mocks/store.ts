@@ -226,7 +226,6 @@ export function canSeeRoute(role: GlobalRole | undefined, route: string): boolea
     "/meu-painel": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
     "/meus-indicadores": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
     "/lancamentos": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
-    "/aprovacoes": ["superadmin", "admin_corporativo", "gestor_setor", "gestor_franquia"],
     "/setores": ["superadmin", "admin_corporativo", "gestor_setor", "auditor"],
     "/franquias": ["superadmin", "admin_corporativo", "gestor_franquia", "auditor"],
     "/indicadores": ["superadmin", "admin_corporativo", "gestor_setor", "auditor"],

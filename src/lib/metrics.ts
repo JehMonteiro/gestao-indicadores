@@ -135,12 +135,12 @@ export function latestTargetForIndicator(indicator: Indicator, targets: Indicato
 }
 
 
-export function approvedEntriesForIndicator(indicator: Indicator, entries: IndicatorEntry[]) {
+export function registeredEntriesForIndicator(indicator: Indicator, entries: IndicatorEntry[]) {
   return entriesByPeriodAsc(
     entries.filter(
       (e) =>
         e.indicator_id === indicator.id &&
-        e.status === "aprovado" &&
+        e.status === "registrado" &&
         (!indicator.franchise_id || e.franchise_id === indicator.franchise_id),
     ),
   );

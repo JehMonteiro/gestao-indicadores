@@ -42,7 +42,6 @@ function mapSector(row: any): Sector {
     color: row.color ?? "#2563eb",
     icon: "Folder",
     active: row.status === "ativo",
-    requires_approval: true,
     display_order: 0,
     created_at: row.created_at,
   };

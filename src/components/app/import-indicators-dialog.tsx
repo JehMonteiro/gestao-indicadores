@@ -18,7 +18,7 @@ const TEMPLATE_HEADERS = [
   "responsible", "status", "value_type", "unit", "frequency",
   "direction", "input_method", "default_target", "warning_threshold",
   "critical_threshold", "start_date", "end_date",
-  "requires_approval", "allows_attachment", "instructions", "data_source",
+  "allows_attachment", "instructions", "data_source",
 ];
 
 const TEMPLATE_EXAMPLE = [
@@ -218,7 +218,6 @@ export function ImportIndicatorsDialog() {
           warning_threshold: toNum(row.warning_threshold, 80),
           critical_threshold: toNum(row.critical_threshold, 60),
           weight: 1,
-          requires_approval: toBool(row.requires_approval),
           allows_attachment: toBool(row.allows_attachment),
           instructions: norm(row.instructions) || undefined,
           start_date: toDate(row.start_date) || new Date().toISOString().slice(0, 10),
@@ -297,7 +296,7 @@ export function ImportIndicatorsDialog() {
           </label>
 
           <p className="text-xs text-muted-foreground">
-            Campos aceitos: name, objective, owner_sector, franchise, audience, responsible, status, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, start_date, end_date, requires_approval, allows_attachment, instructions, data_source. A coluna franchise deve conter uma empresa cadastrada.
+            Campos aceitos: name, objective, owner_sector, franchise, audience, responsible, status, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, start_date, end_date, allows_attachment, instructions, data_source. A coluna franchise deve conter uma empresa cadastrada.
           </p>
         </div>
 
