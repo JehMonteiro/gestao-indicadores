@@ -22,6 +22,12 @@ export function numericStep(type?: ValueType | null): string {
   return requiresInteger(type) ? "1" : "0.01";
 }
 
+/** Arredonda o valor quando o tipo exige inteiro (usado em importações/seed). */
+export function roundForType<T extends number | null | undefined>(value: T, type?: ValueType | null): T {
+  if (value === null || value === undefined) return value;
+  return (requiresInteger(type) ? Math.round(value as number) : value) as T;
+}
+
 /**
  * Retorna mensagem de erro quando o valor não respeita a regra do tipo.
  * `null` quando o valor é válido (ou vazio).
