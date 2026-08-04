@@ -4,7 +4,7 @@ import { PageHeader, EmptyState, StatusDot } from "@/components/app/page-header"
 import { useCurrentUser, useStore } from "@/mocks/store";
 import { useVisibleIndicators } from "@/lib/permissions";
 import { classify, classificationStyles, computeAchievement, formatDate, formatValue, weightedIndex } from "@/lib/format";
-import { approvedEntriesForIndicator, findTargetForEntry, latestTargetForIndicator } from "@/lib/metrics";
+import { registeredEntriesForIndicator, findTargetForEntry, latestTargetForIndicator } from "@/lib/metrics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ function MyDashboard() {
 
   const stats = useMemo(() => {
     const metrics = indicators.map((ind) => {
-      const e = approvedEntriesForIndicator(ind, entries).slice(-1)[0];
+      const e = registeredEntriesForIndicator(ind, entries).slice(-1)[0];
       const t = e ? findTargetForEntry(e, targets) : latestTargetForIndicator(ind, targets);
       const pct = computeAchievement(e, t, ind.direction);
       return { ind, pct, target: t, entry: e };
@@ -38,7 +38,7 @@ function MyDashboard() {
     return { metrics, counts, idx };
   }, [indicators, targets, entries, settings]);
 
-  const pending = entries.filter((e) => e.user_id === user?.id && (e.status === "rascunho" || e.status === "rejeitado"));
+  const pending = entries.filter((e) => e.user_id === user?.id && e.status === "rascunho");
   const sectorChart = useMemo(() => {
     return sectors.map((s) => {
       const sectorMetrics = stats.metrics.filter((m) => m.ind.owner_sector_id === s.id);

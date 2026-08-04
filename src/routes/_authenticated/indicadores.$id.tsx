@@ -38,7 +38,7 @@ function IndicatorDetail() {
   const indTargets = targets.filter((t) => t.indicator_id === id);
   const sector = sectors.find((s) => s.id === ind.owner_sector_id);
 
-  const chartData = indEntries.filter((e) => e.status === "aprovado").map((e) => {
+  const chartData = indEntries.filter((e) => e.status === "registrado").map((e) => {
     const t = findTargetForEntry(e, indTargets);
     return { period: formatMonth(e.period_end), realizado: e.actual_value ?? 0, meta: t?.target_value ?? 0 };
   });

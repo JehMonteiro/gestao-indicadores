@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
-import { approvedEntriesForIndicator, entriesByPeriodAsc, findTargetForEntry, latestTarget } from "@/lib/metrics";
+import { registeredEntriesForIndicator, entriesByPeriodAsc, findTargetForEntry, latestTarget } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/visao-geral")({
   head: () => ({ meta: [{ title: "Visão geral — Gestão de Indicadores" }] }),
@@ -29,7 +29,7 @@ function Overview() {
 
   const metricsByIndicator = useMemo(() => {
     return indicators.map((ind) => {
-      const indEntries = approvedEntriesForIndicator(ind, entries);
+      const indEntries = registeredEntriesForIndicator(ind, entries);
       const indTargets = targets.filter((t) => t.indicator_id === ind.id);
       const monthly = indEntries.map((e) => {
         const t = findTargetForEntry(e, indTargets);
@@ -75,7 +75,7 @@ function Overview() {
       const items = metricsByIndicator
         .map((m) => {
           const franchiseTargets = targets.filter((t) => t.indicator_id === m.ind.id && t.franchise_id === f.id);
-          const e = entriesByPeriodAsc(entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "aprovado")).slice(-1)[0];
+          const e = entriesByPeriodAsc(entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "registrado")).slice(-1)[0];
           const t = e ? findTargetForEntry(e, franchiseTargets) : latestTarget(franchiseTargets);
           const pct = computeAchievement(e, t, m.ind.direction);
           return { percent: pct, weight: m.ind.weight };
@@ -102,7 +102,7 @@ function Overview() {
     return indicators
       .filter((i) => i.status === "ativo")
       .map((ind) => {
-        const approved = entries.filter((e) => e.indicator_id === ind.id && e.status === "aprovado");
+        const approved = entries.filter((e) => e.indicator_id === ind.id && e.status === "registrado");
         let accThis = 0, accLast = 0, accPrev = 0;
         const monthsThisYear = new Set<string>();
         for (const e of approved) {
