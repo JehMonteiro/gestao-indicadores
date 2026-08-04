@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { classify, classificationStyles, computeAchievement, formatDate, formatValue } from "@/lib/format";
+import { resolveTargetForEntry } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/lancamentos/$id")({
   head: () => ({ meta: [{ title: "Lançamento" }] }),
@@ -21,7 +22,7 @@ function EntryDetail() {
   const entry = entries.find((e) => e.id === id);
   if (!entry) throw notFound();
   const ind = indicators.find((i) => i.id === entry.indicator_id);
-  const target = targets.find((t) => t.id === entry.target_id);
+  const target = ind ? resolveTargetForEntry(ind, entry, targets.filter((t) => t.indicator_id === entry.indicator_id)) : null;
   const pct = computeAchievement(entry, target, ind?.direction ?? "maior_melhor");
   const cs = classificationStyles(classify(pct, settings));
 
@@ -37,7 +38,7 @@ function EntryDetail() {
         <CardHeader><CardTitle className="text-base">Dados</CardTitle></CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-4 text-sm">
           <Item k="Valor realizado" v={formatValue(entry.actual_value, ind?.value_type ?? "inteiro", ind?.unit)} />
-          <Item k="Meta" v={target ? formatValue(target.target_value, ind?.value_type ?? "inteiro", ind?.unit) : "—"} />
+          <Item k="Meta" v={target ? formatValue(target.target_value, ind?.value_type ?? "inteiro", ind?.unit) : "Sem meta definida"} />
           <Item k="Atingimento" v={pct != null ? `${Math.round(pct)}%` : "—"} />
           <div><p className="text-xs uppercase text-muted-foreground">Status</p><Badge variant="outline" className={`capitalize mt-1 ${cs.className}`}>{entry.status}</Badge></div>
           <Item k="Comentário" v={entry.comment ?? "—"} full />
