@@ -67,34 +67,66 @@ function NewEntry() {
   const indicatorHasCompany = !!ind?.franchise_id || ind?.scope === "franquia";
   const effectiveFranchiseId = ind?.franchise_id ?? (ind?.scope === "franquia" ? franchiseId : undefined);
 
+  const entrySectorIdBase = ind?.owner_sector_id || undefined;
+
   const target = useMemo(() => {
-    const sameIndicatorPeriod = targets.filter((t) => t.indicator_id === indId && t.period_start === periodStart);
-    return sameIndicatorPeriod.find((t) => !effectiveFranchiseId || t.franchise_id === effectiveFranchiseId) ?? sameIndicatorPeriod[0];
-  }, [targets, indId, periodStart, effectiveFranchiseId]);
+    if (!ind) return undefined;
+    return resolveTargetRowForEntry(
+      {
+        indicator_id: ind.id,
+        franchise_id: effectiveFranchiseId,
+        sector_id: entrySectorIdBase,
+        user_id: authUser?.id,
+        period_start: periodStart,
+        period_end: periodEnd,
+      },
+      targets,
+    );
+  }, [targets, ind, effectiveFranchiseId, entrySectorIdBase, authUser?.id, periodStart, periodEnd]);
+
+  const effectiveTarget = useMemo(() => {
+    if (!ind) return null;
+    return resolveTargetForEntry(
+      ind,
+      { indicator_id: ind.id, period_start: periodStart, period_end: periodEnd, target_id: target?.id } as IndicatorEntry,
+      targets,
+    );
+  }, [ind, targets, target?.id, periodStart, periodEnd]);
 
   const preview = useMemo(() => {
-    if (!ind || !target || actual === "") return null;
-    return computeAchievement({ actual_value: Number(actual) }, target, ind.direction);
-  }, [ind, target, actual]);
+    if (!ind || !effectiveTarget || actual === "") return null;
+    return computeAchievement({ actual_value: Number(actual) }, effectiveTarget, ind.direction);
+  }, [ind, effectiveTarget, actual]);
 
   const save = async (status: "rascunho" | "registrado") => {
     if (!ind) { toast.error("Selecione um indicador"); return; }
     const userId = authUser?.id;
     if (authLoading || !userId) { toast.error("Aguarde seu usuário carregar antes de salvar"); return; }
     const entryFranchiseId = effectiveFranchiseId ?? target?.franchise_id;
-    const entrySectorId = target?.sector_id ?? (ind.owner_sector_id || undefined);
+    const entrySectorId = entrySectorIdBase ?? target?.sector_id;
     if (indicatorHasCompany && !entryFranchiseId) { toast.error("Selecione uma empresa"); return; }
     if (actual === "" || isNaN(Number(actual))) { toast.error("Informe um valor numérico"); return; }
+    // Nova revisão substitui o lançamento anterior do mesmo indicador/empresa/período.
+    const previous = allEntries.find(
+      (e) =>
+        e.indicator_id === ind.id &&
+        (e.franchise_id ?? "") === (entryFranchiseId ?? "") &&
+        e.period_start === periodStart &&
+        e.period_end === periodEnd,
+    );
     const entry: IndicatorEntry = {
-      id: newId(),
+      id: previous?.id ?? newId(),
       indicator_id: ind.id, target_id: target?.id,
       user_id: userId, sector_id: entrySectorId, franchise_id: entryFranchiseId,
       period_start: periodStart, period_end: periodEnd,
       actual_value: Number(actual), comment, justification,
       status,
       submitted_at: status === "registrado" ? new Date().toISOString() : undefined,
-      revision_number: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      revision_number: (previous?.revision_number ?? 0) + 1,
+      created_at: previous?.created_at ?? new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
+
     setSaving(status);
     try {
       const saved = await upsertEntry(entry);
