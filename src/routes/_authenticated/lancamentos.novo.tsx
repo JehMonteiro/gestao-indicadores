@@ -31,6 +31,8 @@ function NewEntry() {
   const indicators = useStore((s) => s.indicators);
   const franchises = useStore((s) => s.franchises);
   const targets = useStore((s) => s.targets);
+  const allEntries = useStore((s) => s.entries);
+
   const upsertEntry = useStore((s) => s.upsertEntry);
   const hydrateStore = useStore((s) => s.hydrate);
   const logAudit = useStore((s) => s.logAudit);
