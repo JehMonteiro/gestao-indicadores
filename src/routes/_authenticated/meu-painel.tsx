@@ -122,7 +122,7 @@ function MyDashboard() {
                     <p className="text-sm font-medium truncate">{m.ind.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {m.entry ? `Último: ${formatValue(m.entry.actual_value, m.ind.value_type, m.ind.unit)}` : "Sem lançamento"}
-                      {m.target ? ` · Meta: ${formatValue(m.target.target_value, m.ind.value_type, m.ind.unit)}` : ""}
+                      {m.target ? ` · Meta: ${formatValue(m.target.target_value, m.ind.value_type, m.ind.unit)}` : " · Sem meta definida"}
                     </p>
                   </div>
                   <div className="text-right">
