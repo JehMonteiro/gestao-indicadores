@@ -467,9 +467,11 @@ function reportError(err: unknown, label: string) {
   // Keep raw error in server/devtools console only — do not surface DB internals to users.
   // eslint-disable-next-line no-console
   console.error(`[supabase-data:${label}]`, err);
+  const raw = err instanceof Error ? err.message : typeof err === "object" && err && "message" in err ? String((err as { message?: unknown }).message ?? "") : "";
+  const isValidation = /número inteiro|casas decimais/i.test(raw);
   import("sonner").then(({ toast }) => {
-    toast.error("Não foi possível salvar", {
-      description: "Tente novamente em instantes. Se persistir, contate o administrador.",
+    toast.error(isValidation ? "Valor inválido" : "Não foi possível salvar", {
+      description: isValidation ? raw : "Tente novamente em instantes. Se persistir, contate o administrador.",
     });
   }).catch(() => {});
   // Roll back optimistic local state by re-hydrating from the DB so the UI
