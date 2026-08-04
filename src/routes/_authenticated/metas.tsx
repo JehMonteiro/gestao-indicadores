@@ -38,7 +38,12 @@ function TargetsPage() {
     hydrateStore(data);
   };
   const handleSave = async (t: IndicatorTarget) => {
-    const { error } = await dbWrite.target(t);
+    let error: { message: string } | null = null;
+    try {
+      ({ error } = await dbWrite.target(t));
+    } catch (err) {
+      error = { message: err instanceof Error ? err.message : "Erro desconhecido" };
+    }
     if (error) {
       toast.error("Não foi possível salvar", { description: error.message });
       return false;
