@@ -270,6 +270,20 @@ export async function loadAllFromSupabase(userId: string) {
   };
 }
 
+// ---------- Validação de valores inteiros (camada de aplicação) ----------
+
+function indicatorValueType(indicatorId: string): ValueType | undefined {
+  return useStore.getState().indicators.find((i) => i.id === indicatorId)?.value_type;
+}
+
+function assertIntegerFields(
+  type: ValueType | undefined,
+  fields: Array<{ label: string; value: number | null | undefined }>,
+) {
+  const err = firstIntegerError(type, fields);
+  if (err) throw new Error(err);
+}
+
 // ---------- Write-through helpers (mock type → DB) ----------
 
 export const dbWrite = {
@@ -301,6 +315,12 @@ export const dbWrite = {
     return supabase.from("franchises").delete().eq("id", id);
   },
   async indicator(i: Indicator) {
+    assertIntegerFields(i.value_type, [
+      { label: "Meta padrão", value: i.default_target },
+      { label: "Valor mínimo", value: i.minimum_value },
+      { label: "Valor máximo", value: i.maximum_value },
+      { label: "Peso", value: i.weight },
+    ]);
     return supabase.from("indicators").upsert({
       id: i.id,
       code: i.code,
@@ -335,6 +355,11 @@ export const dbWrite = {
     return supabase.from("indicators").delete().eq("id", id);
   },
   async target(t: IndicatorTarget) {
+    assertIntegerFields(indicatorValueType(t.indicator_id), [
+      { label: "Valor da meta", value: t.target_value },
+      { label: "Valor mínimo", value: t.minimum_value },
+      { label: "Valor máximo", value: t.maximum_value },
+    ]);
     return supabase.from("targets").upsert({
       id: t.id,
       indicator_id: t.indicator_id,
@@ -353,6 +378,9 @@ export const dbWrite = {
     return supabase.from("targets").delete().eq("id", id);
   },
   async entry(e: IndicatorEntry) {
+    assertIntegerFields(indicatorValueType(e.indicator_id), [
+      { label: "O valor realizado", value: e.actual_value },
+    ]);
     const { data, error } = await supabase.from("indicator_entries").upsert({
       id: e.id,
       indicator_id: e.indicator_id,
