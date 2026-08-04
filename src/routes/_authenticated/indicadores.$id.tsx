@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { classify, classificationStyles, computeAchievement, formatDate, formatMonth, formatValue, indicatorPeriodLabel } from "@/lib/format";
-import { findTargetForEntry } from "@/lib/metrics";
+import { resolveTargetForEntry, latestEntriesByPeriod } from "@/lib/metrics";
 import { Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/indicadores/$id")({
@@ -34,12 +34,12 @@ function IndicatorDetail() {
   const ind = indicators.find((i) => i.id === id);
   if (!ind) throw notFound();
 
-  const indEntries = entries.filter((e) => e.indicator_id === id).sort((a, b) => a.period_end.localeCompare(b.period_end));
+  const indEntries = latestEntriesByPeriod(entries.filter((e) => e.indicator_id === id));
   const indTargets = targets.filter((t) => t.indicator_id === id);
   const sector = sectors.find((s) => s.id === ind.owner_sector_id);
 
   const chartData = indEntries.filter((e) => e.status === "registrado").map((e) => {
-    const t = findTargetForEntry(e, indTargets);
+    const t = resolveTargetForEntry(ind, e, indTargets);
     return { period: formatMonth(e.period_end), realizado: e.actual_value ?? 0, meta: t?.target_value ?? 0 };
   });
 
@@ -107,7 +107,7 @@ function IndicatorDetail() {
             <TableHeader><TableRow><TableHead>Período</TableHead><TableHead>Valor</TableHead><TableHead>Meta</TableHead><TableHead>%</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
             <TableBody>
               {indEntries.map((e) => {
-                const t = findTargetForEntry(e, indTargets);
+                const t = resolveTargetForEntry(ind, e, indTargets);
                 const pct = computeAchievement(e, t, ind.direction);
                 const c = classify(pct, settings);
                 const cs = classificationStyles(c);
@@ -115,7 +115,7 @@ function IndicatorDetail() {
                   <TableRow key={e.id}>
                     <TableCell>{formatDate(e.period_end)}</TableCell>
                     <TableCell className="font-mono">{formatValue(e.actual_value, ind.value_type, ind.unit)}</TableCell>
-                    <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type, ind.unit) : "—"}</TableCell>
+                    <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type, ind.unit) : <span className="text-muted-foreground text-xs">Sem meta definida</span>}</TableCell>
                     <TableCell className="font-mono">{pct != null ? `${Math.round(pct)}%` : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={cs.className}>{cs.label}</Badge></TableCell>
                   </TableRow>
