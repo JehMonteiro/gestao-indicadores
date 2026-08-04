@@ -88,7 +88,6 @@ function mapIndicator(row: any): Indicator {
     warning_threshold: row.warning_threshold != null ? Number(row.warning_threshold) : undefined,
     critical_threshold: row.critical_threshold != null ? Number(row.critical_threshold) : undefined,
     weight: 1,
-    requires_approval: row.requires_approval,
     allows_attachment: row.allows_attachment,
     instructions: row.instructions ?? undefined,
     start_date: row.start_date ?? row.created_at,
@@ -132,9 +131,6 @@ function mapEntry(row: any): IndicatorEntry {
     justification: row.justification ?? undefined,
     status: row.status,
     submitted_at: row.submitted_at ?? undefined,
-    approved_by: row.approved_by ?? undefined,
-    approved_at: row.approved_at ?? undefined,
-    rejection_reason: row.rejection_reason ?? undefined,
     revision_number: row.revision_number ?? 0,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -328,7 +324,6 @@ export const dbWrite = {
       maximum_value: i.maximum_value ?? null,
       warning_threshold: i.warning_threshold ?? null,
       critical_threshold: i.critical_threshold ?? null,
-      requires_approval: i.requires_approval,
       allows_attachment: i.allows_attachment,
       start_date: i.start_date || null,
       instructions: i.instructions ?? null,
@@ -373,9 +368,6 @@ export const dbWrite = {
       justification: e.justification ?? null,
       status: e.status as any,
       submitted_at: e.submitted_at ?? null,
-      approved_by: e.approved_by ?? null,
-      approved_at: e.approved_at ?? null,
-      rejection_reason: e.rejection_reason ?? null,
       revision_number: e.revision_number,
       updated_at: e.updated_at,
     }).select("*").maybeSingle();
@@ -387,9 +379,6 @@ export const dbWrite = {
   async updateEntryStatus(id: string, patch: Partial<IndicatorEntry>) {
     const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (patch.status !== undefined) payload.status = patch.status;
-    if (patch.approved_by !== undefined) payload.approved_by = patch.approved_by;
-    if (patch.approved_at !== undefined) payload.approved_at = patch.approved_at;
-    if (patch.rejection_reason !== undefined) payload.rejection_reason = patch.rejection_reason;
     if (patch.submitted_at !== undefined) payload.submitted_at = patch.submitted_at;
     const { data, error } = await supabase
       .from("indicator_entries")
