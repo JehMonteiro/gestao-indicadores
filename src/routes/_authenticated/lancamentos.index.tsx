@@ -42,9 +42,7 @@ function EntriesList() {
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="rascunho">Rascunho</SelectItem>
-            <SelectItem value="enviado">Enviado</SelectItem>
-            <SelectItem value="aprovado">Aprovado</SelectItem>
-            <SelectItem value="rejeitado">Rejeitado</SelectItem>
+            <SelectItem value="registrado">Registrado</SelectItem>
             <SelectItem value="atrasado">Atrasado</SelectItem>
           </SelectContent>
         </Select>
