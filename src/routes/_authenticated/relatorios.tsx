@@ -76,7 +76,7 @@ function ReportsPage() {
                     <TableRow key={e.id}>
                       <TableCell>{formatDate(e.period_start)} — {formatDate(e.period_end)}</TableCell>
                       <TableCell className="font-mono">{formatValue(e.actual_value, ind.value_type, ind.unit)}</TableCell>
-                      <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type, ind.unit) : "—"}</TableCell>
+                      <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type, ind.unit) : <span className="text-muted-foreground text-xs">Sem meta definida</span>}</TableCell>
                       <TableCell className="font-mono">{pct != null ? `${Math.round(pct)}%` : "—"}</TableCell>
                       <TableCell><Badge variant="outline" className={cs.className}>{cs.label}</Badge></TableCell>
                     </TableRow>
