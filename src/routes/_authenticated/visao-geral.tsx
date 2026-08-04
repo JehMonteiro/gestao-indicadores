@@ -32,11 +32,12 @@ function Overview() {
       const indEntries = registeredEntriesForIndicator(ind, entries);
       const indTargets = targets.filter((t) => t.indicator_id === ind.id);
       const monthly = indEntries.map((e) => {
-        const t = findTargetForEntry(e, indTargets);
+        const t = resolveTargetForEntry(ind, e, indTargets);
         return {
           period: e.period_end,
           actual: e.actual_value ?? 0,
           target: t?.target_value ?? 0,
+          hasTarget: !!t,
           pct: computeAchievement(e, t, ind.direction),
         };
       });
@@ -74,15 +75,22 @@ function Overview() {
     return franchises.map((f) => {
       const items = metricsByIndicator
         .map((m) => {
-          const franchiseTargets = targets.filter((t) => t.indicator_id === m.ind.id && t.franchise_id === f.id);
-          const e = entriesByPeriodAsc(entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "registrado")).slice(-1)[0];
-          const t = e ? findTargetForEntry(e, franchiseTargets) : latestTarget(franchiseTargets);
+          const franchiseTargets = targets.filter(
+            (t) => t.indicator_id === m.ind.id && (!t.franchise_id || t.franchise_id === f.id),
+          );
+          const e = latestEntriesByPeriod(
+            entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "registrado"),
+          ).slice(-1)[0];
+          const t = e
+            ? resolveTargetForEntry(m.ind, e, franchiseTargets)
+            : resolveTargetForIndicator(m.ind, franchiseTargets);
           const pct = computeAchievement(e, t, m.ind.direction);
           return { percent: pct, weight: m.ind.weight };
         });
       return { name: f.name, valor: Math.round(weightedIndex(items) ?? 0) };
     }).sort((a, b) => b.valor - a.valor);
   }, [franchises, metricsByIndicator, targets, entries]);
+
 
   const sectorData = sectors.map((s) => {
     const items = metricsByIndicator.filter((m) => m.ind.owner_sector_id === s.id)
