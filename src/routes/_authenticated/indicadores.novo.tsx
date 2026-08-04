@@ -60,6 +60,13 @@ function NewIndicator() {
       toast.error("Selecione a empresa do indicador");
       return;
     }
+    const intError = firstIntegerError(f.value_type, [
+      { label: "Meta padrão", value: f.default_target },
+      { label: "Valor mínimo", value: f.minimum_value },
+      { label: "Valor máximo", value: f.maximum_value },
+      { label: "Peso", value: (f as { weight?: number }).weight },
+    ]);
+    if (intError) { toast.error(intError); return; }
     const franchiseRef = franchises.find((fr) => fr.id === f.franchise_id);
     const baseCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
     const suffix = (franchiseRef?.code || franchiseRef?.name || "")

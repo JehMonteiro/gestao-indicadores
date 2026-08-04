@@ -79,6 +79,13 @@ function EditIndicator() {
       toast.error("Selecione a empresa do indicador");
       return;
     }
+    const intError = firstIntegerError(f.value_type, [
+      { label: "Meta padrão", value: f.default_target },
+      { label: "Valor mínimo", value: f.minimum_value },
+      { label: "Valor máximo", value: f.maximum_value },
+      { label: "Peso", value: (f as { weight?: number }).weight },
+    ]);
+    if (intError) { toast.error(intError); return; }
     upsert(f);
     logAudit({ user_id: user?.id ?? "", action: "update", entity_type: "indicator", entity_id: f.id });
     toast.success("Indicador atualizado");
