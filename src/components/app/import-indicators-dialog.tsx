@@ -190,8 +190,8 @@ export function ImportIndicatorsDialog() {
 
         const responsibleId = findProfileId(norm(row.responsible));
         const valueType = lower(row.value_type);
-        const resolvedValueType = (validValueTypes.includes(valueType) ? valueType : "inteiro") as ValueType;
         const validValueTypes = ["inteiro", "decimal", "moeda", "percentual"];
+        const resolvedValueType = (validValueTypes.includes(valueType) ? valueType : "inteiro") as ValueType;
         const frequency = lower(row.frequency);
         const validFrequencies = ["diaria", "semanal", "mensal", "trimestral", "semestral", "anual"];
         const direction = lower(row.direction);
