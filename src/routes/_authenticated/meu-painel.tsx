@@ -4,7 +4,7 @@ import { PageHeader, EmptyState, StatusDot } from "@/components/app/page-header"
 import { useCurrentUser, useStore } from "@/mocks/store";
 import { useVisibleIndicators } from "@/lib/permissions";
 import { classify, classificationStyles, computeAchievement, formatDate, formatValue, weightedIndex } from "@/lib/format";
-import { registeredEntriesForIndicator, findTargetForEntry, latestTargetForIndicator } from "@/lib/metrics";
+import { registeredEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
