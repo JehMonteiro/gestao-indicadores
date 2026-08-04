@@ -110,8 +110,6 @@ export type Database = {
       indicator_entries: {
         Row: {
           actual_value: number
-          approved_at: string | null
-          approved_by: string | null
           comment: string | null
           created_at: string
           franchise_id: string | null
@@ -121,7 +119,6 @@ export type Database = {
           justification: string | null
           period_end: string
           period_start: string
-          rejection_reason: string | null
           revision_number: number
           sector_id: string | null
           status: Database["public"]["Enums"]["entry_status"]
@@ -132,8 +129,6 @@ export type Database = {
         }
         Insert: {
           actual_value: number
-          approved_at?: string | null
-          approved_by?: string | null
           comment?: string | null
           created_at?: string
           franchise_id?: string | null
@@ -143,7 +138,6 @@ export type Database = {
           justification?: string | null
           period_end: string
           period_start: string
-          rejection_reason?: string | null
           revision_number?: number
           sector_id?: string | null
           status?: Database["public"]["Enums"]["entry_status"]
@@ -154,8 +148,6 @@ export type Database = {
         }
         Update: {
           actual_value?: number
-          approved_at?: string | null
-          approved_by?: string | null
           comment?: string | null
           created_at?: string
           franchise_id?: string | null
@@ -165,7 +157,6 @@ export type Database = {
           justification?: string | null
           period_end?: string
           period_start?: string
-          rejection_reason?: string | null
           revision_number?: number
           sector_id?: string | null
           status?: Database["public"]["Enums"]["entry_status"]
@@ -229,7 +220,6 @@ export type Database = {
           objective: string | null
           owner_sector_id: string | null
           periodicity: Database["public"]["Enums"]["periodicity"]
-          requires_approval: boolean
           responsible_user_id: string | null
           scope: Database["public"]["Enums"]["indicator_scope"]
           start_date: string | null
@@ -263,7 +253,6 @@ export type Database = {
           objective?: string | null
           owner_sector_id?: string | null
           periodicity?: Database["public"]["Enums"]["periodicity"]
-          requires_approval?: boolean
           responsible_user_id?: string | null
           scope?: Database["public"]["Enums"]["indicator_scope"]
           start_date?: string | null
@@ -297,7 +286,6 @@ export type Database = {
           objective?: string | null
           owner_sector_id?: string | null
           periodicity?: Database["public"]["Enums"]["periodicity"]
-          requires_approval?: boolean
           responsible_user_id?: string | null
           scope?: Database["public"]["Enums"]["indicator_scope"]
           start_date?: string | null
@@ -609,12 +597,7 @@ export type Database = {
         | "colaborador"
         | "franqueado"
         | "auditor"
-      entry_status:
-        | "rascunho"
-        | "enviado"
-        | "aprovado"
-        | "rejeitado"
-        | "atrasado"
+      entry_status: "rascunho" | "registrado" | "atrasado"
       franchise_role: "franqueado" | "gestor" | "operador" | "leitor"
       indicator_direction:
         | "maior_melhor"
@@ -769,13 +752,7 @@ export const Constants = {
         "franqueado",
         "auditor",
       ],
-      entry_status: [
-        "rascunho",
-        "enviado",
-        "aprovado",
-        "rejeitado",
-        "atrasado",
-      ],
+      entry_status: ["rascunho", "registrado", "atrasado"],
       franchise_role: ["franqueado", "gestor", "operador", "leitor"],
       indicator_direction: [
         "maior_melhor",

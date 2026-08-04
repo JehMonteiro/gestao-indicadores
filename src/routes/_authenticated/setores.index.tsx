@@ -64,7 +64,7 @@ function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave:
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<Sector>(initial ?? {
     id: newId(), name: "", code: "", color: "#2563eb", icon: "Briefcase",
-    active: true, requires_approval: true, display_order: 99, created_at: new Date().toISOString(),
+    active: true, display_order: 99, created_at: new Date().toISOString(),
   });
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -86,10 +86,6 @@ function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave:
             <div><p className="text-sm font-medium">Setor ativo</p></div>
             <Switch checked={f.active} onCheckedChange={(v) => setF({ ...f, active: v })} />
           </div>
-          <div className="flex items-center justify-between border rounded-md p-3">
-            <div><p className="text-sm font-medium">Exige aprovação de lançamentos</p></div>
-            <Switch checked={f.requires_approval} onCheckedChange={(v) => setF({ ...f, requires_approval: v })} />
-          </div>
         </div>
         <DialogFooter className="gap-2">
           {onDelete && <Button variant="destructive" onClick={() => { onDelete(); setOpen(false); }}>Excluir</Button>}
@@ -100,7 +96,7 @@ function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave:
             setOpen(false);
             if (!initial) {
               setF({ id: newId(), name: "", code: "", color: "#2563eb", icon: "Briefcase",
-                active: true, requires_approval: true, display_order: 99, created_at: new Date().toISOString() });
+                active: true, display_order: 99, created_at: new Date().toISOString() });
             }
           }}>Salvar</Button>
         </DialogFooter>

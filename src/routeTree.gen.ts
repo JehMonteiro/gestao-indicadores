@@ -22,7 +22,6 @@ import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authentica
 import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
-import { Route as AuthenticatedAprovacoesRouteImport } from './routes/_authenticated/aprovacoes'
 import { Route as AuthenticatedSetoresIndexRouteImport } from './routes/_authenticated/setores.index'
 import { Route as AuthenticatedLancamentosIndexRouteImport } from './routes/_authenticated/lancamentos.index'
 import { Route as AuthenticatedIndicadoresIndexRouteImport } from './routes/_authenticated/indicadores.index'
@@ -101,11 +100,6 @@ const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
   path: '/auditoria',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAprovacoesRoute = AuthenticatedAprovacoesRouteImport.update({
-  id: '/aprovacoes',
-  path: '/aprovacoes',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedSetoresIndexRoute =
   AuthenticatedSetoresIndexRouteImport.update({
     id: '/setores/',
@@ -176,7 +170,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/definir-senha': typeof DefinirSenhaRoute
-  '/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/metas': typeof AuthenticatedMetasRoute
@@ -202,7 +195,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/definir-senha': typeof DefinirSenhaRoute
-  '/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/metas': typeof AuthenticatedMetasRoute
@@ -230,7 +222,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/definir-senha': typeof DefinirSenhaRoute
-  '/_authenticated/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/metas': typeof AuthenticatedMetasRoute
@@ -258,7 +249,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/definir-senha'
-    | '/aprovacoes'
     | '/auditoria'
     | '/configuracoes'
     | '/metas'
@@ -284,7 +274,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/definir-senha'
-    | '/aprovacoes'
     | '/auditoria'
     | '/configuracoes'
     | '/metas'
@@ -311,7 +300,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/definir-senha'
-    | '/_authenticated/aprovacoes'
     | '/_authenticated/auditoria'
     | '/_authenticated/configuracoes'
     | '/_authenticated/metas'
@@ -434,13 +422,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/aprovacoes': {
-      id: '/_authenticated/aprovacoes'
-      path: '/aprovacoes'
-      fullPath: '/aprovacoes'
-      preLoaderRoute: typeof AuthenticatedAprovacoesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/setores/': {
       id: '/_authenticated/setores/'
       path: '/setores'
@@ -537,7 +518,6 @@ const AuthenticatedIndicadoresIdRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAprovacoesRoute: typeof AuthenticatedAprovacoesRoute
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedMetasRoute: typeof AuthenticatedMetasRoute
@@ -560,7 +540,6 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAprovacoesRoute: AuthenticatedAprovacoesRoute,
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedMetasRoute: AuthenticatedMetasRoute,
@@ -594,13 +573,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

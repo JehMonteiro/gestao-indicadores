@@ -18,9 +18,7 @@ export const Route = createFileRoute("/_authenticated/lancamentos/")({
 
 const statusColors: Record<string, string> = {
   rascunho: "bg-muted text-muted-foreground border-border",
-  enviado: "bg-info/15 text-info-foreground border-info/30",
-  aprovado: "bg-success/15 text-success border-success/30",
-  rejeitado: "bg-destructive/15 text-destructive border-destructive/30",
+  registrado: "bg-success/15 text-success border-success/30",
   atrasado: "bg-warning/15 text-warning-foreground border-warning/30",
 };
 
@@ -44,9 +42,7 @@ function EntriesList() {
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="rascunho">Rascunho</SelectItem>
-            <SelectItem value="enviado">Enviado</SelectItem>
-            <SelectItem value="aprovado">Aprovado</SelectItem>
-            <SelectItem value="rejeitado">Rejeitado</SelectItem>
+            <SelectItem value="registrado">Registrado</SelectItem>
             <SelectItem value="atrasado">Atrasado</SelectItem>
           </SelectContent>
         </Select>

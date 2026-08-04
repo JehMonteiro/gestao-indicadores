@@ -28,7 +28,6 @@ const NAV: { group: string; items: NavItem[] }[] = [
   ]},
   { group: "Operação", items: [
     { to: "/lancamentos", label: "Lançamentos", icon: ClipboardEdit },
-    { to: "/aprovacoes", label: "Aprovações", icon: CheckSquare },
   ]},
   { group: "Estrutura", items: [
     { to: "/indicadores", label: "Indicadores", icon: Target },

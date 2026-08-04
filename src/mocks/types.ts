@@ -42,12 +42,7 @@ export type Scope = "corporativo" | "setor" | "franquia" | "usuario";
 export type InputMethod = "manual" | "importacao" | "integracao" | "calculo";
 export type IndicatorStatus = "rascunho" | "ativo" | "pausado" | "arquivado";
 
-export type EntryStatus =
-  | "rascunho"
-  | "enviado"
-  | "aprovado"
-  | "rejeitado"
-  | "atrasado";
+export type EntryStatus = "rascunho" | "registrado" | "atrasado";
 
 export interface Profile {
   id: string;
@@ -69,7 +64,6 @@ export interface Sector {
   color: string; // tailwind-friendly token name or hex
   icon: string; // lucide icon name
   active: boolean;
-  requires_approval: boolean;
   display_order: number;
   created_at: string;
 }
@@ -143,7 +137,6 @@ export interface Indicator {
   warning_threshold?: number; // percentual classificatório
   critical_threshold?: number;
   weight: number;
-  requires_approval: boolean;
   allows_attachment: boolean;
   instructions?: string;
   start_date: string;
@@ -186,9 +179,6 @@ export interface IndicatorEntry {
   justification?: string;
   status: EntryStatus;
   submitted_at?: string;
-  approved_by?: string;
-  approved_at?: string;
-  rejection_reason?: string;
   revision_number: number;
   previous_entry_id?: string;
   created_at: string;

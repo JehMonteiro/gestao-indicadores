@@ -41,7 +41,7 @@ function NewIndicator() {
     input_method: "manual" as InputMethod, data_source: "",
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
     warning_threshold: 80, critical_threshold: 60,
-    requires_approval: true, allows_attachment: false, instructions: "",
+    allows_attachment: false, instructions: "",
     start_date: new Date().toISOString().slice(0, 10),
     end_date: "",
     status: "ativo" as IndicatorStatus,
@@ -222,12 +222,8 @@ function NewIndicator() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Aprovação e instruções</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Instruções</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between border rounded-md p-3">
-              <div><p className="text-sm font-medium">Necessita aprovação</p><p className="text-xs text-muted-foreground">Lançamentos vão para o fluxo de aprovação.</p></div>
-              <Switch checked={f.requires_approval} onCheckedChange={(v) => set("requires_approval", v)} />
-            </div>
             <div className="flex items-center justify-between border rounded-md p-3">
               <div><p className="text-sm font-medium">Permite anexar comprovantes</p></div>
               <Switch checked={f.allows_attachment} onCheckedChange={(v) => set("allows_attachment", v)} />
