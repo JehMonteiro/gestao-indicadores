@@ -1,3 +1,4 @@
+import { roundForType } from "@/lib/value-rules";
 import { addDays, formatISO, startOfMonth, subMonths } from "date-fns";
 import type {
   AuditLog,
@@ -219,7 +220,7 @@ export const seedEntries: IndicatorEntry[] = (() => {
       franchise_id: t.franchise_id,
       period_start: t.period_start,
       period_end: t.period_end,
-      actual_value: Math.round(actual * 100) / 100,
+      actual_value: roundForType(Math.round(actual * 100) / 100, ind.value_type),
       comment: undefined,
       status,
       submitted_at: status !== "rascunho" ? t.period_end : undefined,
