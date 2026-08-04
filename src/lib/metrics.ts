@@ -90,53 +90,135 @@ export function latestTarget(targets: IndicatorTarget[]) {
   return [...targets].sort(compareTargetAsc)[targets.length - 1];
 }
 
-function matchesEntryCompany(entry: IndicatorEntry, target: IndicatorTarget) {
-  return entry.franchise_id ? target.franchise_id === entry.franchise_id : !target.franchise_id;
+type EntryScope = Pick<
+  IndicatorEntry,
+  "indicator_id" | "franchise_id" | "sector_id" | "user_id" | "period_start" | "period_end"
+> & { target_id?: string };
+
+/**
+ * Company compatibility: a target for another company is never usable.
+ * A corporate target (no franchise) is usable by any entry as fallback.
+ */
+function companyCompatible(entry: EntryScope, target: IndicatorTarget) {
+  if (!target.franchise_id) return true;
+  return target.franchise_id === entry.franchise_id;
 }
 
-function matchesEntryPeriod(entry: IndicatorEntry, target: IndicatorTarget) {
-  return target.period_start === entry.period_start && target.period_end === entry.period_end;
+function sectorCompatible(entry: EntryScope, target: IndicatorTarget) {
+  if (!target.sector_id) return true;
+  return !entry.sector_id || target.sector_id === entry.sector_id;
+}
+
+function userCompatible(entry: EntryScope, target: IndicatorTarget) {
+  if (!target.user_id) return true;
+  return !entry.user_id || target.user_id === entry.user_id;
+}
+
+/** Target period must CONTAIN the entry period (monthly entry inside a yearly goal). */
+function periodContains(entry: EntryScope, target: IndicatorTarget) {
+  if (!target.period_start || !target.period_end) return false;
+  return target.period_start <= entry.period_start && target.period_end >= entry.period_end;
+}
+
+function specificity(entry: EntryScope, target: IndicatorTarget) {
+  let score = 0;
+  if (target.franchise_id && target.franchise_id === entry.franchise_id) score += 8;
+  if (target.user_id && target.user_id === entry.user_id) score += 4;
+  if (target.sector_id && target.sector_id === entry.sector_id) score += 2;
+  if (target.period_start === entry.period_start && target.period_end === entry.period_end) score += 1;
+  return score;
+}
+
+function periodLength(target: IndicatorTarget) {
+  return daysBetween(target.period_start, target.period_end) ?? Number.MAX_SAFE_INTEGER;
+}
+
+/**
+ * Single source of truth for "which target row applies to this entry".
+ * Used both when saving a lançamento (to persist `target_id`) and when
+ * computing achievement anywhere in the app.
+ */
+export function resolveTargetRowForEntry(
+  entry: EntryScope,
+  targets: IndicatorTarget[],
+): IndicatorTarget | undefined {
+  const explicit = entry.target_id ? targets.find((t) => t.id === entry.target_id) : undefined;
+  if (explicit) return explicit;
+
+  const candidates = targets.filter(
+    (t) =>
+      t.indicator_id === entry.indicator_id &&
+      companyCompatible(entry, t) &&
+      sectorCompatible(entry, t) &&
+      userCompatible(entry, t) &&
+      periodContains(entry, t),
+  );
+  if (!candidates.length) return undefined;
+
+  return [...candidates].sort((a, b) => {
+    const bySpec = specificity(entry, b) - specificity(entry, a);
+    if (bySpec !== 0) return bySpec;
+    // narrower period wins (closer to the entry period)
+    const byLen = periodLength(a) - periodLength(b);
+    if (byLen !== 0) return byLen;
+    return compareTargetAsc(b, a);
+  })[0];
 }
 
 export function findTargetForEntry(entry: IndicatorEntry, targets: IndicatorTarget[]) {
-  const exact = entry.target_id ? targets.find((t) => t.id === entry.target_id) : undefined;
-  if (exact) return exact;
-
-  const sameIndicator = targets.filter((t) => t.indicator_id === entry.indicator_id);
-  const sameCompany = sameIndicator.filter((t) => matchesEntryCompany(entry, t));
-
-  if (entry.franchise_id) {
-    // Never fall back to another franchise's target.
-    const samePeriodSameCompany = sameCompany.filter((t) => matchesEntryPeriod(entry, t));
-    return latestTarget(samePeriodSameCompany) ?? latestTarget(sameCompany);
-  }
-
-  const samePeriod = sameIndicator.filter((t) => matchesEntryPeriod(entry, t));
-  return (
-    latestTarget(samePeriod.filter((t) => matchesEntryCompany(entry, t))) ??
-    latestTarget(samePeriod) ??
-    latestTarget(sameCompany) ??
-    latestTarget(sameIndicator)
-  );
+  return resolveTargetRowForEntry(entry, targets);
 }
 
 export function latestTargetForIndicator(indicator: Indicator, targets: IndicatorTarget[]) {
   const sameIndicator = targets.filter((t) => t.indicator_id === indicator.id);
+  if (!sameIndicator.length) return undefined;
   if (indicator.franchise_id) {
-    return latestTarget(sameIndicator.filter((t) => t.franchise_id === indicator.franchise_id));
+    return (
+      latestTarget(sameIndicator.filter((t) => t.franchise_id === indicator.franchise_id)) ??
+      latestTarget(sameIndicator.filter((t) => !t.franchise_id))
+    );
   }
   if (indicator.scope === "franquia") {
-    // Multi-franchise indicator without a specific franchise fixed on it:
-    // there is no single canonical target — avoid returning one from an
-    // arbitrary franchise.
-    return undefined;
+    const companies = new Set(sameIndicator.map((t) => t.franchise_id ?? "").filter(Boolean));
+    // Only safe when every target belongs to the same company (or none does).
+    if (companies.size > 1) return undefined;
+    return latestTarget(sameIndicator);
   }
   return latestTarget(sameIndicator.filter((t) => !t.franchise_id)) ?? latestTarget(sameIndicator);
 }
 
+function entryRevisionKey(e: IndicatorEntry) {
+  return [e.indicator_id, e.franchise_id ?? "", e.sector_id ?? "", e.period_start, e.period_end].join("|");
+}
+
+function isNewerRevision(candidate: IndicatorEntry, current: IndicatorEntry) {
+  const a = candidate.revision_number ?? 1;
+  const b = current.revision_number ?? 1;
+  if (a !== b) return a > b;
+  return (
+    valueForSort(candidate.updated_at, candidate.created_at).localeCompare(
+      valueForSort(current.updated_at, current.created_at),
+    ) > 0
+  );
+}
+
+/**
+ * Keeps only the latest revision per (indicator, company, sector, period), so
+ * re-launching the same period replaces the previous value instead of being
+ * counted twice.
+ */
+export function latestEntriesByPeriod(entries: IndicatorEntry[]): IndicatorEntry[] {
+  const map = new Map<string, IndicatorEntry>();
+  for (const e of entries) {
+    const key = entryRevisionKey(e);
+    const current = map.get(key);
+    if (!current || isNewerRevision(e, current)) map.set(key, e);
+  }
+  return entriesByPeriodAsc(Array.from(map.values()));
+}
 
 export function registeredEntriesForIndicator(indicator: Indicator, entries: IndicatorEntry[]) {
-  return entriesByPeriodAsc(
+  return latestEntriesByPeriod(
     entries.filter(
       (e) =>
         e.indicator_id === indicator.id &&
@@ -145,6 +227,7 @@ export function registeredEntriesForIndicator(indicator: Indicator, entries: Ind
     ),
   );
 }
+
 
 function defaultTargetFallback(indicator: Indicator): EffectiveTarget | null {
   if (indicator.default_target == null || indicator.default_target <= 0) return null;
