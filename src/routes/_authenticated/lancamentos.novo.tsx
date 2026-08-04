@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { validateNumericValue, numericStep, blockDecimalKeys } from "@/lib/value-rules";
 import type { IndicatorEntry } from "@/mocks/types";
 import { startOfMonth, endOfMonth, formatISO } from "date-fns";
 import { computeAchievement, formatValue } from "@/lib/format";
@@ -110,6 +111,8 @@ function NewEntry() {
     const entrySectorId = entrySectorIdBase ?? target?.sector_id;
     if (indicatorHasCompany && !entryFranchiseId) { toast.error("Selecione uma empresa"); return; }
     if (actual === "" || isNaN(Number(actual))) { toast.error("Informe um valor numérico"); return; }
+    const intError = validateNumericValue(actual, ind.value_type, "O valor realizado");
+    if (intError) { toast.error(intError); return; }
     // Nova revisão substitui o lançamento anterior do mesmo indicador/empresa/período.
     const previous = allEntries.find(
       (e) =>
@@ -183,7 +186,7 @@ function NewEntry() {
               <Field label="Início do período"><Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} /></Field>
               <Field label="Fim do período"><Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} /></Field>
             </div>
-            <Field label={`Valor realizado${ind?.unit ? ` (${ind.unit})` : ""}`}><Input type="number" step="0.01" value={actual} onChange={(e) => setActual(e.target.value)} /></Field>
+            <Field label={`Valor realizado${ind?.unit ? ` (${ind.unit})` : ""}`}><Input type="number" step={numericStep(ind?.value_type)} onKeyDown={blockDecimalKeys(ind?.value_type)} value={actual} onChange={(e) => setActual(e.target.value)} /></Field>
             <Field label="Comentário"><Textarea value={comment} onChange={(e) => setComment(e.target.value)} /></Field>
             <Field label="Justificativa (opcional)"><Textarea value={justification} onChange={(e) => setJustification(e.target.value)} /></Field>
             {ind?.allows_attachment && (
