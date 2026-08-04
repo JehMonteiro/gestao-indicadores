@@ -232,7 +232,7 @@ export const seedEntries: IndicatorEntry[] = (() => {
 })();
 
 export const seedNotifications: Notification[] = [
-  { id: "n1", user_id: "u-gest-com", title: "Lançamento pendente", message: "Faturamento mensal aguardando sua aprovação", type: "warning", link: "/aprovacoes", created_at: iso(today) },
+  { id: "n1", user_id: "u-gest-com", title: "Lançamento pendente", message: "Faturamento mensal ainda não foi registrado", type: "warning", link: "/lancamentos", created_at: iso(today) },
   { id: "n2", user_id: "u-fr-camp", title: "Meta próxima do vencimento", message: "Você ainda não lançou Novos clientes deste mês", type: "info", link: "/lancamentos", created_at: iso(today) },
 ];
 

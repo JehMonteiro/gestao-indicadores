@@ -74,7 +74,7 @@ function AuthPage() {
             Indicadores, metas e resultados em um só lugar.
           </h1>
           <p className="opacity-80 max-w-md text-sm">
-            Acompanhe a performance de cada setor e franquia, com aprovação de
+            Acompanhe a performance de cada setor e franquia, com registro de
             lançamentos, histórico auditável e dashboards consolidados.
           </p>
         </div>
