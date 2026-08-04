@@ -4,7 +4,7 @@ import { PageHeader, EmptyState, StatusDot } from "@/components/app/page-header"
 import { useCurrentUser, useStore } from "@/mocks/store";
 import { useVisibleIndicators } from "@/lib/permissions";
 import { classify, classificationStyles, computeAchievement, formatDate, formatValue, weightedIndex } from "@/lib/format";
-import { registeredEntriesForIndicator, findTargetForEntry, latestTargetForIndicator } from "@/lib/metrics";
+import { registeredEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,8 +27,9 @@ function MyDashboard() {
 
   const stats = useMemo(() => {
     const metrics = indicators.map((ind) => {
+      const indTargets = targets.filter((t) => t.indicator_id === ind.id);
       const e = registeredEntriesForIndicator(ind, entries).slice(-1)[0];
-      const t = e ? findTargetForEntry(e, targets) : latestTargetForIndicator(ind, targets);
+      const t = e ? resolveTargetForEntry(ind, e, indTargets) : resolveTargetForIndicator(ind, indTargets);
       const pct = computeAchievement(e, t, ind.direction);
       return { ind, pct, target: t, entry: e };
     });
@@ -121,7 +122,7 @@ function MyDashboard() {
                     <p className="text-sm font-medium truncate">{m.ind.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {m.entry ? `Último: ${formatValue(m.entry.actual_value, m.ind.value_type, m.ind.unit)}` : "Sem lançamento"}
-                      {m.target ? ` · Meta: ${formatValue(m.target.target_value, m.ind.value_type, m.ind.unit)}` : ""}
+                      {m.target ? ` · Meta: ${formatValue(m.target.target_value, m.ind.value_type, m.ind.unit)}` : " · Sem meta definida"}
                     </p>
                   </div>
                   <div className="text-right">

@@ -10,6 +10,7 @@ import { Download } from "lucide-react";
 import { classify, classificationStyles, computeAchievement, formatDate, formatValue } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { resolveTargetForEntry, latestEntriesByPeriod } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios" }] }),
@@ -25,9 +26,10 @@ function ReportsPage() {
   const [indId, setIndId] = useState<string>(indicators[0]?.id ?? "");
   const ind = indicators.find((i) => i.id === indId);
 
-  const rows = entries.filter((e) => e.indicator_id === indId).sort((a, b) => a.period_end.localeCompare(b.period_end))
+  const indTargets = targets.filter((t) => t.indicator_id === indId);
+  const rows = latestEntriesByPeriod(entries.filter((e) => e.indicator_id === indId))
     .map((e) => {
-      const t = targets.find((t) => t.id === e.target_id);
+      const t = ind ? resolveTargetForEntry(ind, e, indTargets) : null;
       const pct = computeAchievement(e, t, ind?.direction ?? "maior_melhor");
       return { e, t, pct };
     });
@@ -74,7 +76,7 @@ function ReportsPage() {
                     <TableRow key={e.id}>
                       <TableCell>{formatDate(e.period_start)} — {formatDate(e.period_end)}</TableCell>
                       <TableCell className="font-mono">{formatValue(e.actual_value, ind.value_type, ind.unit)}</TableCell>
-                      <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type, ind.unit) : "—"}</TableCell>
+                      <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type, ind.unit) : <span className="text-muted-foreground text-xs">Sem meta definida</span>}</TableCell>
                       <TableCell className="font-mono">{pct != null ? `${Math.round(pct)}%` : "—"}</TableCell>
                       <TableCell><Badge variant="outline" className={cs.className}>{cs.label}</Badge></TableCell>
                     </TableRow>

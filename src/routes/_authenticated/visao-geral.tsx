@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
-import { registeredEntriesForIndicator, entriesByPeriodAsc, findTargetForEntry, latestTarget } from "@/lib/metrics";
+import { registeredEntriesForIndicator, latestEntriesByPeriod, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
 
 export const Route = createFileRoute("/_authenticated/visao-geral")({
   head: () => ({ meta: [{ title: "Visão geral — Gestão de Indicadores" }] }),
@@ -32,11 +32,12 @@ function Overview() {
       const indEntries = registeredEntriesForIndicator(ind, entries);
       const indTargets = targets.filter((t) => t.indicator_id === ind.id);
       const monthly = indEntries.map((e) => {
-        const t = findTargetForEntry(e, indTargets);
+        const t = resolveTargetForEntry(ind, e, indTargets);
         return {
           period: e.period_end,
           actual: e.actual_value ?? 0,
           target: t?.target_value ?? 0,
+          hasTarget: !!t,
           pct: computeAchievement(e, t, ind.direction),
         };
       });
@@ -74,15 +75,22 @@ function Overview() {
     return franchises.map((f) => {
       const items = metricsByIndicator
         .map((m) => {
-          const franchiseTargets = targets.filter((t) => t.indicator_id === m.ind.id && t.franchise_id === f.id);
-          const e = entriesByPeriodAsc(entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "registrado")).slice(-1)[0];
-          const t = e ? findTargetForEntry(e, franchiseTargets) : latestTarget(franchiseTargets);
+          const franchiseTargets = targets.filter(
+            (t) => t.indicator_id === m.ind.id && (!t.franchise_id || t.franchise_id === f.id),
+          );
+          const e = latestEntriesByPeriod(
+            entries.filter((e) => e.indicator_id === m.ind.id && e.franchise_id === f.id && e.status === "registrado"),
+          ).slice(-1)[0];
+          const t = e
+            ? resolveTargetForEntry(m.ind, e, franchiseTargets)
+            : resolveTargetForIndicator(m.ind, franchiseTargets);
           const pct = computeAchievement(e, t, m.ind.direction);
           return { percent: pct, weight: m.ind.weight };
         });
       return { name: f.name, valor: Math.round(weightedIndex(items) ?? 0) };
     }).sort((a, b) => b.valor - a.valor);
   }, [franchises, metricsByIndicator, targets, entries]);
+
 
   const sectorData = sectors.map((s) => {
     const items = metricsByIndicator.filter((m) => m.ind.owner_sector_id === s.id)
@@ -102,7 +110,9 @@ function Overview() {
     return indicators
       .filter((i) => i.status === "ativo")
       .map((ind) => {
-        const approved = entries.filter((e) => e.indicator_id === ind.id && e.status === "registrado");
+        const approved = latestEntriesByPeriod(
+          entries.filter((e) => e.indicator_id === ind.id && e.status === "registrado"),
+        );
         let accThis = 0, accLast = 0, accPrev = 0;
         const monthsThisYear = new Set<string>();
         for (const e of approved) {
