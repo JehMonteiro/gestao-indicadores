@@ -140,7 +140,7 @@ function TargetDialog({
   const isEdit = !!initialValue;
   const [open, setOpen] = useState(!!openControlled);
   const makeInitial = (): IndicatorTarget => initialValue ?? ({
-    id: newId(), indicator_id: indicators[0]?.id ?? "", scope_type: "franquia",
+    id: newId(), indicator_id: "", scope_type: "franquia",
     franchise_id: franchises[0]?.id,
     period_start: new Date().toISOString().slice(0,10), period_end: new Date().toISOString().slice(0,10),
     target_value: 0, weight: 1, created_by: authUser?.id ?? "", created_at: new Date().toISOString(),
