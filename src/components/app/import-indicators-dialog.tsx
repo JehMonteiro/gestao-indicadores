@@ -8,6 +8,7 @@ import { Upload, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { newId } from "@/lib/ids";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { roundForType } from "@/lib/value-rules";
 import { dbWrite } from "@/lib/supabase-data";
 import type {
   Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, ValueType,
@@ -190,6 +191,7 @@ export function ImportIndicatorsDialog() {
         const responsibleId = findProfileId(norm(row.responsible));
         const valueType = lower(row.value_type);
         const validValueTypes = ["inteiro", "decimal", "moeda", "percentual"];
+        const resolvedValueType = (validValueTypes.includes(valueType) ? valueType : "inteiro") as ValueType;
         const frequency = lower(row.frequency);
         const validFrequencies = ["diaria", "semanal", "mensal", "trimestral", "semestral", "anual"];
         const direction = lower(row.direction);
@@ -208,13 +210,13 @@ export function ImportIndicatorsDialog() {
           audience: mapAudience(row.audience),
           scope: "setor",
           responsible_ids: responsibleId ? [responsibleId] : [],
-          value_type: (validValueTypes.includes(valueType) ? valueType : "inteiro") as ValueType,
+          value_type: resolvedValueType,
           unit: norm(row.unit) || undefined,
           frequency: (validFrequencies.includes(frequency) ? frequency : "mensal") as Frequency,
           direction: (validDirections.includes(direction) ? direction : "maior_melhor") as Direction,
           data_source: norm(row.data_source) || undefined,
           input_method: mapInputMethod(row.input_method),
-          default_target: toNum(row.default_target, 0),
+          default_target: roundForType(toNum(row.default_target, 0), resolvedValueType),
           warning_threshold: toNum(row.warning_threshold, 80),
           critical_threshold: toNum(row.critical_threshold, 60),
           weight: 1,

@@ -3,6 +3,7 @@
 // and write-through helpers used by the Zustand store actions.
 
 import { supabase } from "@/integrations/supabase/client";
+import { firstIntegerError } from "@/lib/value-rules";
 import type {
   AuditLog,
   Franchise,
@@ -16,6 +17,7 @@ import type {
   UserFranchise,
   UserSector,
   GlobalRole,
+  ValueType,
 } from "@/mocks/types";
 
 // ---------- Mappers (DB row → mock type) ----------
@@ -270,6 +272,21 @@ export async function loadAllFromSupabase(userId: string) {
   };
 }
 
+// ---------- Validação de valores inteiros (camada de aplicação) ----------
+
+async function indicatorValueType(indicatorId: string): Promise<ValueType | undefined> {
+  const { useStore } = await import("@/mocks/store");
+  return useStore.getState().indicators.find((i) => i.id === indicatorId)?.value_type;
+}
+
+function assertIntegerFields(
+  type: ValueType | undefined,
+  fields: Array<{ label: string; value: number | null | undefined }>,
+) {
+  const err = firstIntegerError(type, fields);
+  if (err) throw new Error(err);
+}
+
 // ---------- Write-through helpers (mock type → DB) ----------
 
 export const dbWrite = {
@@ -301,6 +318,12 @@ export const dbWrite = {
     return supabase.from("franchises").delete().eq("id", id);
   },
   async indicator(i: Indicator) {
+    assertIntegerFields(i.value_type, [
+      { label: "Meta padrão", value: i.default_target },
+      { label: "Valor mínimo", value: i.minimum_value },
+      { label: "Valor máximo", value: i.maximum_value },
+      { label: "Peso", value: i.weight },
+    ]);
     return supabase.from("indicators").upsert({
       id: i.id,
       code: i.code,
@@ -335,6 +358,11 @@ export const dbWrite = {
     return supabase.from("indicators").delete().eq("id", id);
   },
   async target(t: IndicatorTarget) {
+    assertIntegerFields(await indicatorValueType(t.indicator_id), [
+      { label: "Valor da meta", value: t.target_value },
+      { label: "Valor mínimo", value: t.minimum_value },
+      { label: "Valor máximo", value: t.maximum_value },
+    ]);
     return supabase.from("targets").upsert({
       id: t.id,
       indicator_id: t.indicator_id,
@@ -353,6 +381,9 @@ export const dbWrite = {
     return supabase.from("targets").delete().eq("id", id);
   },
   async entry(e: IndicatorEntry) {
+    assertIntegerFields(await indicatorValueType(e.indicator_id), [
+      { label: "O valor realizado", value: e.actual_value },
+    ]);
     const { data, error } = await supabase.from("indicator_entries").upsert({
       id: e.id,
       indicator_id: e.indicator_id,
@@ -436,9 +467,11 @@ function reportError(err: unknown, label: string) {
   // Keep raw error in server/devtools console only — do not surface DB internals to users.
   // eslint-disable-next-line no-console
   console.error(`[supabase-data:${label}]`, err);
+  const raw = err instanceof Error ? err.message : typeof err === "object" && err && "message" in err ? String((err as { message?: unknown }).message ?? "") : "";
+  const isValidation = /número inteiro|casas decimais/i.test(raw);
   import("sonner").then(({ toast }) => {
-    toast.error("Não foi possível salvar", {
-      description: "Tente novamente em instantes. Se persistir, contate o administrador.",
+    toast.error(isValidation ? "Valor inválido" : "Não foi possível salvar", {
+      description: isValidation ? raw : "Tente novamente em instantes. Se persistir, contate o administrador.",
     });
   }).catch(() => {});
   // Roll back optimistic local state by re-hydrating from the DB so the UI

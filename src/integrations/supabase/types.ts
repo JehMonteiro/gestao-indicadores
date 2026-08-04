@@ -313,6 +313,36 @@ export type Database = {
           },
         ]
       }
+      integer_rounding_log: {
+        Row: {
+          created_at: string
+          field_name: string
+          id: string
+          new_value: number
+          old_value: number
+          record_id: string
+          table_name: string
+        }
+        Insert: {
+          created_at?: string
+          field_name: string
+          id?: string
+          new_value: number
+          old_value: number
+          record_id: string
+          table_name: string
+        }
+        Update: {
+          created_at?: string
+          field_name?: string
+          id?: string
+          new_value?: number
+          old_value?: number
+          record_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -586,6 +616,10 @@ export type Database = {
         Returns: undefined
       }
       seed_demo_data: { Args: never; Returns: undefined }
+      value_type_requires_integer: {
+        Args: { _vt: Database["public"]["Enums"]["value_type"] }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role:

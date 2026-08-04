@@ -13,6 +13,7 @@ import { useStore, useCurrentUser } from "@/mocks/store";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import type { Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
+import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-rules";
 import { EmptyState } from "@/components/app/page-header";
 import { ShieldAlert } from "lucide-react";
 
@@ -59,6 +60,13 @@ function NewIndicator() {
       toast.error("Selecione a empresa do indicador");
       return;
     }
+    const intError = firstIntegerError(f.value_type, [
+      { label: "Meta padrão", value: f.default_target },
+      { label: "Valor mínimo", value: f.minimum_value },
+      { label: "Valor máximo", value: f.maximum_value },
+      { label: "Peso", value: (f as { weight?: number }).weight },
+    ]);
+    if (intError) { toast.error(intError); return; }
     const franchiseRef = franchises.find((fr) => fr.id === f.franchise_id);
     const baseCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
     const suffix = (franchiseRef?.code || franchiseRef?.name || "")
@@ -207,11 +215,11 @@ function NewIndicator() {
         <Card>
           <CardHeader><CardTitle className="text-base">Meta padrão e limites</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-3 gap-3">
-            <Field label="Meta padrão"><Input type="number" value={f.default_target} onChange={(e) => set("default_target", Number(e.target.value))} /></Field>
+            <Field label="Meta padrão"><Input type="number" step={numericStep(f.value_type)} onKeyDown={blockDecimalKeys(f.value_type)} value={f.default_target} onChange={(e) => set("default_target", Number(e.target.value))} /></Field>
             {f.direction === "faixa_ideal" && (
               <>
-                <Field label="Valor mínimo"><Input type="number" value={f.minimum_value ?? ""} onChange={(e) => set("minimum_value", e.target.value === "" ? undefined : Number(e.target.value))} /></Field>
-                <Field label="Valor máximo"><Input type="number" value={f.maximum_value ?? ""} onChange={(e) => set("maximum_value", e.target.value === "" ? undefined : Number(e.target.value))} /></Field>
+                <Field label="Valor mínimo"><Input type="number" step={numericStep(f.value_type)} onKeyDown={blockDecimalKeys(f.value_type)} value={f.minimum_value ?? ""} onChange={(e) => set("minimum_value", e.target.value === "" ? undefined : Number(e.target.value))} /></Field>
+                <Field label="Valor máximo"><Input type="number" step={numericStep(f.value_type)} onKeyDown={blockDecimalKeys(f.value_type)} value={f.maximum_value ?? ""} onChange={(e) => set("maximum_value", e.target.value === "" ? undefined : Number(e.target.value))} /></Field>
               </>
             )}
             <Field label="Limite de atenção (%)"><Input type="number" value={f.warning_threshold ?? 80} onChange={(e) => set("warning_threshold", Number(e.target.value))} /></Field>
