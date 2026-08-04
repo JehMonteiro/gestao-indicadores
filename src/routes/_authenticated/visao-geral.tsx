@@ -110,7 +110,9 @@ function Overview() {
     return indicators
       .filter((i) => i.status === "ativo")
       .map((ind) => {
-        const approved = entries.filter((e) => e.indicator_id === ind.id && e.status === "registrado");
+        const approved = latestEntriesByPeriod(
+          entries.filter((e) => e.indicator_id === ind.id && e.status === "registrado"),
+        );
         let accThis = 0, accLast = 0, accPrev = 0;
         const monthsThisYear = new Set<string>();
         for (const e of approved) {
