@@ -1,6 +1,6 @@
 import { newId } from "@/lib/ids";
 import { useServerFn } from "@tanstack/react-start";
-import { inviteUser, deleteUser } from "@/lib/users.functions";
+import { inviteUser, deleteUser, updateUserGlobalRole } from "@/lib/users.functions";
 import { useSession, useAuthProfile } from "@/hooks/use-auth";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { createFileRoute } from "@tanstack/react-router";
@@ -105,7 +105,14 @@ function UsersPage() {
       {editing && (
         <Dialog open onOpenChange={(o) => !o && setEditing(null)}>
           <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>Vínculos de {editing.full_name}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Editar {editing.full_name}</DialogTitle></DialogHeader>
+
+            <GlobalRoleSection
+              target={editing}
+              isSuperadmin={isSuperadmin}
+              currentUserId={currentUserId}
+            />
+
             <div>
               <p className="text-sm font-medium mb-2">Setores</p>
               <div className="space-y-1">
@@ -166,6 +173,75 @@ function UsersPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+    </div>
+  );
+}
+
+function GlobalRoleSection({ target, isSuperadmin, currentUserId }: { target: Profile; isSuperadmin: boolean; currentUserId?: string }) {
+  const [role, setRole] = useState<GlobalRole>(target.global_role);
+  const [confirming, setConfirming] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const updateRole = useServerFn(updateUserGlobalRole);
+
+  const isSelf = !!currentUserId && target.id === currentUserId;
+  const targetIsSuper = target.global_role === "superadmin";
+  const blocked = isSelf || (!isSuperadmin && targetIsSuper);
+  const reason = isSelf
+    ? "Você não pode alterar o seu próprio perfil global."
+    : "Apenas um superadmin pode alterar o perfil de outro superadmin.";
+
+  const options = selectableRoles.filter((r) => isSuperadmin || r !== "superadmin");
+  const roleList = options.includes(target.global_role) ? options : [target.global_role, ...options];
+
+  return (
+    <div className="border rounded-md p-3">
+      <p className="text-sm font-medium mb-2">Perfil global</p>
+      <div className="flex gap-2">
+        <Select value={role} onValueChange={(v) => setRole(v as GlobalRole)} disabled={blocked || saving}>
+          <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+          <SelectContent>{roleList.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}</SelectContent>
+        </Select>
+        <Button disabled={blocked || saving || role === target.global_role} onClick={() => setConfirming(true)}>
+          {saving ? "Salvando..." : "Salvar perfil"}
+        </Button>
+      </div>
+      {blocked && <p className="text-xs text-muted-foreground mt-2">{reason}</p>}
+
+      <AlertDialog open={confirming} onOpenChange={(o) => !o && setConfirming(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alterar perfil global?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja alterar o perfil global de <strong>{target.full_name}</strong> de{" "}
+              <strong>{roleLabels[target.global_role]}</strong> para <strong>{roleLabels[role]}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async (e) => {
+                e.preventDefault();
+                setSaving(true);
+                try {
+                  await updateRole({ data: { user_id: target.id, global_role: role as any } });
+                  toast.success("Perfil global atualizado");
+                  setConfirming(false);
+                  if (currentUserId) {
+                    const data = await loadAllFromSupabase(currentUserId);
+                    useStore.getState().hydrate(data);
+                  }
+                } catch (err: any) {
+                  toast.error("Não foi possível alterar o perfil", { description: err?.message });
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
