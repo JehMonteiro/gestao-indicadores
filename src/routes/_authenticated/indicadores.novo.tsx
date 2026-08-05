@@ -230,13 +230,12 @@ function NewIndicator() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Instruções</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Complementos</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between border rounded-md p-3">
               <div><p className="text-sm font-medium">Permite anexar comprovantes</p></div>
               <Switch checked={f.allows_attachment} onCheckedChange={(v) => set("allows_attachment", v)} />
             </div>
-            <Field label="Instruções de preenchimento"><Textarea value={f.instructions} onChange={(e) => set("instructions", e.target.value)} /></Field>
             <Field label="Fonte dos dados"><Input value={f.data_source} onChange={(e) => set("data_source", e.target.value)} /></Field>
           </CardContent>
         </Card>

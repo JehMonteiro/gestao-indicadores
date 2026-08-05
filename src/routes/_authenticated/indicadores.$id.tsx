@@ -82,7 +82,7 @@ function IndicatorDetail() {
             <Item k="Permite anexo" v={ind.allows_attachment ? "Sim" : "Não"} />
             <Item k="Fonte" v={ind.data_source ?? "—"} />
             <Item k="Início" v={formatDate(ind.start_date)} />
-            {ind.instructions && <Item k="Instruções" v={ind.instructions} full />}
+            
           </CardContent></Card>
         </TabsContent>
 
