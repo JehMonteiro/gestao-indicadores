@@ -287,6 +287,13 @@ function assertIntegerFields(
   if (err) throw new Error(err);
 }
 
+/** Garante inteiro (ou null) antes de persistir — nenhum decimal chega ao banco. */
+function intOrNull(v: number | null | undefined): number | null {
+  if (v === null || v === undefined || Number.isNaN(v)) return null;
+  return Math.round(v);
+}
+
+
 // ---------- Write-through helpers (mock type → DB) ----------
 
 export const dbWrite = {
