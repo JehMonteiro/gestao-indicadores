@@ -116,6 +116,7 @@ function IndicatorsList() {
               {filtered.map((i) => {
                 const sector = sectors.find((s) => s.id === i.owner_sector_id);
                 const franchise = i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id) : null;
+                const responsible = i.responsible_user_id ? profiles.find((p) => p.id === i.responsible_user_id) : null;
                 const e = registeredEntriesForIndicator(i, entries).slice(-1)[0];
                 const t = e ? resolveTargetForEntry(i, e, targets) : resolveTargetForIndicator(i, targets);
                 const pct = computeAchievement(e, t, i.direction);
@@ -128,6 +129,7 @@ function IndicatorsList() {
                     </TableCell>
                     <TableCell>{sector && <Badge variant="outline" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</TableCell>
                     <TableCell className="text-sm">{franchise ? franchise.name : <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="text-sm">{responsible ? responsible.full_name : <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-sm">{indicatorPeriodLabel(i)}</TableCell>
                     <TableCell className="font-mono text-sm">{e ? formatValue(e.actual_value, i.value_type) : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={cs.className}>{pct != null ? `${Math.round(pct)}% · ${cs.label}` : cs.label}</Badge></TableCell>
