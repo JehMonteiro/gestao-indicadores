@@ -200,7 +200,7 @@ function NewEntry() {
           <CardHeader><CardTitle className="text-base">Previsão</CardTitle></CardHeader>
           <CardContent className="text-sm space-y-2">
             <p className="text-muted-foreground">Meta: {target ? formatValue(target.target_value, ind?.value_type ?? "inteiro") : "—"}</p>
-            <p className="text-muted-foreground">Atual: {actual ? formatValue(Number(actual), ind?.value_type ?? "inteiro", ind?.unit) : "—"}</p>
+            <p className="text-muted-foreground">Atual: {actual ? formatValue(Number(actual), ind?.value_type ?? "inteiro") : "—"}</p>
             <div className="border-t pt-3">
               <p className="text-xs uppercase text-muted-foreground">Atingimento</p>
               <p className="text-3xl font-semibold font-mono mt-1">{preview != null ? `${Math.round(preview)}%` : "—"}</p>
