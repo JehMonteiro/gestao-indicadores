@@ -24,9 +24,10 @@ export const seedProfiles: Profile[] = [
   { id: "u-gest-com", full_name: "Carla Comercial", email: "carla@empresa.com", global_role: "gestor_setor", user_type: "interno", status: "ativo", created_at: iso(today) },
   { id: "u-gest-mkt", full_name: "Diego Marketing", email: "diego@empresa.com", global_role: "gestor_setor", user_type: "interno", status: "ativo", created_at: iso(today) },
   { id: "u-colab", full_name: "Eduarda Colaboradora", email: "edu@empresa.com", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: iso(today) },
-  { id: "u-gest-fr", full_name: "Felipe Gestor de Franquia", email: "felipe@empresa.com", global_role: "gestor_franquia", user_type: "interno", status: "ativo", created_at: iso(today) },
-  { id: "u-fr-camp", full_name: "Gabriela Campinas", email: "gabi@franquia.com", global_role: "franqueado", user_type: "franqueado", status: "ativo", created_at: iso(today) },
-  { id: "u-fr-bh", full_name: "Henrique BH", email: "henrique@franquia.com", global_role: "franqueado", user_type: "franqueado", status: "ativo", created_at: iso(today) },
+  { id: "u-gest-fr", full_name: "Felipe Gestor de Operações", email: "felipe@empresa.com", global_role: "gestor_setor", user_type: "interno", status: "ativo", created_at: iso(today) },
+  { id: "u-fr-camp", full_name: "Gabriela Campinas", email: "gabi@empresa.com", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: iso(today) },
+  { id: "u-fr-bh", full_name: "Henrique BH", email: "henrique@empresa.com", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: iso(today) },
+
   { id: "u-aud", full_name: "Ivone Auditora", email: "ivone@empresa.com", global_role: "auditor", user_type: "interno", status: "ativo", created_at: iso(today) },
 ];
 
@@ -57,12 +58,8 @@ export const seedFranchises: Franchise[] = [
   { id: "f-poa", name: "Unidade Porto Alegre", code: "POA", legal_name: "Franquia POA Ltda", city: "Porto Alegre", state: "RS", region: "Sul", status: "ativa", start_date: iso(subMonths(today, 3)), created_at: iso(today) },
 ];
 
-export const seedUserFranchises: UserFranchise[] = [
-  { id: "uf1", user_id: "u-gest-fr", franchise_id: "f-camp", franchise_role: "gestor", active: true, joined_at: iso(today) },
-  { id: "uf2", user_id: "u-gest-fr", franchise_id: "f-bh", franchise_role: "gestor", active: true, joined_at: iso(today) },
-  { id: "uf3", user_id: "u-fr-camp", franchise_id: "f-camp", franchise_role: "franqueado", active: true, joined_at: iso(today) },
-  { id: "uf4", user_id: "u-fr-bh", franchise_id: "f-bh", franchise_role: "franqueado", active: true, joined_at: iso(today) },
-];
+export const seedUserFranchises: UserFranchise[] = [];
+
 
 // ===== Categories =====
 export const seedCategories: IndicatorCategory[] = [

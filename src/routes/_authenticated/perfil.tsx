@@ -18,9 +18,7 @@ function ProfilePage() {
   const user = useCurrentUser();
   const upsert = useStore((s) => s.upsertProfile);
   const userSectors = useStore((s) => s.userSectors);
-  const userFranchises = useStore((s) => s.userFranchises);
   const sectors = useStore((s) => s.sectors);
-  const franchises = useStore((s) => s.franchises);
 
   const [name, setName] = useState(user?.full_name ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -28,11 +26,11 @@ function ProfilePage() {
   if (!user) return null;
 
   const mySectors = userSectors.filter((us) => us.user_id === user.id);
-  const myFranchises = userFranchises.filter((uf) => uf.user_id === user.id);
 
   return (
     <div>
-      <PageHeader title="Meu perfil" description="Dados pessoais e vínculos com setores e franquias." />
+      <PageHeader title="Meu perfil" description="Dados pessoais e vínculos com setores." />
+
       <div className="grid lg:grid-cols-3 gap-4 max-w-5xl">
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle className="text-base">Dados básicos</CardTitle></CardHeader>
@@ -54,16 +52,6 @@ function ProfilePage() {
                 <div key={us.id} className="flex justify-between border rounded p-2 mb-1">
                   <span>{sectors.find((s) => s.id === us.sector_id)?.name}</span>
                   <Badge variant="outline" className="capitalize">{us.sector_role}</Badge>
-                </div>
-              ))}
-            </div>
-            <div>
-              <p className="text-xs uppercase text-muted-foreground mb-1">Franquias</p>
-              {myFranchises.length === 0 && <p className="text-muted-foreground">Nenhuma</p>}
-              {myFranchises.map((uf) => (
-                <div key={uf.id} className="flex justify-between border rounded p-2 mb-1">
-                  <span>{franchises.find((f) => f.id === uf.franchise_id)?.name}</span>
-                  <Badge variant="outline" className="capitalize">{uf.franchise_role}</Badge>
                 </div>
               ))}
             </div>
