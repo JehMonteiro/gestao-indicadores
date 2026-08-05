@@ -234,6 +234,13 @@ export async function loadAllFromSupabase(userId: string) {
     supabase.from("user_roles").select("user_id, role"),
   ]);
 
+  const sharedByIndicator = new Map<string, string[]>();
+  ((sharedSectors.data ?? []) as any[]).forEach((r: any) => {
+    const list = sharedByIndicator.get(r.indicator_id) ?? [];
+    list.push(r.sector_id);
+    sharedByIndicator.set(r.indicator_id, list);
+  });
+
   const rolesByUser = new Map<string, GlobalRole[]>();
   (roles.data ?? []).forEach((r: any) => {
     const list = rolesByUser.get(r.user_id) ?? [];
