@@ -24,9 +24,10 @@ export const seedProfiles: Profile[] = [
   { id: "u-gest-com", full_name: "Carla Comercial", email: "carla@empresa.com", global_role: "gestor_setor", user_type: "interno", status: "ativo", created_at: iso(today) },
   { id: "u-gest-mkt", full_name: "Diego Marketing", email: "diego@empresa.com", global_role: "gestor_setor", user_type: "interno", status: "ativo", created_at: iso(today) },
   { id: "u-colab", full_name: "Eduarda Colaboradora", email: "edu@empresa.com", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: iso(today) },
-  { id: "u-gest-fr", full_name: "Felipe Gestor de Franquia", email: "felipe@empresa.com", global_role: "gestor_franquia", user_type: "interno", status: "ativo", created_at: iso(today) },
-  { id: "u-fr-camp", full_name: "Gabriela Campinas", email: "gabi@franquia.com", global_role: "franqueado", user_type: "franqueado", status: "ativo", created_at: iso(today) },
-  { id: "u-fr-bh", full_name: "Henrique BH", email: "henrique@franquia.com", global_role: "franqueado", user_type: "franqueado", status: "ativo", created_at: iso(today) },
+  { id: "u-gest-fr", full_name: "Felipe Gestor de Operações", email: "felipe@empresa.com", global_role: "gestor_setor", user_type: "interno", status: "ativo", created_at: iso(today) },
+  { id: "u-fr-camp", full_name: "Gabriela Campinas", email: "gabi@empresa.com", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: iso(today) },
+  { id: "u-fr-bh", full_name: "Henrique BH", email: "henrique@empresa.com", global_role: "colaborador", user_type: "interno", status: "ativo", created_at: iso(today) },
+
   { id: "u-aud", full_name: "Ivone Auditora", email: "ivone@empresa.com", global_role: "auditor", user_type: "interno", status: "ativo", created_at: iso(today) },
 ];
 
