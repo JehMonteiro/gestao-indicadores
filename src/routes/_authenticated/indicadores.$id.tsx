@@ -132,7 +132,7 @@ function IndicatorDetail() {
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis dataKey="period" fontSize={12} />
                 <YAxis fontSize={12} tickFormatter={(v: number) => String(Math.round(v))} />
-                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: number | string) => (typeof v === "number" ? Math.round(v) : v)} />
+                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: unknown) => (typeof v === "number" ? Math.round(v) : (v as never))} />
                 <Line type="monotone" dataKey="meta" stroke="var(--muted-foreground)" strokeDasharray="4 4" />
                 <Line type="monotone" dataKey="realizado" stroke="var(--primary)" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>

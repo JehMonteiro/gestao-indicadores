@@ -184,7 +184,7 @@ function Overview() {
                   <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                   <XAxis dataKey="period" fontSize={12} />
                   <YAxis fontSize={12} unit="%" tickFormatter={(v: number) => String(Math.round(v))} />
-                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: number | string) => (typeof v === "number" ? Math.round(v) : v)} />
+                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: unknown) => (typeof v === "number" ? Math.round(v) : (v as never))} />
                   <Line type="monotone" dataKey="valor" stroke="var(--primary)" strokeWidth={2.5} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
@@ -223,7 +223,7 @@ function Overview() {
                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                     <XAxis dataKey="setor" fontSize={12} />
                     <YAxis fontSize={12} unit="%" tickFormatter={(v: number) => String(Math.round(v))} />
-                    <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: number | string) => (typeof v === "number" ? Math.round(v) : v)} />
+                    <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: unknown) => (typeof v === "number" ? Math.round(v) : (v as never))} />
                     <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
                       {sectorData.map((s, i) => <Cell key={i} fill={s.fill} />)}
                     </Bar>
