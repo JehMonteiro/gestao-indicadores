@@ -256,7 +256,7 @@ export async function loadAllFromSupabase(userId: string) {
     profiles: mappedProfiles,
     sectors: (sectors.data ?? []).map(mapSector),
     franchises: (franchises.data ?? []).map(mapFranchise),
-    indicators: (indicators.data ?? []).map(mapIndicator),
+    indicators: (indicators.data ?? []).map((row: any) => mapIndicator(row, sharedByIndicator.get(row.id) ?? [])),
     targets: (targets.data ?? []).map(mapTarget),
     entries: (entries.data ?? []).map(mapEntry),
     userSectors: (userSectors.data ?? []).map(mapUserSector),
