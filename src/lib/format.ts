@@ -60,25 +60,26 @@ export function computeAchievement(
   direction: Direction,
 ): number | null {
   if (!entry || entry.actual_value == null || !target) return null;
+  const r = (n: number | null) => (n == null ? null : Math.round(n));
   const actual = entry.actual_value;
   const t = target.target_value;
   switch (direction) {
     case "maior_melhor":
       if (!t) return actual > 0 ? 100 : null;
-      return (actual / t) * 100;
+      return r((actual / t) * 100);
     case "menor_melhor":
       if (actual <= 0) return 100;
-      return (t / actual) * 100;
+      return r((t / actual) * 100);
     case "meta_exata":
       if (t === 0) return actual === 0 ? 100 : 0;
-      return Math.max(0, 100 - (Math.abs(actual - t) / Math.abs(t)) * 100);
+      return r(Math.max(0, 100 - (Math.abs(actual - t) / Math.abs(t)) * 100));
     case "faixa_ideal": {
       const min = target.minimum_value ?? -Infinity;
       const max = target.maximum_value ?? Infinity;
       if (actual >= min && actual <= max) return 100;
       const dist = actual < min ? min - actual : actual - max;
       const ref = Math.abs(t || (max === Infinity ? min : max)) || 1;
-      return Math.max(0, 100 - (dist / ref) * 100);
+      return r(Math.max(0, 100 - (dist / ref) * 100));
     }
   }
 }
@@ -90,7 +91,7 @@ export function weightedIndex(
   if (!valid.length) return null;
   const totalW = valid.reduce((s, i) => s + i.weight, 0) || 1;
   const sum = valid.reduce((s, i) => s + (i.percent as number) * i.weight, 0);
-  return sum / totalW;
+  return Math.round(sum / totalW);
 }
 
 export function classificationStyles(c: Classification) {
