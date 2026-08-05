@@ -37,8 +37,8 @@ function EntryDetail() {
       <Card>
         <CardHeader><CardTitle className="text-base">Dados</CardTitle></CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-4 text-sm">
-          <Item k="Valor realizado" v={formatValue(entry.actual_value, ind?.value_type ?? "inteiro", ind?.unit)} />
-          <Item k="Meta" v={target ? formatValue(target.target_value, ind?.value_type ?? "inteiro", ind?.unit) : "Sem meta definida"} />
+          <Item k="Valor realizado" v={formatValue(entry.actual_value, ind?.value_type ?? "inteiro")} />
+          <Item k="Meta" v={target ? formatValue(target.target_value, ind?.value_type ?? "inteiro") : "Sem meta definida"} />
           <Item k="Atingimento" v={pct != null ? `${Math.round(pct)}%` : "—"} />
           <div><p className="text-xs uppercase text-muted-foreground">Status</p><Badge variant="outline" className={`capitalize mt-1 ${cs.className}`}>{entry.status}</Badge></div>
           <Item k="Comentário" v={entry.comment ?? "—"} full />
@@ -52,7 +52,7 @@ function EntryDetail() {
             <div key={r.id} className="flex items-center justify-between p-3 border rounded-md">
               <div>
                 <p className="text-sm font-medium">Revisão #{r.revision_number}</p>
-                <p className="text-xs text-muted-foreground">{formatDate(r.updated_at)} — {formatValue(r.actual_value, ind?.value_type ?? "inteiro", ind?.unit)}</p>
+                <p className="text-xs text-muted-foreground">{formatDate(r.updated_at)} — {formatValue(r.actual_value, ind?.value_type ?? "inteiro")}</p>
               </div>
               <Badge variant="outline" className="capitalize">{r.status}</Badge>
             </div>

@@ -11,23 +11,21 @@ import { useStore, useCurrentUser } from "@/mocks/store";
 import { roundForType } from "@/lib/value-rules";
 import { dbWrite } from "@/lib/supabase-data";
 import type {
-  Audience, Direction, Frequency, Indicator, IndicatorStatus, InputMethod, ValueType,
+  Direction, Frequency, Indicator, IndicatorStatus, ValueType,
 } from "@/mocks/types";
 
 const TEMPLATE_HEADERS = [
-  "name", "objective", "owner_sector", "franchise", "audience",
-  "responsible", "status", "value_type", "unit", "frequency",
-  "direction", "input_method", "default_target", "warning_threshold",
+  "name", "objective", "owner_sector", "franchise",
+  "responsible", "status", "value_type", "frequency",
+  "direction", "default_target", "warning_threshold",
   "critical_threshold", "start_date", "end_date",
-  "allows_attachment", "data_source",
 ];
 
 const TEMPLATE_EXAMPLE = [
-  "Faturamento mensal", "Atingir meta de receita", "Comercial", "Nocta Seguros e Benefícios", "ambos",
-  "", "ativo", "moeda", "R$", "mensal",
-  "maior_melhor", "manual", 100000, 80,
+  "Faturamento mensal", "Atingir meta de receita", "Comercial", "Nocta Seguros e Benefícios",
+  "", "ativo", "moeda", "mensal",
+  "maior_melhor", 100000, 80,
   60, "2026-01-01", "",
-  "sim", "nao", "ERP",
 ];
 
 export function ImportIndicatorsDialog() {
@@ -56,10 +54,6 @@ export function ImportIndicatorsDialog() {
   const lower = (v: unknown) => stripAccents(norm(v).toLowerCase());
   const lookupKey = (v: unknown) => lower(v).replace(/[^a-z0-9]+/g, " ").trim();
   const codeKey = (v: unknown) => lower(v).replace(/[^a-z0-9]+/g, "");
-  const toBool = (v: unknown) => {
-    const s = lower(v);
-    return s === "sim" || s === "true" || s === "1" || s === "yes" || s === "y";
-  };
   const toNum = (v: unknown, def = 0) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : def;
@@ -72,21 +66,6 @@ export function ImportIndicatorsDialog() {
     const d = new Date(s);
     if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
     return s;
-  };
-  const mapAudience = (v: unknown): Audience => {
-    const s = lower(v);
-    if (!s) return "ambos";
-    if (s.includes("franq")) return "franqueado";
-    if (s.includes("intern") || s.includes("colab")) return "interno";
-    if (["interno", "franqueado", "ambos"].includes(s)) return s as Audience;
-    return "ambos";
-  };
-  const mapInputMethod = (v: unknown): InputMethod => {
-    const s = lower(v);
-    if (s.startsWith("import")) return "importacao";
-    if (s.startsWith("integ")) return "integracao";
-    if (s.startsWith("calc")) return "calculo";
-    return "manual";
   };
 
   const findSectorId = (v: string) => {
@@ -207,20 +186,15 @@ export function ImportIndicatorsDialog() {
           owner_sector_id,
           shared_sector_ids: [],
           franchise_id: franchise.id,
-          audience: mapAudience(row.audience),
           scope: "setor",
           responsible_ids: responsibleId ? [responsibleId] : [],
           value_type: resolvedValueType,
-          unit: norm(row.unit) || undefined,
           frequency: (validFrequencies.includes(frequency) ? frequency : "mensal") as Frequency,
           direction: (validDirections.includes(direction) ? direction : "maior_melhor") as Direction,
-          data_source: norm(row.data_source) || undefined,
-          input_method: mapInputMethod(row.input_method),
           default_target: roundForType(toNum(row.default_target, 0), resolvedValueType),
           warning_threshold: toNum(row.warning_threshold, 80),
           critical_threshold: toNum(row.critical_threshold, 60),
           weight: 1,
-          allows_attachment: toBool(row.allows_attachment),
           
           start_date: toDate(row.start_date) || new Date().toISOString().slice(0, 10),
           end_date: toDate(row.end_date),
@@ -298,7 +272,7 @@ export function ImportIndicatorsDialog() {
           </label>
 
           <p className="text-xs text-muted-foreground">
-            Campos aceitos: name, objective, owner_sector, franchise, audience, responsible, status, value_type, unit, frequency, direction, input_method, default_target, warning_threshold, critical_threshold, start_date, end_date, allows_attachment, data_source. A coluna franchise deve conter uma empresa cadastrada.
+            Campos aceitos: name, objective, owner_sector, franchise, responsible, status, value_type, frequency, direction, default_target, warning_threshold, critical_threshold, start_date, end_date. A coluna franchise deve conter uma empresa cadastrada.
           </p>
         </div>
 

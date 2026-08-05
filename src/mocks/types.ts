@@ -37,9 +37,7 @@ export type Frequency =
   | "anual";
 
 export type Direction = "maior_melhor" | "menor_melhor" | "faixa_ideal" | "meta_exata";
-export type Audience = "interno" | "franqueado" | "ambos";
 export type Scope = "corporativo" | "setor" | "franquia" | "usuario";
-export type InputMethod = "manual" | "importacao" | "integracao" | "calculo";
 export type IndicatorStatus = "rascunho" | "ativo" | "pausado" | "arquivado";
 
 export type EntryStatus = "rascunho" | "registrado" | "atrasado";
@@ -122,22 +120,17 @@ export interface Indicator {
   franchise_id?: string;
   category_id?: string;
   strategic_pillar?: string;
-  audience: Audience;
   scope: Scope;
   responsible_ids: string[];
   value_type: ValueType;
-  unit?: string;
   frequency: Frequency;
   direction: Direction;
-  data_source?: string;
-  input_method: InputMethod;
   default_target?: number;
   minimum_value?: number;
   maximum_value?: number;
   warning_threshold?: number; // percentual classificatório
   critical_threshold?: number;
   weight: number;
-  allows_attachment: boolean;
   instructions?: string;
   start_date: string;
   end_date?: string;

@@ -73,14 +73,10 @@ function IndicatorDetail() {
           <Card><CardContent className="p-6 grid sm:grid-cols-2 gap-4 text-sm">
             <Item k="Objetivo" v={ind.objective ?? "—"} />
             <Item k="Pilar estratégico" v={ind.strategic_pillar ?? "—"} />
-            <Item k="Público" v={ind.audience} />
             <Item k="Abrangência" v={ind.scope} />
-            <Item k="Tipo de valor" v={`${ind.value_type}${ind.unit ? ` (${ind.unit})` : ""}`} />
+            <Item k="Tipo de valor" v={`${ind.value_type}`} />
             <Item k="Regra" v={ind.direction.replace("_", " ")} />
-            <Item k="Forma de preenchimento" v={ind.input_method} />
             <Item k="Responsável" v={ind.responsible_ids?.length ? ind.responsible_ids.map((rid) => profiles.find((p) => p.id === rid)?.full_name ?? "—").join(", ") : "—"} />
-            <Item k="Permite anexo" v={ind.allows_attachment ? "Sim" : "Não"} />
-            <Item k="Fonte" v={ind.data_source ?? "—"} />
             <Item k="Início" v={formatDate(ind.start_date)} />
             
           </CardContent></Card>
@@ -94,7 +90,7 @@ function IndicatorDetail() {
                 <TableRow key={t.id}>
                   <TableCell className="capitalize">{t.scope_type}</TableCell>
                   <TableCell>{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
-                  <TableCell className="font-mono">{formatValue(t.target_value, ind.value_type, ind.unit)}</TableCell>
+                  <TableCell className="font-mono">{formatValue(t.target_value, ind.value_type)}</TableCell>
                   <TableCell>{t.weight}</TableCell>
                 </TableRow>
               ))}
@@ -114,8 +110,8 @@ function IndicatorDetail() {
                 return (
                   <TableRow key={e.id}>
                     <TableCell>{formatDate(e.period_end)}</TableCell>
-                    <TableCell className="font-mono">{formatValue(e.actual_value, ind.value_type, ind.unit)}</TableCell>
-                    <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type, ind.unit) : <span className="text-muted-foreground text-xs">Sem meta definida</span>}</TableCell>
+                    <TableCell className="font-mono">{formatValue(e.actual_value, ind.value_type)}</TableCell>
+                    <TableCell className="font-mono">{t ? formatValue(t.target_value, ind.value_type) : <span className="text-muted-foreground text-xs">Sem meta definida</span>}</TableCell>
                     <TableCell className="font-mono">{pct != null ? `${Math.round(pct)}%` : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={cs.className}>{cs.label}</Badge></TableCell>
                   </TableRow>

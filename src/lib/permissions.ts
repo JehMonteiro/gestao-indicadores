@@ -6,8 +6,7 @@ import type { Indicator } from "@/mocks/types";
  * RLS rules planned for Phase 2:
  *  - super/admin: see everything
  *  - sector members/managers: see indicators owned/shared with their sectors
- *  - franchise users: see indicators with audience including franchise AND
- *    where they have an entry/target for their franchise
+ *  - franchise users: see franchise/corporate indicators
  *  - auditor: see anything in their assigned sectors/franchises (read-only)
  */
 export function useVisibleIndicators(): Indicator[] {
@@ -24,7 +23,6 @@ export function useVisibleIndicators(): Indicator[] {
 
   return all.filter((ind) => {
     if (user.user_type === "franqueado") {
-      if (ind.audience === "interno") return false;
       // Restrict to indicators relevant to franchises
       return ind.scope === "franquia" || ind.scope === "corporativo";
     }
@@ -33,7 +31,7 @@ export function useVisibleIndicators(): Indicator[] {
       || ind.shared_sector_ids.some((s) => mySectorIds.includes(s));
     if (sectorMatch) return true;
     if (user.global_role === "gestor_franquia") {
-      return myFranchiseIds.length > 0 && (ind.audience === "franqueado" || ind.audience === "ambos");
+      return myFranchiseIds.length > 0;
     }
     return false;
   });

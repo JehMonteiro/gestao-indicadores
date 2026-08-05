@@ -186,14 +186,9 @@ function NewEntry() {
               <Field label="Início do período"><Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} /></Field>
               <Field label="Fim do período"><Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} /></Field>
             </div>
-            <Field label={`Valor realizado${ind?.unit ? ` (${ind.unit})` : ""}`}><Input type="number" step={numericStep(ind?.value_type)} onKeyDown={blockDecimalKeys(ind?.value_type)} value={actual} onChange={(e) => setActual(e.target.value)} /></Field>
+            <Field label="Valor realizado"><Input type="number" step={numericStep(ind?.value_type)} onKeyDown={blockDecimalKeys(ind?.value_type)} value={actual} onChange={(e) => setActual(e.target.value)} /></Field>
             <Field label="Comentário"><Textarea value={comment} onChange={(e) => setComment(e.target.value)} /></Field>
             <Field label="Justificativa (opcional)"><Textarea value={justification} onChange={(e) => setJustification(e.target.value)} /></Field>
-            {ind?.allows_attachment && (
-              <div className="border-dashed border rounded-md p-4 text-center text-sm text-muted-foreground">
-                Anexos de comprovação serão habilitados quando o Lovable Cloud estiver ativo.
-              </div>
-            )}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" disabled={!!saving || authLoading} onClick={() => save("rascunho")}>{saving === "rascunho" ? "Salvando..." : "Salvar rascunho"}</Button>
               <Button disabled={!!saving || authLoading} onClick={() => save("registrado")}>{saving === "registrado" ? "Salvando..." : "Cadastrar"}</Button>
@@ -204,8 +199,8 @@ function NewEntry() {
         <Card>
           <CardHeader><CardTitle className="text-base">Previsão</CardTitle></CardHeader>
           <CardContent className="text-sm space-y-2">
-            <p className="text-muted-foreground">Meta: {target ? formatValue(target.target_value, ind?.value_type ?? "inteiro", ind?.unit) : "—"}</p>
-            <p className="text-muted-foreground">Atual: {actual ? formatValue(Number(actual), ind?.value_type ?? "inteiro", ind?.unit) : "—"}</p>
+            <p className="text-muted-foreground">Meta: {target ? formatValue(target.target_value, ind?.value_type ?? "inteiro") : "—"}</p>
+            <p className="text-muted-foreground">Atual: {actual ? formatValue(Number(actual), ind?.value_type ?? "inteiro") : "—"}</p>
             <div className="border-t pt-3">
               <p className="text-xs uppercase text-muted-foreground">Atingimento</p>
               <p className="text-3xl font-semibold font-mono mt-1">{preview != null ? `${Math.round(preview)}%` : "—"}</p>
