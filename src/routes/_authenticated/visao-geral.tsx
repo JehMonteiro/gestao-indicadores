@@ -306,7 +306,7 @@ function Overview() {
                       <TableCell className={`text-right font-mono ${varColor}`}>
                         <span className="inline-flex items-center gap-1 justify-end">
                           <VarIcon className="size-3.5" />
-                          {variation == null ? "—" : `${variation > 0 ? "+" : ""}${variation.toFixed(1)}%`}
+                          {variation == null ? "—" : `${variation > 0 ? "+" : ""}${Math.round(variation)}%`}
                         </span>
                       </TableCell>
                     </TableRow>
