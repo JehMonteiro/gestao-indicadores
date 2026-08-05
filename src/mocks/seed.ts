@@ -136,7 +136,7 @@ export const seedIndicators: Indicator[] = [
   {
     id: "i-pdv", name: "Produtos por cliente", code: "PDV", owner_sector_id: "s-com", shared_sector_ids: [],
     audience: "franqueado", scope: "franquia", responsible_ids: ["u-fr-camp"], value_type: "decimal",
-    frequency: "mensal", direction: "faixa_ideal", input_method: "manual", minimum_value: 2.5, maximum_value: 4.5, default_target: 3.5,
+    frequency: "mensal", direction: "faixa_ideal", input_method: "manual", minimum_value: 3, maximum_value: 5, default_target: 4,
     weight: 1, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
