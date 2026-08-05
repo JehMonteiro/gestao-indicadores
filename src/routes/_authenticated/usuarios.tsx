@@ -105,7 +105,14 @@ function UsersPage() {
       {editing && (
         <Dialog open onOpenChange={(o) => !o && setEditing(null)}>
           <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>Vínculos de {editing.full_name}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Editar {editing.full_name}</DialogTitle></DialogHeader>
+
+            <GlobalRoleSection
+              target={editing}
+              isSuperadmin={isSuperadmin}
+              currentUserId={currentUserId}
+            />
+
             <div>
               <p className="text-sm font-medium mb-2">Setores</p>
               <div className="space-y-1">
