@@ -63,7 +63,7 @@ function mapFranchise(row: any): Franchise {
   };
 }
 
-function mapIndicator(row: any): Indicator {
+function mapIndicator(row: any, sharedSectorIds: string[] = []): Indicator {
   return {
     id: row.id,
     name: row.name,
@@ -71,7 +71,7 @@ function mapIndicator(row: any): Indicator {
     description: row.description ?? undefined,
     objective: row.objective ?? undefined,
     owner_sector_id: row.owner_sector_id ?? "",
-    shared_sector_ids: [],
+    shared_sector_ids: sharedSectorIds,
     franchise_id: row.franchise_id ?? undefined,
     strategic_pillar: row.strategic_pillar ?? undefined,
     scope: row.scope,
