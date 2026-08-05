@@ -116,7 +116,10 @@ function IndicatorsList() {
               {filtered.map((i) => {
                 const sector = sectors.find((s) => s.id === i.owner_sector_id);
                 const franchise = i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id) : null;
-                const responsible = i.responsible_user_id ? profiles.find((p) => p.id === i.responsible_user_id) : null;
+                const responsibleNames = (i.responsible_ids ?? [])
+                  .map((rid) => profiles.find((p) => p.id === rid)?.full_name)
+                  .filter(Boolean)
+                  .join(", ");
                 const e = registeredEntriesForIndicator(i, entries).slice(-1)[0];
                 const t = e ? resolveTargetForEntry(i, e, targets) : resolveTargetForIndicator(i, targets);
                 const pct = computeAchievement(e, t, i.direction);
