@@ -43,14 +43,10 @@ const selectableRoles: GlobalRole[] = [
 function UsersPage() {
   const profiles = useStore((s) => s.profiles);
   const sectors = useStore((s) => s.sectors);
-  const franchises = useStore((s) => s.franchises);
   const userSectors = useStore((s) => s.userSectors);
-  const userFranchises = useStore((s) => s.userFranchises);
   const upsertProfile = useStore((s) => s.upsertProfile);
   const upsertUS = useStore((s) => s.upsertUserSector);
   const removeUS = useStore((s) => s.removeUserSector);
-  const upsertUF = useStore((s) => s.upsertUserFranchise);
-  const removeUF = useStore((s) => s.removeUserFranchise);
 
   const [editing, setEditing] = useState<Profile | null>(null);
   const [deleting, setDeleting] = useState<Profile | null>(null);
@@ -77,26 +73,23 @@ function UsersPage() {
 
   return (
     <div>
-      <PageHeader title="Usuários" description="Cadastro e vínculos com setores e franquias."
+      <PageHeader title="Usuários" description="Cadastro de colaboradores internos e vínculos com setores."
         actions={
           <ProfileDialog onSave={(p) => { upsertProfile(p); toast.success("Usuário salvo"); }} />
         }
       />
 
       <Card><Table>
-        <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Perfil global</TableHead><TableHead>Tipo</TableHead><TableHead>Setores</TableHead><TableHead>Franquias</TableHead><TableHead></TableHead></TableRow></TableHeader>
+        <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Perfil global</TableHead><TableHead>Setores</TableHead><TableHead></TableHead></TableRow></TableHeader>
         <TableBody>
           {profiles.map((p) => {
             const ss = userSectors.filter((us) => us.user_id === p.id);
-            const ff = userFranchises.filter((uf) => uf.user_id === p.id);
             return (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.full_name}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{p.email}</TableCell>
                 <TableCell><Badge variant="secondary">{roleLabels[p.global_role]}</Badge></TableCell>
-                <TableCell className="capitalize text-sm">{p.user_type}</TableCell>
                 <TableCell className="text-xs">{ss.map((u) => sectors.find((s) => s.id === u.sector_id)?.code).filter(Boolean).join(", ") || "—"}</TableCell>
-                <TableCell className="text-xs">{ff.map((u) => franchises.find((s) => s.id === u.franchise_id)?.code).filter(Boolean).join(", ") || "—"}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="icon" onClick={() => setEditing(p)}><Pencil className="size-4" /></Button>
                   {isSuperadmin && p.id !== currentUserId && (
@@ -113,38 +106,22 @@ function UsersPage() {
         <Dialog open onOpenChange={(o) => !o && setEditing(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader><DialogTitle>Vínculos de {editing.full_name}</DialogTitle></DialogHeader>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium mb-2">Setores</p>
-                <div className="space-y-1">
-                  {userSectors.filter((us) => us.user_id === editing.id).map((us) => {
-                    const s = sectors.find((s) => s.id === us.sector_id);
-                    return (
-                      <div key={us.id} className="flex items-center justify-between border rounded p-2 text-sm">
-                        <span>{s?.name} <Badge variant="outline" className="ml-1 capitalize">{us.sector_role}</Badge></span>
-                        <Button size="icon" variant="ghost" onClick={() => removeUS(us.id)}><UserMinus className="size-3.5" /></Button>
-                      </div>
-                    );
-                  })}
-                </div>
-                <AddSectorRow userId={editing.id} onAdd={(sid, role) => { upsertUS({ id: newId(), user_id: editing.id, sector_id: sid, sector_role: role, active: true, joined_at: new Date().toISOString() }); toast.success("Vínculo adicionado"); }} />
+            <div>
+              <p className="text-sm font-medium mb-2">Setores</p>
+              <div className="space-y-1">
+                {userSectors.filter((us) => us.user_id === editing.id).map((us) => {
+                  const s = sectors.find((s) => s.id === us.sector_id);
+                  return (
+                    <div key={us.id} className="flex items-center justify-between border rounded p-2 text-sm">
+                      <span>{s?.name} <Badge variant="outline" className="ml-1 capitalize">{us.sector_role}</Badge></span>
+                      <Button size="icon" variant="ghost" onClick={() => removeUS(us.id)}><UserMinus className="size-3.5" /></Button>
+                    </div>
+                  );
+                })}
               </div>
-              <div>
-                <p className="text-sm font-medium mb-2">Franquias</p>
-                <div className="space-y-1">
-                  {userFranchises.filter((uf) => uf.user_id === editing.id).map((uf) => {
-                    const f = franchises.find((f) => f.id === uf.franchise_id);
-                    return (
-                      <div key={uf.id} className="flex items-center justify-between border rounded p-2 text-sm">
-                        <span>{f?.name} <Badge variant="outline" className="ml-1 capitalize">{uf.franchise_role}</Badge></span>
-                        <Button size="icon" variant="ghost" onClick={() => removeUF(uf.id)}><UserMinus className="size-3.5" /></Button>
-                      </div>
-                    );
-                  })}
-                </div>
-                <AddFranchiseRow userId={editing.id} onAdd={(fid, role) => { upsertUF({ id: newId(), user_id: editing.id, franchise_id: fid, franchise_role: role, active: true, joined_at: new Date().toISOString() }); toast.success("Vínculo adicionado"); }} />
-              </div>
+              <AddSectorRow userId={editing.id} onAdd={(sid, role) => { upsertUS({ id: newId(), user_id: editing.id, sector_id: sid, sector_role: role, active: true, joined_at: new Date().toISOString() }); toast.success("Vínculo adicionado"); }} />
             </div>
+
             <DialogFooter><Button onClick={() => setEditing(null)}>Fechar</Button></DialogFooter>
           </DialogContent>
         </Dialog>
