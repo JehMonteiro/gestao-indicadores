@@ -85,7 +85,11 @@ function EditIndicator() {
       { label: "Peso", value: (f as { weight?: number }).weight },
     ]);
     if (intError) { toast.error(intError); return; }
-    upsert(f);
+    await upsert(f);
+    if (user?.id) {
+      const data = await loadAllFromSupabase(user.id);
+      useStore.getState().hydrate(data);
+    }
     logAudit({ user_id: user?.id ?? "", action: "update", entity_type: "indicator", entity_id: f.id });
     toast.success("Indicador atualizado");
     navigate({ to: "/indicadores/$id", params: { id: f.id } });
