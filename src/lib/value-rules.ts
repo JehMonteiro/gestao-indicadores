@@ -1,26 +1,19 @@
 import type { ValueType } from "@/mocks/types";
 
 /**
- * Regra central: quais tipos de valor exigem números inteiros nos
+ * Regra central: TODOS os tipos de valor exigem números inteiros nos
  * valores cadastrados (meta padrão, mínimo, máximo, meta e realizado).
- * Percentual, decimal e tempo continuam aceitando casas decimais.
+ * Não há exceções — percentual, decimal e tempo também são inteiros.
  */
-const INTEGER_VALUE_TYPES: ReadonlySet<ValueType> = new Set<ValueType>([
-  "inteiro",
-  "quantidade",
-  "moeda",
-  "nota",
-]);
-
-export function requiresInteger(type?: ValueType | null): boolean {
-  if (!type) return false;
-  return INTEGER_VALUE_TYPES.has(type);
+export function requiresInteger(_type?: ValueType | null): boolean {
+  return true;
 }
 
-/** Passo do input numérico conforme o tipo de valor. */
-export function numericStep(type?: ValueType | null): string {
-  return requiresInteger(type) ? "1" : "0.01";
+/** Passo do input numérico: sempre inteiro. */
+export function numericStep(_type?: ValueType | null): string {
+  return "1";
 }
+
 
 /** Arredonda o valor quando o tipo exige inteiro (usado em importações/seed). */
 export function roundForType<T extends number | null | undefined>(value: T, type?: ValueType | null): T {
