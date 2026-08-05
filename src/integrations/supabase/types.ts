@@ -241,6 +241,7 @@ export type Database = {
           default_target: number | null
           description: string | null
           direction: Database["public"]["Enums"]["indicator_direction"]
+          end_date: string | null
           formula: string | null
           franchise_id: string | null
           id: string
@@ -269,6 +270,7 @@ export type Database = {
           default_target?: number | null
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
+          end_date?: string | null
           formula?: string | null
           franchise_id?: string | null
           id?: string
@@ -297,6 +299,7 @@ export type Database = {
           default_target?: number | null
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
+          end_date?: string | null
           formula?: string | null
           franchise_id?: string | null
           id?: string

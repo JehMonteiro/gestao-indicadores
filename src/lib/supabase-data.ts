@@ -86,6 +86,7 @@ function mapIndicator(row: any, sharedSectorIds: string[] = []): Indicator {
     critical_threshold: row.critical_threshold != null ? Number(row.critical_threshold) : undefined,
     weight: 1,
     start_date: row.start_date ?? row.created_at,
+    end_date: row.end_date ?? undefined,
     status: row.status,
     created_by: row.created_by ?? "",
     created_at: row.created_at,
@@ -354,6 +355,7 @@ export const dbWrite = {
       warning_threshold: intOrNull(i.warning_threshold),
       critical_threshold: intOrNull(i.critical_threshold),
       start_date: i.start_date || null,
+      end_date: i.end_date || null,
       status: i.status as any,
       created_by: i.created_by || null,
     });
