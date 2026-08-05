@@ -68,7 +68,7 @@ function EditIndicator() {
 
   const set = <K extends keyof Indicator>(k: K, v: Indicator[K]) => setF((p) => (p ? { ...p, [k]: v } : p));
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!f.name || !f.owner_sector_id) {
       toast.error("Preencha nome e setor proprietário");
