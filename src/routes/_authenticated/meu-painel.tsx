@@ -1,14 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PageHeader, EmptyState, StatusDot } from "@/components/app/page-header";
 import { useCurrentUser, useStore } from "@/mocks/store";
-import { useVisibleIndicators } from "@/lib/permissions";
+import { useOwnedIndicators, useVisibleIndicators } from "@/lib/permissions";
 import { classify, classificationStyles, computeAchievement, formatDate, formatValue, weightedIndex } from "@/lib/format";
 import { registeredEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
+import {
+  AnnualSummaryCard,
+  FranchiseRankingList,
+  IndexEvolutionCard,
+  buildIndicatorMetrics,
+  useFranchiseRanking,
+} from "@/components/app/dashboard-blocks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Activity, AlertTriangle, CheckCircle2, Clock, ListChecks, TrendingDown, TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 
@@ -20,10 +29,36 @@ export const Route = createFileRoute("/_authenticated/meu-painel")({
 function MyDashboard() {
   const user = useCurrentUser();
   const indicators = useVisibleIndicators();
-  const entries = useStore((s) => s.entries);
-  const targets = useStore((s) => s.targets);
+  const ownedIndicators = useOwnedIndicators();
+  const allEntries = useStore((s) => s.entries);
+  const allTargets = useStore((s) => s.targets);
   const settings = useStore((s) => s.settings);
-  const sectors = useStore((s) => s.sectors);
+  const allSectors = useStore((s) => s.sectors);
+  const allFranchises = useStore((s) => s.franchises);
+  const [period, setPeriod] = useState<"3m" | "6m" | "12m">("6m");
+
+  const visibleIds = useMemo(() => new Set(indicators.map((i) => i.id)), [indicators]);
+  const entries = useMemo(() => allEntries.filter((e) => visibleIds.has(e.indicator_id)), [allEntries, visibleIds]);
+  const targets = useMemo(() => allTargets.filter((t) => visibleIds.has(t.indicator_id)), [allTargets, visibleIds]);
+  const sectors = useMemo(() => {
+    const ids = new Set(indicators.flatMap((i) => [i.owner_sector_id, ...(i.shared_sector_ids ?? [])]));
+    return allSectors.filter((s) => ids.has(s.id));
+  }, [allSectors, indicators]);
+  const franchises = useMemo(() => {
+    const ids = new Set<string>([
+      ...indicators.map((i) => i.franchise_id).filter(Boolean) as string[],
+      ...targets.map((t) => t.franchise_id).filter(Boolean) as string[],
+      ...entries.map((e) => e.franchise_id).filter(Boolean) as string[],
+    ]);
+    return ids.size > 0 ? allFranchises.filter((f) => ids.has(f.id)) : allFranchises;
+  }, [allFranchises, indicators, targets, entries]);
+
+  const metricsByIndicator = useMemo(
+    () => buildIndicatorMetrics(indicators, entries, targets),
+    [indicators, entries, targets],
+  );
+  const franchiseRanking = useFranchiseRanking(franchises, metricsByIndicator, targets, entries);
+
 
   const stats = useMemo(() => {
     const metrics = indicators.map((ind) => {
