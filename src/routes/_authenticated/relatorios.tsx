@@ -39,7 +39,7 @@ function ReportsPage() {
     const header = ["periodo_inicio", "periodo_fim", "valor", "meta", "atingimento", "status"];
     const lines = [header.join(",")];
     rows.forEach(({ e, t, pct }) => {
-      lines.push([e.period_start, e.period_end, e.actual_value ?? "", t?.target_value ?? "", pct ?? "", e.status].join(","));
+      lines.push([e.period_start, e.period_end, e.actual_value ?? "", t?.target_value ?? "", pct != null ? Math.round(pct) : "", e.status].join(","));
     });
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const a = document.createElement("a");
