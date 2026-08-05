@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Pencil, Plus, Trash2, UserMinus, UserPlus } from "lucide-react";
 import { useState } from "react";
-import type { Profile, SectorRole, FranchiseRole, GlobalRole } from "@/mocks/types";
+import type { Profile, SectorRole, GlobalRole } from "@/mocks/types";
 import { toast } from "sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { EmptyState } from "@/components/app/page-header";
