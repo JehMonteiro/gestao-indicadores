@@ -55,16 +55,6 @@ function ProfilePage() {
                 </div>
               ))}
             </div>
-            <div>
-              <p className="text-xs uppercase text-muted-foreground mb-1">Franquias</p>
-              {myFranchises.length === 0 && <p className="text-muted-foreground">Nenhuma</p>}
-              {myFranchises.map((uf) => (
-                <div key={uf.id} className="flex justify-between border rounded p-2 mb-1">
-                  <span>{franchises.find((f) => f.id === uf.franchise_id)?.name}</span>
-                  <Badge variant="outline" className="capitalize">{uf.franchise_role}</Badge>
-                </div>
-              ))}
-            </div>
           </CardContent>
         </Card>
       </div>
