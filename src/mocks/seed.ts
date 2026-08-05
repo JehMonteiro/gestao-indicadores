@@ -58,12 +58,8 @@ export const seedFranchises: Franchise[] = [
   { id: "f-poa", name: "Unidade Porto Alegre", code: "POA", legal_name: "Franquia POA Ltda", city: "Porto Alegre", state: "RS", region: "Sul", status: "ativa", start_date: iso(subMonths(today, 3)), created_at: iso(today) },
 ];
 
-export const seedUserFranchises: UserFranchise[] = [
-  { id: "uf1", user_id: "u-gest-fr", franchise_id: "f-camp", franchise_role: "gestor", active: true, joined_at: iso(today) },
-  { id: "uf2", user_id: "u-gest-fr", franchise_id: "f-bh", franchise_role: "gestor", active: true, joined_at: iso(today) },
-  { id: "uf3", user_id: "u-fr-camp", franchise_id: "f-camp", franchise_role: "franqueado", active: true, joined_at: iso(today) },
-  { id: "uf4", user_id: "u-fr-bh", franchise_id: "f-bh", franchise_role: "franqueado", active: true, joined_at: iso(today) },
-];
+export const seedUserFranchises: UserFranchise[] = [];
+
 
 // ===== Categories =====
 export const seedCategories: IndicatorCategory[] = [
