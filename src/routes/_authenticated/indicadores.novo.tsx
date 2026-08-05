@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import type { Direction, Frequency, Indicator, IndicatorStatus, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
