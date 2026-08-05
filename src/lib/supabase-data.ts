@@ -221,6 +221,7 @@ export async function loadAllFromSupabase(userId: string) {
     supabase.from("sectors").select("*").order("name"),
     supabase.from("franchises").select("*").order("name"),
     supabase.from("indicators").select("*").order("name"),
+    supabase.from("indicator_shared_sectors" as any).select("indicator_id, sector_id"),
     supabase.from("targets").select("*"),
     supabase.from("indicator_entries").select("*").order("period_end", { ascending: false }),
     supabase.from("user_sectors").select("*"),
