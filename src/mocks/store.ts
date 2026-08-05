@@ -124,7 +124,7 @@ export const useStore = create<State & Actions>()(
       },
       upsertIndicator: (i) => {
         set((st) => ({ indicators: upsert(st.indicators, i) }));
-        fireAndForget("indicator", dbWrite.indicator(i));
+        return fireAndForget("indicator", dbWrite.indicator(i));
       },
       deleteIndicator: (id) => {
         set((st) => ({ indicators: st.indicators.filter((x) => x.id !== id) }));
