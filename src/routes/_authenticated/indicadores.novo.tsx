@@ -82,7 +82,11 @@ function NewIndicator() {
       ...rest,
       end_date: rest.end_date || undefined,
     };
-    upsert(ind);
+    await upsert(ind);
+    if (user?.id) {
+      const data = await loadAllFromSupabase(user.id);
+      useStore.getState().hydrate(data);
+    }
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
     toast.success("Indicador criado com sucesso");
     navigate({ to: "/indicadores/$id", params: { id: ind.id } });
