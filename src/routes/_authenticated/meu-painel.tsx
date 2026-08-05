@@ -205,7 +205,38 @@ function MyDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="mt-4 flex justify-end">
+        <Select value={period} onValueChange={(v) => setPeriod(v as never)}>
+          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="3m">Últimos 3 meses</SelectItem>
+            <SelectItem value="6m">Últimos 6 meses</SelectItem>
+            <SelectItem value="12m">Últimos 12 meses</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="mt-2">
+        <IndexEvolutionCard metrics={metricsByIndicator} period={period} />
+      </div>
+
+      <Tabs defaultValue="franquias" className="mt-4">
+        <TabsList>
+          <TabsTrigger value="franquias">Ranking empresas</TabsTrigger>
+        </TabsList>
+        <TabsContent value="franquias">
+          <Card>
+            <CardContent className="p-4">
+              <FranchiseRankingList ranking={franchiseRanking} settings={settings} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <AnnualSummaryCard indicators={ownedIndicators} entries={entries} targets={targets} settings={settings} />
     </div>
+
   );
 }
 
