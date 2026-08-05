@@ -6,7 +6,7 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { classify, classificationStyles, computeAchievement, formatMonth, formatValue, weightedIndex } from "@/lib/format";
 import { latestEntriesByPeriod, registeredEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
-import type { AppSettings, Franchise, Indicator, IndicatorEntry, IndicatorTarget } from "@/mocks/types";
+import type { Franchise, Indicator, IndicatorEntry, IndicatorTarget, SystemSettings } from "@/mocks/types";
 
 export type IndicatorMetric = {
   ind: Indicator;
@@ -106,7 +106,7 @@ export function FranchiseRankingList({
   settings,
 }: {
   ranking: { name: string; valor: number }[];
-  settings: AppSettings;
+  settings: SystemSettings;
 }) {
   return (
     <div className="space-y-2">
@@ -141,7 +141,7 @@ export function AnnualSummaryCard({
   indicators: Indicator[];
   entries: IndicatorEntry[];
   targets: IndicatorTarget[];
-  settings: AppSettings;
+  settings: SystemSettings;
 }) {
   const currentYear = new Date().getFullYear();
   const rows = useMemo(() => {
