@@ -104,6 +104,7 @@ function IndicatorsList() {
                 <TableHead>Indicador</TableHead>
                 <TableHead>Setor</TableHead>
                 <TableHead>Empresa</TableHead>
+                <TableHead>Responsável</TableHead>
                 <TableHead>Periodicidade</TableHead>
                 <TableHead>Último resultado</TableHead>
                 <TableHead>Atingimento</TableHead>
