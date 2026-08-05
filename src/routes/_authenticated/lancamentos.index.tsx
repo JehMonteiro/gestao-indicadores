@@ -71,7 +71,7 @@ function EntriesList() {
                   <TableCell className="font-medium">{ind?.name}</TableCell>
                   <TableCell>{franchise?.name ?? "—"}</TableCell>
                   <TableCell>{formatDate(e.period_start)} — {formatDate(e.period_end)}</TableCell>
-                  <TableCell className="font-mono">{formatValue(e.actual_value, ind?.value_type ?? "inteiro", ind?.unit)}</TableCell>
+                  <TableCell className="font-mono">{formatValue(e.actual_value, ind?.value_type ?? "inteiro")}</TableCell>
                   <TableCell>{formatDate(e.updated_at)}</TableCell>
                   <TableCell><Badge variant="outline" className={`capitalize ${statusColors[e.status]}`}>{e.status}</Badge></TableCell>
                   <TableCell><Link to="/lancamentos/$id" params={{ id: e.id }} className="text-primary hover:underline text-sm">Ver</Link></TableCell>

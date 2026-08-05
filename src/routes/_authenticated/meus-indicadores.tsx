@@ -41,8 +41,8 @@ function MyIndicators() {
                 <TableCell className="font-medium">{i.name}</TableCell>
                 <TableCell>{sector && <Badge variant="outline" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</TableCell>
                 <TableCell className="text-sm">{franchise ? franchise.name : <span className="text-muted-foreground">—</span>}</TableCell>
-                <TableCell className="font-mono">{e ? formatValue(e.actual_value, i.value_type, i.unit) : "—"}</TableCell>
-                <TableCell className="font-mono">{t ? formatValue(t.target_value, i.value_type, i.unit) : "—"}</TableCell>
+                <TableCell className="font-mono">{e ? formatValue(e.actual_value, i.value_type) : "—"}</TableCell>
+                <TableCell className="font-mono">{t ? formatValue(t.target_value, i.value_type) : "—"}</TableCell>
                 <TableCell className="font-mono">{pct != null ? `${Math.round(pct)}%` : "—"}</TableCell>
                 <TableCell><Badge variant="outline" className={cs.className}>{cs.label}</Badge></TableCell>
               </TableRow>

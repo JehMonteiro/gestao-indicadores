@@ -100,7 +100,7 @@ function TargetsPage() {
                 <TableCell className="text-sm">{setorName}</TableCell>
                 <TableCell className="text-sm">{respName}</TableCell>
                 <TableCell className="text-sm">{formatDate(t.period_start)} — {formatDate(t.period_end)}</TableCell>
-                <TableCell className="font-mono">{formatValue(t.target_value, ind?.value_type ?? "inteiro", ind?.unit)}</TableCell>
+                <TableCell className="font-mono">{formatValue(t.target_value, ind?.value_type ?? "inteiro")}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => setEditing(t)} aria-label="Editar"><Pencil className="size-4" /></Button>

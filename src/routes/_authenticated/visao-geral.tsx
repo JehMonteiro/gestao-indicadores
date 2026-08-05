@@ -293,9 +293,9 @@ function Overview() {
                         <div className="font-medium">{ind.name}</div>
                         <div className="text-xs text-muted-foreground font-mono">{ind.code}</div>
                       </TableCell>
-                      <TableCell className="text-right font-mono">{formatValue(accPrev, ind.value_type, ind.unit)}</TableCell>
-                      <TableCell className="text-right font-mono">{formatValue(accThis, ind.value_type, ind.unit)}</TableCell>
-                      <TableCell className="text-right font-mono">{avgMonth == null ? "—" : formatValue(avgMonth, ind.value_type, ind.unit)}</TableCell>
+                      <TableCell className="text-right font-mono">{formatValue(accPrev, ind.value_type)}</TableCell>
+                      <TableCell className="text-right font-mono">{formatValue(accThis, ind.value_type)}</TableCell>
+                      <TableCell className="text-right font-mono">{avgMonth == null ? "—" : formatValue(avgMonth, ind.value_type)}</TableCell>
                       <TableCell className="text-right">
                         {pctRealized == null ? (
                           <span className="text-muted-foreground">—</span>
