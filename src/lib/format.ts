@@ -14,28 +14,32 @@ export function formatMonth(iso?: string): string {
 
 export function formatBRL(v?: number | null): string {
   if (v == null || Number.isNaN(v)) return "—";
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 2 });
+  return Math.round(v).toLocaleString("pt-BR", {
+    style: "currency", currency: "BRL", maximumFractionDigits: 0, minimumFractionDigits: 0,
+  });
 }
 
-export function formatNumber(v?: number | null, digits = 0): string {
+/** Todos os números do sistema são exibidos como inteiros, sem vírgula. */
+export function formatNumber(v?: number | null, _digits = 0): string {
   if (v == null || Number.isNaN(v)) return "—";
-  return v.toLocaleString("pt-BR", { maximumFractionDigits: digits, minimumFractionDigits: digits });
+  return Math.round(v).toLocaleString("pt-BR", { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 }
 
 export function formatValue(v: number | undefined, type: ValueType, unit?: string): string {
   if (v == null || Number.isNaN(v)) return "—";
   switch (type) {
     case "moeda": return formatBRL(v);
-    case "percentual": return `${formatNumber(v, 1)}%`;
-    case "decimal": return formatNumber(v, 2);
+    case "percentual": return `${formatNumber(v)}%`;
+    case "decimal":
     case "inteiro":
-    case "quantidade": return formatNumber(v, 0);
-    case "tempo": return `${formatNumber(v, 1)} ${unit ?? "min"}`;
-    case "nota": return `${formatNumber(v, 1)} ${unit ?? ""}`.trim();
+    case "quantidade": return formatNumber(v);
+    case "tempo": return `${formatNumber(v)} ${unit ?? "min"}`;
+    case "nota": return `${formatNumber(v)} ${unit ?? ""}`.trim();
     case "boolean": return v ? "Sim" : "Não";
     default: return String(v);
   }
 }
+
 
 export type Classification = "atingido" | "atencao" | "critico" | "sem_info";
 
