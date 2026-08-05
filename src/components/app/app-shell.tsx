@@ -150,18 +150,6 @@ function ContextSwitcher() {
             ))}
           </div>
         )}
-        {myFranchises.length > 0 && (
-          <div className="border-t p-2">
-            <p className="px-2 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Franquias</p>
-            {myFranchises.map((f) => (
-              <button key={f.id} onClick={() => { setActiveFranchise(f.id); setActiveSector(null); }}
-                className={cn("w-full text-left px-2 py-1.5 text-sm rounded hover:bg-muted",
-                  activeFranchiseId === f.id && "bg-muted font-medium")}>
-                {f.name}
-              </button>
-            ))}
-          </div>
-        )}
       </PopoverContent>
     </Popover>
   );
