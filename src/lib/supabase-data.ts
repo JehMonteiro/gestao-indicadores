@@ -287,6 +287,13 @@ function assertIntegerFields(
   if (err) throw new Error(err);
 }
 
+/** Garante inteiro (ou null) antes de persistir — nenhum decimal chega ao banco. */
+function intOrNull(v: number | null | undefined): number | null {
+  if (v === null || v === undefined || Number.isNaN(v)) return null;
+  return Math.round(v);
+}
+
+
 // ---------- Write-through helpers (mock type → DB) ----------
 
 export const dbWrite = {
@@ -341,11 +348,11 @@ export const dbWrite = {
       periodicity: i.frequency as any,
       direction: i.direction as any,
       input_method: i.input_method,
-      default_target: i.default_target ?? null,
-      minimum_value: i.minimum_value ?? null,
-      maximum_value: i.maximum_value ?? null,
-      warning_threshold: i.warning_threshold ?? null,
-      critical_threshold: i.critical_threshold ?? null,
+      default_target: intOrNull(i.default_target),
+      minimum_value: intOrNull(i.minimum_value),
+      maximum_value: intOrNull(i.maximum_value),
+      warning_threshold: intOrNull(i.warning_threshold),
+      critical_threshold: intOrNull(i.critical_threshold),
       allows_attachment: i.allows_attachment,
       start_date: i.start_date || null,
       instructions: i.instructions ?? null,
@@ -371,9 +378,9 @@ export const dbWrite = {
       user_id: t.user_id ?? null,
       period_start: t.period_start,
       period_end: t.period_end,
-      target_value: t.target_value,
-      min_value: t.minimum_value ?? null,
-      max_value: t.maximum_value ?? null,
+      target_value: Math.round(t.target_value ?? 0),
+      min_value: intOrNull(t.minimum_value),
+      max_value: intOrNull(t.maximum_value),
       created_by: t.created_by || null,
     });
   },
@@ -393,7 +400,7 @@ export const dbWrite = {
       franchise_id: e.franchise_id ?? null,
       period_start: e.period_start,
       period_end: e.period_end,
-      actual_value: e.actual_value ?? 0,
+      actual_value: Math.round(e.actual_value ?? 0),
       comment: e.comment ?? null,
       justification: e.justification ?? null,
       status: e.status as any,

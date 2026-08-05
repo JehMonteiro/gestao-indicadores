@@ -1,4 +1,3 @@
-import { roundForType } from "@/lib/value-rules";
 import { addDays, formatISO, startOfMonth, subMonths } from "date-fns";
 import type {
   AuditLog,
@@ -137,7 +136,7 @@ export const seedIndicators: Indicator[] = [
   {
     id: "i-pdv", name: "Produtos por cliente", code: "PDV", owner_sector_id: "s-com", shared_sector_ids: [],
     audience: "franqueado", scope: "franquia", responsible_ids: ["u-fr-camp"], value_type: "decimal",
-    frequency: "mensal", direction: "faixa_ideal", input_method: "manual", minimum_value: 2.5, maximum_value: 4.5, default_target: 3.5,
+    frequency: "mensal", direction: "faixa_ideal", input_method: "manual", minimum_value: 3, maximum_value: 5, default_target: 4,
     weight: 1, allows_attachment: false,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
@@ -220,7 +219,7 @@ export const seedEntries: IndicatorEntry[] = (() => {
       franchise_id: t.franchise_id,
       period_start: t.period_start,
       period_end: t.period_end,
-      actual_value: roundForType(Math.round(actual * 100) / 100, ind.value_type),
+      actual_value: Math.round(actual),
       comment: undefined,
       status,
       submitted_at: status !== "rascunho" ? t.period_end : undefined,
