@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import type { Direction, Frequency, Indicator, IndicatorStatus, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
@@ -46,7 +47,7 @@ function NewIndicator() {
 
   const set = <K extends keyof typeof f>(k: K, v: typeof f[K]) => setF((p) => ({ ...p, [k]: v }));
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!f.name || !f.owner_sector_id) {
       toast.error("Preencha nome e setor proprietário");
@@ -82,7 +83,11 @@ function NewIndicator() {
       ...rest,
       end_date: rest.end_date || undefined,
     };
-    upsert(ind);
+    await upsert(ind);
+    if (user?.id) {
+      const data = await loadAllFromSupabase(user.id);
+      useStore.getState().hydrate(data);
+    }
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
     toast.success("Indicador criado com sucesso");
     navigate({ to: "/indicadores/$id", params: { id: ind.id } });

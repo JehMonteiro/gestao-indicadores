@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore, useCurrentUser } from "@/mocks/store";
+import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import type { Direction, Frequency, Indicator, IndicatorStatus, ValueType } from "@/mocks/types";
 import { toast } from "sonner";
@@ -68,7 +69,7 @@ function EditIndicator() {
 
   const set = <K extends keyof Indicator>(k: K, v: Indicator[K]) => setF((p) => (p ? { ...p, [k]: v } : p));
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!f.name || !f.owner_sector_id) {
       toast.error("Preencha nome e setor proprietário");
@@ -85,7 +86,11 @@ function EditIndicator() {
       { label: "Peso", value: (f as { weight?: number }).weight },
     ]);
     if (intError) { toast.error(intError); return; }
-    upsert(f);
+    await upsert(f);
+    if (user?.id) {
+      const data = await loadAllFromSupabase(user.id);
+      useStore.getState().hydrate(data);
+    }
     logAudit({ user_id: user?.id ?? "", action: "update", entity_type: "indicator", entity_id: f.id });
     toast.success("Indicador atualizado");
     navigate({ to: "/indicadores/$id", params: { id: f.id } });

@@ -196,6 +196,42 @@ export type Database = {
           },
         ]
       }
+      indicator_shared_sectors: {
+        Row: {
+          created_at: string
+          id: string
+          indicator_id: string
+          sector_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          indicator_id: string
+          sector_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          indicator_id?: string
+          sector_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_shared_sectors_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicator_shared_sectors_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicators: {
         Row: {
           code: string

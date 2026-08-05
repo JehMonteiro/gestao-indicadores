@@ -49,7 +49,7 @@ type Actions = {
   deleteSector: (id: string) => void;
   upsertFranchise: (f: Franchise) => void;
   deleteFranchise: (id: string) => void;
-  upsertIndicator: (i: Indicator) => void;
+  upsertIndicator: (i: Indicator) => Promise<void>;
   deleteIndicator: (id: string) => void;
   upsertTarget: (t: IndicatorTarget) => void;
   deleteTarget: (id: string) => void;
@@ -124,7 +124,7 @@ export const useStore = create<State & Actions>()(
       },
       upsertIndicator: (i) => {
         set((st) => ({ indicators: upsert(st.indicators, i) }));
-        fireAndForget("indicator", dbWrite.indicator(i));
+        return fireAndForget("indicator", dbWrite.indicator(i));
       },
       deleteIndicator: (id) => {
         set((st) => ({ indicators: st.indicators.filter((x) => x.id !== id) }));

@@ -63,7 +63,7 @@ function mapFranchise(row: any): Franchise {
   };
 }
 
-function mapIndicator(row: any): Indicator {
+function mapIndicator(row: any, sharedSectorIds: string[] = []): Indicator {
   return {
     id: row.id,
     name: row.name,
@@ -71,7 +71,7 @@ function mapIndicator(row: any): Indicator {
     description: row.description ?? undefined,
     objective: row.objective ?? undefined,
     owner_sector_id: row.owner_sector_id ?? "",
-    shared_sector_ids: [],
+    shared_sector_ids: sharedSectorIds,
     franchise_id: row.franchise_id ?? undefined,
     strategic_pillar: row.strategic_pillar ?? undefined,
     scope: row.scope,
@@ -208,6 +208,7 @@ export async function loadAllFromSupabase(userId: string) {
     sectors,
     franchises,
     indicators,
+    sharedSectors,
     targets,
     entries,
     userSectors,
@@ -221,6 +222,7 @@ export async function loadAllFromSupabase(userId: string) {
     supabase.from("sectors").select("*").order("name"),
     supabase.from("franchises").select("*").order("name"),
     supabase.from("indicators").select("*").order("name"),
+    supabase.from("indicator_shared_sectors" as any).select("indicator_id, sector_id"),
     supabase.from("targets").select("*"),
     supabase.from("indicator_entries").select("*").order("period_end", { ascending: false }),
     supabase.from("user_sectors").select("*"),
@@ -231,6 +233,13 @@ export async function loadAllFromSupabase(userId: string) {
     supabase.from("profiles").select("*"),
     supabase.from("user_roles").select("user_id, role"),
   ]);
+
+  const sharedByIndicator = new Map<string, string[]>();
+  ((sharedSectors.data ?? []) as any[]).forEach((r: any) => {
+    const list = sharedByIndicator.get(r.indicator_id) ?? [];
+    list.push(r.sector_id);
+    sharedByIndicator.set(r.indicator_id, list);
+  });
 
   const rolesByUser = new Map<string, GlobalRole[]>();
   (roles.data ?? []).forEach((r: any) => {
@@ -254,7 +263,7 @@ export async function loadAllFromSupabase(userId: string) {
     profiles: mappedProfiles,
     sectors: (sectors.data ?? []).map(mapSector),
     franchises: (franchises.data ?? []).map(mapFranchise),
-    indicators: (indicators.data ?? []).map(mapIndicator),
+    indicators: (indicators.data ?? []).map((row: any) => mapIndicator(row, sharedByIndicator.get(row.id) ?? [])),
     targets: (targets.data ?? []).map(mapTarget),
     entries: (entries.data ?? []).map(mapEntry),
     userSectors: (userSectors.data ?? []).map(mapUserSector),
@@ -325,7 +334,7 @@ export const dbWrite = {
       { label: "Valor máximo", value: i.maximum_value },
       { label: "Peso", value: i.weight },
     ]);
-    return supabase.from("indicators").upsert({
+    const res = await supabase.from("indicators").upsert({
       id: i.id,
       code: i.code,
       name: i.name,
@@ -348,6 +357,23 @@ export const dbWrite = {
       status: i.status as any,
       created_by: i.created_by || null,
     });
+    if (res.error) return res;
+
+    // Sincroniza os setores compartilhados do indicador
+    const shared = (i.shared_sector_ids ?? []).filter(Boolean);
+    if (shared.length === 0) {
+      await supabase.from("indicator_shared_sectors" as any).delete().eq("indicator_id", i.id);
+    } else {
+      await supabase.from("indicator_shared_sectors" as any)
+        .delete()
+        .eq("indicator_id", i.id)
+        .not("sector_id", "in", `(${shared.join(",")})`);
+      await supabase.from("indicator_shared_sectors" as any).upsert(
+        shared.map((sid) => ({ indicator_id: i.id, sector_id: sid })) as any,
+        { onConflict: "indicator_id,sector_id" } as any,
+      );
+    }
+    return res;
   },
   async deleteIndicator(id: string) {
     return supabase.from("indicators").delete().eq("id", id);
@@ -487,7 +513,7 @@ async function rehydrateFromCloud() {
 }
 
 export function fireAndForget(label: string, p: Promise<unknown>) {
-  p.then((res: any) => {
+  return p.then((res: any) => {
     if (res && typeof res === "object" && "error" in res && res.error) {
       reportError(res.error, label);
     }
