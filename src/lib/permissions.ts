@@ -41,9 +41,31 @@ export function useVisibleIndicators(): Indicator[] {
   });
 }
 
+/**
+ * Indicadores em que o usuário logado é responsável direto pelo indicador
+ * ou responsável/criador de alguma meta ligada a ele.
+ * Superadministrador mantém acesso irrestrito.
+ */
+export function useOwnedIndicators(): Indicator[] {
+  const user = useCurrentUser();
+  const visible = useVisibleIndicators();
+  const targets = useStore((s) => s.targets);
+
+  if (!user) return [];
+  if (user.global_role === "superadmin") return visible;
+
+  return visible.filter((ind) => {
+    if ((ind.responsible_ids ?? []).includes(user.id)) return true;
+    return targets.some(
+      (t) => t.indicator_id === ind.id && (t.user_id === user.id || t.created_by === user.id),
+    );
+  });
+}
+
 export function canManageIndicator(ind: Indicator, userId: string | undefined, role: string | undefined, mySectorRoles: { sector_id: string; sector_role: string }[]) {
   if (!userId) return false;
   if (role === "superadmin" || role === "admin_corporativo") return true;
   const managedSectors = mySectorRoles.filter((r) => r.sector_role === "gestor").map((r) => r.sector_id);
   return managedSectors.includes(ind.owner_sector_id);
 }
+

@@ -222,7 +222,7 @@ export const useCurrentUser = (): Profile | null => {
 export function canSeeRoute(role: GlobalRole | undefined, route: string): boolean {
   if (!role) return false;
   const roleMatrix: Record<string, GlobalRole[]> = {
-    "/visao-geral": ["superadmin", "admin_corporativo", "auditor"],
+    "/visao-geral": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
     "/meu-painel": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
     "/meus-indicadores": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
     "/lancamentos": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
