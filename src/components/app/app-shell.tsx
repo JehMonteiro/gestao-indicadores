@@ -105,25 +105,21 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 function ContextSwitcher() {
   const user = useCurrentUser();
   const sectors = useStore((s) => s.sectors);
-  const franchises = useStore((s) => s.franchises);
   const userSectors = useStore((s) => s.userSectors);
-  const userFranchises = useStore((s) => s.userFranchises);
   const activeSectorId = useStore((s) => s.activeSectorId);
-  const activeFranchiseId = useStore((s) => s.activeFranchiseId);
   const setActiveSector = useStore((s) => s.setActiveSector);
   const setActiveFranchise = useStore((s) => s.setActiveFranchise);
 
   if (!user) return null;
   const isAdmin = user.global_role === "superadmin" || user.global_role === "admin_corporativo";
   const mySectors = isAdmin ? sectors : sectors.filter((s) => userSectors.some((us) => us.user_id === user.id && us.sector_id === s.id));
-  const myFranchises = isAdmin ? franchises : franchises.filter((f) => userFranchises.some((uf) => uf.user_id === user.id && uf.franchise_id === f.id));
 
-  if (mySectors.length <= 1 && myFranchises.length <= 1) return null;
+  if (mySectors.length <= 1) return null;
 
   const activeSector = sectors.find((s) => s.id === activeSectorId);
-  const activeFranchise = franchises.find((f) => f.id === activeFranchiseId);
 
-  const label = activeSector?.name ?? activeFranchise?.name ?? "Todos os contextos";
+  const label = activeSector?.name ?? "Todos os contextos";
+
 
   return (
     <Popover>
