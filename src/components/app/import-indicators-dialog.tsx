@@ -54,10 +54,6 @@ export function ImportIndicatorsDialog() {
   const lower = (v: unknown) => stripAccents(norm(v).toLowerCase());
   const lookupKey = (v: unknown) => lower(v).replace(/[^a-z0-9]+/g, " ").trim();
   const codeKey = (v: unknown) => lower(v).replace(/[^a-z0-9]+/g, "");
-  const toBool = (v: unknown) => {
-    const s = lower(v);
-    return s === "sim" || s === "true" || s === "1" || s === "yes" || s === "y";
-  };
   const toNum = (v: unknown, def = 0) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : def;
