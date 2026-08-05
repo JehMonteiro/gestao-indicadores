@@ -182,23 +182,11 @@ function AddSectorRow({ userId, onAdd }: { userId: string; onAdd: (sid: string, 
     </div>
   );
 }
-function AddFranchiseRow({ userId, onAdd }: { userId: string; onAdd: (fid: string, role: FranchiseRole) => void }) {
-  const franchises = useStore((s) => s.franchises);
-  const [fid, setFid] = useState(franchises[0]?.id ?? "");
-  const [role, setRole] = useState<FranchiseRole>("franqueado");
-  return (
-    <div className="flex gap-2 mt-2">
-      <Select value={fid} onValueChange={setFid}><SelectTrigger className="flex-1"><SelectValue /></SelectTrigger><SelectContent>{franchises.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}</SelectContent></Select>
-      <Select value={role} onValueChange={(v) => setRole(v as FranchiseRole)}><SelectTrigger className="w-36"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="gestor">Gestor</SelectItem><SelectItem value="franqueado">Franqueado</SelectItem><SelectItem value="colaborador">Colaborador</SelectItem><SelectItem value="visualizador">Visualizador</SelectItem></SelectContent></Select>
-      <Button size="icon" onClick={() => onAdd(fid, role)}><UserPlus className="size-4" /></Button>
-    </div>
-  );
-}
 
 function ProfileDialog({ onSave: _onSave }: { onSave: (p: Profile) => void }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const empty = { full_name: "", email: "", global_role: "colaborador" as GlobalRole, user_type: "interno" as Profile["user_type"] };
+  const empty = { full_name: "", email: "", global_role: "colaborador" as GlobalRole };
   const [f, setF] = useState(empty);
   const invite = useServerFn(inviteUser);
   const { user } = useSession();
@@ -211,20 +199,13 @@ function ProfileDialog({ onSave: _onSave }: { onSave: (p: Profile) => void }) {
         <div className="space-y-3">
           <div><Label>Nome completo</Label><Input value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} /></div>
           <div><Label>E-mail</Label><Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>Perfil global</Label>
-              <Select value={f.global_role} onValueChange={(v) => setF({ ...f, global_role: v as GlobalRole })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{Object.entries(roleLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label>Tipo</Label>
-              <Select value={f.user_type} onValueChange={(v) => setF({ ...f, user_type: v as Profile["user_type"] })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="interno">Interno</SelectItem><SelectItem value="franqueado">Franqueado</SelectItem></SelectContent>
-              </Select>
-            </div>
+          <div><Label>Perfil global</Label>
+            <Select value={f.global_role} onValueChange={(v) => setF({ ...f, global_role: v as GlobalRole })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{selectableRoles.map((r) => <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
+
           <p className="text-xs text-muted-foreground">
             Enviaremos um e-mail com link para o usuário criar a senha e acessar a plataforma.
           </p>
