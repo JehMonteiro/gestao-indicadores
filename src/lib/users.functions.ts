@@ -11,10 +11,9 @@ const inviteSchema = z.object({
     "admin_corporativo",
     "gestor_setor",
     "colaborador",
-    "gestor_franquia",
-    "franqueado",
     "auditor",
   ]),
+
 });
 
 export const inviteUser = createServerFn({ method: "POST" })
