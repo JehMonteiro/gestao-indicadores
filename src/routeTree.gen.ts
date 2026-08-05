@@ -9,34 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedVisaoGeralRouteImport } from './routes/_authenticated/visao-geral'
-import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
-import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
-import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
-import { Route as AuthenticatedMeusIndicadoresRouteImport } from './routes/_authenticated/meus-indicadores'
-import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
-import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
-import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
-import { Route as AuthenticatedSetoresIndexRouteImport } from './routes/_authenticated/setores.index'
-import { Route as AuthenticatedLancamentosIndexRouteImport } from './routes/_authenticated/lancamentos.index'
-import { Route as AuthenticatedIndicadoresIndexRouteImport } from './routes/_authenticated/indicadores.index'
+import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
+import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
+import { Route as AuthenticatedMeusIndicadoresRouteImport } from './routes/_authenticated/meus-indicadores'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
+import { Route as AuthenticatedVisaoGeralRouteImport } from './routes/_authenticated/visao-geral'
 import { Route as AuthenticatedFranquiasIndexRouteImport } from './routes/_authenticated/franquias.index'
-import { Route as AuthenticatedSetoresIdRouteImport } from './routes/_authenticated/setores.$id'
-import { Route as AuthenticatedLancamentosNovoRouteImport } from './routes/_authenticated/lancamentos.novo'
-import { Route as AuthenticatedLancamentosIdRouteImport } from './routes/_authenticated/lancamentos.$id'
-import { Route as AuthenticatedIndicadoresNovoRouteImport } from './routes/_authenticated/indicadores.novo'
-import { Route as AuthenticatedIndicadoresIdRouteImport } from './routes/_authenticated/indicadores.$id'
 import { Route as AuthenticatedFranquiasIdRouteImport } from './routes/_authenticated/franquias.$id'
+import { Route as AuthenticatedIndicadoresIndexRouteImport } from './routes/_authenticated/indicadores.index'
+import { Route as AuthenticatedIndicadoresIdRouteImport } from './routes/_authenticated/indicadores.$id'
+import { Route as AuthenticatedIndicadoresNovoRouteImport } from './routes/_authenticated/indicadores.novo'
+import { Route as AuthenticatedLancamentosIndexRouteImport } from './routes/_authenticated/lancamentos.index'
+import { Route as AuthenticatedLancamentosIdRouteImport } from './routes/_authenticated/lancamentos.$id'
+import { Route as AuthenticatedLancamentosNovoRouteImport } from './routes/_authenticated/lancamentos.novo'
+import { Route as AuthenticatedSetoresIndexRouteImport } from './routes/_authenticated/setores.index'
+import { Route as AuthenticatedSetoresIdRouteImport } from './routes/_authenticated/setores.$id'
 import { Route as AuthenticatedIndicadoresIdEditarRouteImport } from './routes/_authenticated/indicadores.$id.editar'
 
-const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
-  id: '/definir-senha',
-  path: '/definir-senha',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -44,49 +48,14 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
+  id: '/definir-senha',
+  path: '/definir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedVisaoGeralRoute = AuthenticatedVisaoGeralRouteImport.update({
-  id: '/visao-geral',
-  path: '/visao-geral',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
-  id: '/usuarios',
-  path: '/usuarios',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
-  id: '/relatorios',
-  path: '/relatorios',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedMeusIndicadoresRoute =
-  AuthenticatedMeusIndicadoresRouteImport.update({
-    id: '/meus-indicadores',
-    path: '/meus-indicadores',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedMeuPainelRoute = AuthenticatedMeuPainelRouteImport.update({
-  id: '/meu-painel',
-  path: '/meu-painel',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedMetasRoute = AuthenticatedMetasRouteImport.update({
-  id: '/metas',
-  path: '/metas',
+const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedConfiguracoesRoute =
@@ -95,62 +64,46 @@ const AuthenticatedConfiguracoesRoute =
     path: '/configuracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
-  id: '/auditoria',
-  path: '/auditoria',
+const AuthenticatedMetasRoute = AuthenticatedMetasRouteImport.update({
+  id: '/metas',
+  path: '/metas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSetoresIndexRoute =
-  AuthenticatedSetoresIndexRouteImport.update({
-    id: '/setores/',
-    path: '/setores/',
+const AuthenticatedMeuPainelRoute = AuthenticatedMeuPainelRouteImport.update({
+  id: '/meu-painel',
+  path: '/meu-painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMeusIndicadoresRoute =
+  AuthenticatedMeusIndicadoresRouteImport.update({
+    id: '/meus-indicadores',
+    path: '/meus-indicadores',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedLancamentosIndexRoute =
-  AuthenticatedLancamentosIndexRouteImport.update({
-    id: '/lancamentos/',
-    path: '/lancamentos/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndicadoresIndexRoute =
-  AuthenticatedIndicadoresIndexRouteImport.update({
-    id: '/indicadores/',
-    path: '/indicadores/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVisaoGeralRoute = AuthenticatedVisaoGeralRouteImport.update({
+  id: '/visao-geral',
+  path: '/visao-geral',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFranquiasIndexRoute =
   AuthenticatedFranquiasIndexRouteImport.update({
     id: '/franquias/',
     path: '/franquias/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSetoresIdRoute = AuthenticatedSetoresIdRouteImport.update({
-  id: '/setores/$id',
-  path: '/setores/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedLancamentosNovoRoute =
-  AuthenticatedLancamentosNovoRouteImport.update({
-    id: '/lancamentos/novo',
-    path: '/lancamentos/novo',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedLancamentosIdRoute =
-  AuthenticatedLancamentosIdRouteImport.update({
-    id: '/lancamentos/$id',
-    path: '/lancamentos/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndicadoresNovoRoute =
-  AuthenticatedIndicadoresNovoRouteImport.update({
-    id: '/indicadores/novo',
-    path: '/indicadores/novo',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndicadoresIdRoute =
-  AuthenticatedIndicadoresIdRouteImport.update({
-    id: '/indicadores/$id',
-    path: '/indicadores/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedFranquiasIdRoute =
@@ -159,6 +112,53 @@ const AuthenticatedFranquiasIdRoute =
     path: '/franquias/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIndicadoresIndexRoute =
+  AuthenticatedIndicadoresIndexRouteImport.update({
+    id: '/indicadores/',
+    path: '/indicadores/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresIdRoute =
+  AuthenticatedIndicadoresIdRouteImport.update({
+    id: '/indicadores/$id',
+    path: '/indicadores/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresNovoRoute =
+  AuthenticatedIndicadoresNovoRouteImport.update({
+    id: '/indicadores/novo',
+    path: '/indicadores/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosIndexRoute =
+  AuthenticatedLancamentosIndexRouteImport.update({
+    id: '/lancamentos/',
+    path: '/lancamentos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosIdRoute =
+  AuthenticatedLancamentosIdRouteImport.update({
+    id: '/lancamentos/$id',
+    path: '/lancamentos/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosNovoRoute =
+  AuthenticatedLancamentosNovoRouteImport.update({
+    id: '/lancamentos/novo',
+    path: '/lancamentos/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSetoresIndexRoute =
+  AuthenticatedSetoresIndexRouteImport.update({
+    id: '/setores/',
+    path: '/setores/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSetoresIdRoute = AuthenticatedSetoresIdRouteImport.update({
+  id: '/setores/$id',
+  path: '/setores/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedIndicadoresIdEditarRoute =
   AuthenticatedIndicadoresIdEditarRouteImport.update({
     id: '/editar',
@@ -331,18 +331,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/definir-senha': {
-      id: '/definir-senha'
-      path: '/definir-senha'
-      fullPath: '/definir-senha'
-      preLoaderRoute: typeof DefinirSenhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -352,60 +345,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/visao-geral': {
-      id: '/_authenticated/visao-geral'
-      path: '/visao-geral'
-      fullPath: '/visao-geral'
-      preLoaderRoute: typeof AuthenticatedVisaoGeralRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/definir-senha': {
+      id: '/definir-senha'
+      path: '/definir-senha'
+      fullPath: '/definir-senha'
+      preLoaderRoute: typeof DefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/usuarios': {
-      id: '/_authenticated/usuarios'
-      path: '/usuarios'
-      fullPath: '/usuarios'
-      preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/relatorios': {
-      id: '/_authenticated/relatorios'
-      path: '/relatorios'
-      fullPath: '/relatorios'
-      preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/perfil': {
-      id: '/_authenticated/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/meus-indicadores': {
-      id: '/_authenticated/meus-indicadores'
-      path: '/meus-indicadores'
-      fullPath: '/meus-indicadores'
-      preLoaderRoute: typeof AuthenticatedMeusIndicadoresRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/meu-painel': {
-      id: '/_authenticated/meu-painel'
-      path: '/meu-painel'
-      fullPath: '/meu-painel'
-      preLoaderRoute: typeof AuthenticatedMeuPainelRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/metas': {
-      id: '/_authenticated/metas'
-      path: '/metas'
-      fullPath: '/metas'
-      preLoaderRoute: typeof AuthenticatedMetasRouteImport
+    '/_authenticated/auditoria': {
+      id: '/_authenticated/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/configuracoes': {
@@ -415,32 +373,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/auditoria': {
-      id: '/_authenticated/auditoria'
-      path: '/auditoria'
-      fullPath: '/auditoria'
-      preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
+    '/_authenticated/metas': {
+      id: '/_authenticated/metas'
+      path: '/metas'
+      fullPath: '/metas'
+      preLoaderRoute: typeof AuthenticatedMetasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/setores/': {
-      id: '/_authenticated/setores/'
-      path: '/setores'
-      fullPath: '/setores/'
-      preLoaderRoute: typeof AuthenticatedSetoresIndexRouteImport
+    '/_authenticated/meu-painel': {
+      id: '/_authenticated/meu-painel'
+      path: '/meu-painel'
+      fullPath: '/meu-painel'
+      preLoaderRoute: typeof AuthenticatedMeuPainelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/lancamentos/': {
-      id: '/_authenticated/lancamentos/'
-      path: '/lancamentos'
-      fullPath: '/lancamentos/'
-      preLoaderRoute: typeof AuthenticatedLancamentosIndexRouteImport
+    '/_authenticated/meus-indicadores': {
+      id: '/_authenticated/meus-indicadores'
+      path: '/meus-indicadores'
+      fullPath: '/meus-indicadores'
+      preLoaderRoute: typeof AuthenticatedMeusIndicadoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/indicadores/': {
-      id: '/_authenticated/indicadores/'
-      path: '/indicadores'
-      fullPath: '/indicadores/'
-      preLoaderRoute: typeof AuthenticatedIndicadoresIndexRouteImport
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/relatorios': {
+      id: '/_authenticated/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/usuarios': {
+      id: '/_authenticated/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/visao-geral': {
+      id: '/_authenticated/visao-geral'
+      path: '/visao-geral'
+      fullPath: '/visao-geral'
+      preLoaderRoute: typeof AuthenticatedVisaoGeralRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/franquias/': {
@@ -450,32 +429,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFranquiasIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/setores/$id': {
-      id: '/_authenticated/setores/$id'
-      path: '/setores/$id'
-      fullPath: '/setores/$id'
-      preLoaderRoute: typeof AuthenticatedSetoresIdRouteImport
+    '/_authenticated/franquias/$id': {
+      id: '/_authenticated/franquias/$id'
+      path: '/franquias/$id'
+      fullPath: '/franquias/$id'
+      preLoaderRoute: typeof AuthenticatedFranquiasIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/lancamentos/novo': {
-      id: '/_authenticated/lancamentos/novo'
-      path: '/lancamentos/novo'
-      fullPath: '/lancamentos/novo'
-      preLoaderRoute: typeof AuthenticatedLancamentosNovoRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/lancamentos/$id': {
-      id: '/_authenticated/lancamentos/$id'
-      path: '/lancamentos/$id'
-      fullPath: '/lancamentos/$id'
-      preLoaderRoute: typeof AuthenticatedLancamentosIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/indicadores/novo': {
-      id: '/_authenticated/indicadores/novo'
-      path: '/indicadores/novo'
-      fullPath: '/indicadores/novo'
-      preLoaderRoute: typeof AuthenticatedIndicadoresNovoRouteImport
+    '/_authenticated/indicadores/': {
+      id: '/_authenticated/indicadores/'
+      path: '/indicadores'
+      fullPath: '/indicadores/'
+      preLoaderRoute: typeof AuthenticatedIndicadoresIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/indicadores/$id': {
@@ -485,11 +450,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndicadoresIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/franquias/$id': {
-      id: '/_authenticated/franquias/$id'
-      path: '/franquias/$id'
-      fullPath: '/franquias/$id'
-      preLoaderRoute: typeof AuthenticatedFranquiasIdRouteImport
+    '/_authenticated/indicadores/novo': {
+      id: '/_authenticated/indicadores/novo'
+      path: '/indicadores/novo'
+      fullPath: '/indicadores/novo'
+      preLoaderRoute: typeof AuthenticatedIndicadoresNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/': {
+      id: '/_authenticated/lancamentos/'
+      path: '/lancamentos'
+      fullPath: '/lancamentos/'
+      preLoaderRoute: typeof AuthenticatedLancamentosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/$id': {
+      id: '/_authenticated/lancamentos/$id'
+      path: '/lancamentos/$id'
+      fullPath: '/lancamentos/$id'
+      preLoaderRoute: typeof AuthenticatedLancamentosIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos/novo': {
+      id: '/_authenticated/lancamentos/novo'
+      path: '/lancamentos/novo'
+      fullPath: '/lancamentos/novo'
+      preLoaderRoute: typeof AuthenticatedLancamentosNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/setores/': {
+      id: '/_authenticated/setores/'
+      path: '/setores'
+      fullPath: '/setores/'
+      preLoaderRoute: typeof AuthenticatedSetoresIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/setores/$id': {
+      id: '/_authenticated/setores/$id'
+      path: '/setores/$id'
+      fullPath: '/setores/$id'
+      preLoaderRoute: typeof AuthenticatedSetoresIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/indicadores/$id/editar': {
@@ -573,3 +573,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
