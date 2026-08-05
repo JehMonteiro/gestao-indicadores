@@ -208,6 +208,7 @@ export async function loadAllFromSupabase(userId: string) {
     sectors,
     franchises,
     indicators,
+    sharedSectors,
     targets,
     entries,
     userSectors,
