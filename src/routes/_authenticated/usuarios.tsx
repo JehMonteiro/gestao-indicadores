@@ -1,6 +1,6 @@
 import { newId } from "@/lib/ids";
 import { useServerFn } from "@tanstack/react-start";
-import { inviteUser, deleteUser } from "@/lib/users.functions";
+import { inviteUser, deleteUser, updateUserGlobalRole } from "@/lib/users.functions";
 import { useSession, useAuthProfile } from "@/hooks/use-auth";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { createFileRoute } from "@tanstack/react-router";
