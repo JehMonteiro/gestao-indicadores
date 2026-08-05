@@ -31,6 +31,7 @@ function IndicatorsList() {
   const { isAdmin } = useIsAdmin();
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
+  const profiles = useStore((s) => s.profiles);
   const targets = useStore((s) => s.targets);
   const entries = useStore((s) => s.entries);
   const settings = useStore((s) => s.settings);
@@ -104,6 +105,7 @@ function IndicatorsList() {
                 <TableHead>Indicador</TableHead>
                 <TableHead>Setor</TableHead>
                 <TableHead>Empresa</TableHead>
+                <TableHead>Responsável</TableHead>
                 <TableHead>Periodicidade</TableHead>
                 <TableHead>Último resultado</TableHead>
                 <TableHead>Atingimento</TableHead>
@@ -115,6 +117,10 @@ function IndicatorsList() {
               {filtered.map((i) => {
                 const sector = sectors.find((s) => s.id === i.owner_sector_id);
                 const franchise = i.franchise_id ? franchises.find((fr) => fr.id === i.franchise_id) : null;
+                const responsibleNames = (i.responsible_ids ?? [])
+                  .map((rid) => profiles.find((p) => p.id === rid)?.full_name)
+                  .filter(Boolean)
+                  .join(", ");
                 const e = registeredEntriesForIndicator(i, entries).slice(-1)[0];
                 const t = e ? resolveTargetForEntry(i, e, targets) : resolveTargetForIndicator(i, targets);
                 const pct = computeAchievement(e, t, i.direction);
@@ -127,6 +133,7 @@ function IndicatorsList() {
                     </TableCell>
                     <TableCell>{sector && <Badge variant="outline" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</TableCell>
                     <TableCell className="text-sm">{franchise ? franchise.name : <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="text-sm">{responsibleNames || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-sm">{indicatorPeriodLabel(i)}</TableCell>
                     <TableCell className="font-mono text-sm">{e ? formatValue(e.actual_value, i.value_type) : "—"}</TableCell>
                     <TableCell><Badge variant="outline" className={cs.className}>{pct != null ? `${Math.round(pct)}% · ${cs.label}` : cs.label}</Badge></TableCell>
