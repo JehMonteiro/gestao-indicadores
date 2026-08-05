@@ -28,7 +28,7 @@ export function useVisibleIndicators(): Indicator[] {
     if (ind.scope === "corporativo") return true;
     if (user.user_type === "franqueado") {
       // Restrict to indicators relevant to franchises
-      return ind.scope === "franquia" || ind.scope === "corporativo";
+      return ind.scope === "franquia";
     }
     // Internal user: sector match (setor proprietário ou compartilhado)
     const sectorMatch = (!!ind.owner_sector_id && mySectorIds.includes(ind.owner_sector_id))
