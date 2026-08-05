@@ -125,7 +125,7 @@ export type Database = {
           submitted_at: string | null
           target_id: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           actual_value: number
@@ -144,7 +144,7 @@ export type Database = {
           submitted_at?: string | null
           target_id?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           actual_value?: number
@@ -163,7 +163,7 @@ export type Database = {
           submitted_at?: string | null
           target_id?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
