@@ -42,7 +42,7 @@ function NewIndicator() {
     input_method: "manual" as InputMethod, data_source: "",
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
     warning_threshold: 80, critical_threshold: 60,
-    allows_attachment: false, instructions: "",
+    allows_attachment: false,
     start_date: new Date().toISOString().slice(0, 10),
     end_date: "",
     status: "ativo" as IndicatorStatus,
