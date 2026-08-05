@@ -334,7 +334,7 @@ export const dbWrite = {
       { label: "Valor máximo", value: i.maximum_value },
       { label: "Peso", value: i.weight },
     ]);
-    return supabase.from("indicators").upsert({
+    const res = await supabase.from("indicators").upsert({
       id: i.id,
       code: i.code,
       name: i.name,
@@ -357,6 +357,24 @@ export const dbWrite = {
       status: i.status as any,
       created_by: i.created_by || null,
     });
+    if (res.error) return res;
+
+    // Sincroniza os setores compartilhados do indicador
+    const shared = (i.shared_sector_ids ?? []).filter(Boolean);
+    const table = supabase.from("indicator_shared_sectors" as any);
+    if (shared.length === 0) {
+      await table.delete().eq("indicator_id", i.id);
+    } else {
+      await supabase.from("indicator_shared_sectors" as any)
+        .delete()
+        .eq("indicator_id", i.id)
+        .not("sector_id", "in", `(${shared.join(",")})`);
+      await supabase.from("indicator_shared_sectors" as any).upsert(
+        shared.map((sid) => ({ indicator_id: i.id, sector_id: sid })) as any,
+        { onConflict: "indicator_id,sector_id" } as any,
+      );
+    }
+    return res;
   },
   async deleteIndicator(id: string) {
     return supabase.from("indicators").delete().eq("id", id);
