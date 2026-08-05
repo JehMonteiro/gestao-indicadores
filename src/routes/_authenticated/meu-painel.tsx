@@ -81,8 +81,8 @@ function MyDashboard() {
                 <BarChart data={sectorChart}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                   <XAxis dataKey="setor" fontSize={12} />
-                  <YAxis fontSize={12} unit="%" />
-                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} />
+                  <YAxis fontSize={12} unit="%" tickFormatter={(v: number) => String(Math.round(v))} />
+                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: number | string) => (typeof v === "number" ? Math.round(v) : v)} />
                   <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
                     {sectorChart.map((s, i) => (<Cell key={i} fill={s.fill} />))}
                   </Bar>
