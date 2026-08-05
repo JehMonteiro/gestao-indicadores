@@ -34,6 +34,12 @@ const roleLabels: Record<GlobalRole, string> = {
   colaborador: "Colaborador", gestor_franquia: "Gestor de franquia", franqueado: "Franqueado", auditor: "Auditor",
 };
 
+/** Perfis oferecidos no cadastro — somente colaboradores internos. */
+const selectableRoles: GlobalRole[] = [
+  "superadmin", "admin_corporativo", "gestor_setor", "colaborador", "auditor",
+];
+
+
 function UsersPage() {
   const profiles = useStore((s) => s.profiles);
   const sectors = useStore((s) => s.sectors);
