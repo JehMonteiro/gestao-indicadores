@@ -22,13 +22,17 @@ export function useVisibleIndicators(): Indicator[] {
   const myFranchiseIds = userFranchises.filter((u) => u.user_id === user.id).map((u) => u.franchise_id);
 
   return all.filter((ind) => {
+    // Responsável direto sempre enxerga o indicador
+    if ((ind.responsible_ids ?? []).includes(user.id)) return true;
+    // Indicadores corporativos são visíveis a todos
+    if (ind.scope === "corporativo") return true;
     if (user.user_type === "franqueado") {
       // Restrict to indicators relevant to franchises
       return ind.scope === "franquia" || ind.scope === "corporativo";
     }
-    // Internal user: sector match
-    const sectorMatch = ind.owner_sector_id && mySectorIds.includes(ind.owner_sector_id)
-      || ind.shared_sector_ids.some((s) => mySectorIds.includes(s));
+    // Internal user: sector match (setor proprietário ou compartilhado)
+    const sectorMatch = (!!ind.owner_sector_id && mySectorIds.includes(ind.owner_sector_id))
+      || (ind.shared_sector_ids ?? []).some((s) => mySectorIds.includes(s));
     if (sectorMatch) return true;
     if (user.global_role === "gestor_franquia") {
       return myFranchiseIds.length > 0;
