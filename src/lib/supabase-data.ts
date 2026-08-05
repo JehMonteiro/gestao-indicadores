@@ -361,9 +361,8 @@ export const dbWrite = {
 
     // Sincroniza os setores compartilhados do indicador
     const shared = (i.shared_sector_ids ?? []).filter(Boolean);
-    const table = supabase.from("indicator_shared_sectors" as any);
     if (shared.length === 0) {
-      await table.delete().eq("indicator_id", i.id);
+      await supabase.from("indicator_shared_sectors" as any).delete().eq("indicator_id", i.id);
     } else {
       await supabase.from("indicator_shared_sectors" as any)
         .delete()
