@@ -513,7 +513,7 @@ async function rehydrateFromCloud() {
 }
 
 export function fireAndForget(label: string, p: Promise<unknown>) {
-  p.then((res: any) => {
+  return p.then((res: any) => {
     if (res && typeof res === "object" && "error" in res && res.error) {
       reportError(res.error, label);
     }
