@@ -73,7 +73,15 @@ export function MetasPage({ escopo = "empresa" }: { escopo?: EntityKind }) {
   };
   return (
     <div>
-      <PageHeader title="Metas" description="Defina metas por período e indicador."
+      {escopo === "franquia" && (
+        <Alert className="mb-4">
+          <Info className="size-4" />
+          <AlertDescription>
+            A separação por escopo será aplicada quando o campo de entidade for criado. No momento esta tela exibe todos os registros.
+          </AlertDescription>
+        </Alert>
+      )}
+      <PageHeader title={escopo === "franquia" ? "Metas Franquia" : "Metas"} description="Defina metas por período e indicador."
         actions={<TargetDialog onSave={handleSave} />}
       />
       <Card><Table>

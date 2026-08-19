@@ -30,7 +30,15 @@ export function LancamentosPage({ escopo = "empresa" }: { escopo?: EntityKind })
 
   return (
     <div>
-      <PageHeader title="Lançamentos" description="Histórico e novos lançamentos de resultados."
+      {escopo === "franquia" && (
+        <Alert className="mb-4">
+          <Info className="size-4" />
+          <AlertDescription>
+            A separação por escopo será aplicada quando o campo de entidade for criado. No momento esta tela exibe todos os registros.
+          </AlertDescription>
+        </Alert>
+      )}
+      <PageHeader title={escopo === "franquia" ? "Lançamentos Franquia" : "Lançamentos"} description="Histórico e novos lançamentos de resultados."
         actions={<Button asChild><Link to="/lancamentos/novo"><Plus className="size-4" />Novo lançamento</Link></Button>}
       />
 

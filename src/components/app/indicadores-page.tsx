@@ -60,7 +60,15 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
 
   return (
     <div>
-      <PageHeader title="Indicadores" description="Catálogo de indicadores por setor."
+      {escopo === "franquia" && (
+        <Alert className="mb-4">
+          <Info className="size-4" />
+          <AlertDescription>
+            A separação por escopo será aplicada quando o campo de entidade for criado. No momento esta tela exibe todos os registros.
+          </AlertDescription>
+        </Alert>
+      )}
+      <PageHeader title={escopo === "franquia" ? "Indicadores Franquia" : "Indicadores"} description="Catálogo de indicadores por setor."
         actions={isAdmin ? (
           <div className="flex gap-2">
             <ImportIndicatorsDialog />
