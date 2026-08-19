@@ -73,10 +73,12 @@ export type Database = {
           city: string | null
           code: string
           created_at: string
+          entity_type: Database["public"]["Enums"]["entity_type"] | null
           id: string
           is_demo: boolean
           name: string
           opened_at: string | null
+          parent_id: string | null
           state: string | null
           status: string
           updated_at: string
@@ -85,10 +87,12 @@ export type Database = {
           city?: string | null
           code: string
           created_at?: string
+          entity_type?: Database["public"]["Enums"]["entity_type"] | null
           id?: string
           is_demo?: boolean
           name: string
           opened_at?: string | null
+          parent_id?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -97,15 +101,25 @@ export type Database = {
           city?: string | null
           code?: string
           created_at?: string
+          entity_type?: Database["public"]["Enums"]["entity_type"] | null
           id?: string
           is_demo?: boolean
           name?: string
           opened_at?: string | null
+          parent_id?: string | null
           state?: string | null
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "franchises_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       indicator_entries: {
         Row: {
@@ -242,6 +256,8 @@ export type Database = {
           description: string | null
           direction: Database["public"]["Enums"]["indicator_direction"]
           end_date: string | null
+          entity_id: string | null
+          entity_scope: Database["public"]["Enums"]["entity_scope"] | null
           formula: string | null
           franchise_id: string | null
           id: string
@@ -272,6 +288,8 @@ export type Database = {
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
           end_date?: string | null
+          entity_id?: string | null
+          entity_scope?: Database["public"]["Enums"]["entity_scope"] | null
           formula?: string | null
           franchise_id?: string | null
           id?: string
@@ -302,6 +320,8 @@ export type Database = {
           description?: string | null
           direction?: Database["public"]["Enums"]["indicator_direction"]
           end_date?: string | null
+          entity_id?: string | null
+          entity_scope?: Database["public"]["Enums"]["entity_scope"] | null
           formula?: string | null
           franchise_id?: string | null
           id?: string
@@ -324,6 +344,13 @@ export type Database = {
           warning_threshold?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "indicators_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "indicators_franchise_id_fkey"
             columns: ["franchise_id"]
@@ -437,6 +464,7 @@ export type Database = {
         Row: {
           code: string
           color: string
+          company_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -448,6 +476,7 @@ export type Database = {
         Insert: {
           code: string
           color?: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -459,6 +488,7 @@ export type Database = {
         Update: {
           code?: string
           color?: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -467,7 +497,15 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sectors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "franchises"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       targets: {
         Row: {
@@ -658,6 +696,8 @@ export type Database = {
         | "colaborador"
         | "franqueado"
         | "auditor"
+      entity_scope: "empresa" | "franquia"
+      entity_type: "grupo" | "empresa" | "franquia"
       entry_status: "rascunho" | "registrado" | "atrasado"
       franchise_role: "franqueado" | "gestor" | "operador" | "leitor"
       indicator_direction:
@@ -814,6 +854,8 @@ export const Constants = {
         "franqueado",
         "auditor",
       ],
+      entity_scope: ["empresa", "franquia"],
+      entity_type: ["grupo", "empresa", "franquia"],
       entry_status: ["rascunho", "registrado", "atrasado"],
       franchise_role: ["franqueado", "gestor", "operador", "leitor"],
       indicator_direction: [
