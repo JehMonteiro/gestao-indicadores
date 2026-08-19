@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAuditoriaDadosRouteImport } from './routes/_authenticated/auditoria-dados'
+import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticated/chamados'
 import { Route as AuthenticatedClassificacaoEscopoRouteImport } from './routes/_authenticated/classificacao-escopo'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedDesempenhoFranquiasRouteImport } from './routes/_authenticated/desempenho-franquias'
@@ -70,6 +71,11 @@ const AuthenticatedAuditoriaDadosRoute =
     path: '/auditoria-dados',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedChamadosRoute = AuthenticatedChamadosRouteImport.update({
+  id: '/chamados',
+  path: '/chamados',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedClassificacaoEscopoRoute =
   AuthenticatedClassificacaoEscopoRouteImport.update({
     id: '/classificacao-escopo',
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/definir-senha': typeof DefinirSenhaRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/auditoria-dados': typeof AuthenticatedAuditoriaDadosRoute
+  '/chamados': typeof AuthenticatedChamadosRoute
   '/classificacao-escopo': typeof AuthenticatedClassificacaoEscopoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/definir-senha': typeof DefinirSenhaRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/auditoria-dados': typeof AuthenticatedAuditoriaDadosRoute
+  '/chamados': typeof AuthenticatedChamadosRoute
   '/classificacao-escopo': typeof AuthenticatedClassificacaoEscopoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/definir-senha': typeof DefinirSenhaRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/auditoria-dados': typeof AuthenticatedAuditoriaDadosRoute
+  '/_authenticated/chamados': typeof AuthenticatedChamadosRoute
   '/_authenticated/classificacao-escopo': typeof AuthenticatedClassificacaoEscopoRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
@@ -311,6 +320,7 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/auditoria'
     | '/auditoria-dados'
+    | '/chamados'
     | '/classificacao-escopo'
     | '/configuracoes'
     | '/desempenho-franquias'
@@ -342,6 +352,7 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/auditoria'
     | '/auditoria-dados'
+    | '/chamados'
     | '/classificacao-escopo'
     | '/configuracoes'
     | '/desempenho-franquias'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/_authenticated/auditoria'
     | '/_authenticated/auditoria-dados'
+    | '/_authenticated/chamados'
     | '/_authenticated/classificacao-escopo'
     | '/_authenticated/configuracoes'
     | '/_authenticated/desempenho-franquias'
@@ -449,6 +461,13 @@ declare module '@tanstack/react-router' {
       path: '/auditoria-dados'
       fullPath: '/auditoria-dados'
       preLoaderRoute: typeof AuthenticatedAuditoriaDadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/chamados': {
+      id: '/_authenticated/chamados'
+      path: '/chamados'
+      fullPath: '/chamados'
+      preLoaderRoute: typeof AuthenticatedChamadosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/classificacao-escopo': {
@@ -640,6 +659,7 @@ const AuthenticatedIndicadoresIdRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedAuditoriaDadosRoute: typeof AuthenticatedAuditoriaDadosRoute
+  AuthenticatedChamadosRoute: typeof AuthenticatedChamadosRoute
   AuthenticatedClassificacaoEscopoRoute: typeof AuthenticatedClassificacaoEscopoRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedDesempenhoFranquiasRoute: typeof AuthenticatedDesempenhoFranquiasRoute
@@ -668,6 +688,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedAuditoriaDadosRoute: AuthenticatedAuditoriaDadosRoute,
+  AuthenticatedChamadosRoute: AuthenticatedChamadosRoute,
   AuthenticatedClassificacaoEscopoRoute: AuthenticatedClassificacaoEscopoRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedDesempenhoFranquiasRoute: AuthenticatedDesempenhoFranquiasRoute,

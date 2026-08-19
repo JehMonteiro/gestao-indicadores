@@ -47,6 +47,9 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/classificacao-escopo", label: "Classificação de escopo", icon: Network },
     { to: "/usuarios", label: "Usuários", icon: Users },
   ]},
+  { group: "Atendimento", items: [
+    { to: "/chamados", label: "Chamados", icon: Headphones },
+  ]},
   { group: "Sistema", items: [
     { to: "/relatorios", label: "Relatórios", icon: FileBarChart },
     { to: "/auditoria", label: "Auditoria", icon: History },
