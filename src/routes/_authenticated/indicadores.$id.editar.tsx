@@ -10,7 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import type { Direction, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
+import { ENTITY_SCOPES } from "@/lib/entity-scope";
+import { isFranquia } from "@/lib/entity-kind";
+import type { Direction, EntityScope, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
 import { KPI_GROUPS } from "@/lib/format";
 import { toast } from "sonner";
 import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-rules";
