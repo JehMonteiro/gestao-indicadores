@@ -59,6 +59,7 @@ export function aplicarFiltros(chamados: Chamado[], f: FiltrosChamados): Chamado
     if (f.responsavel && c.responsavel !== f.responsavel) return false;
     if (f.departamento && c.departamento_recebimento !== f.departamento) return false;
     if (f.unidade && c.unidade !== f.unidade) return false;
+    if (f.solicitante && c.solicitante !== f.solicitante) return false;
     if (f.etiqueta && !(c.etiquetas ?? []).includes(f.etiqueta)) return false;
     if (f.categoria && (c.categoria ?? "Sem categoria") !== f.categoria) return false;
     return true;

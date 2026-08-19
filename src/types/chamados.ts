@@ -42,6 +42,7 @@ export interface FiltrosChamados {
   responsavel?: string | null;
   departamento?: string | null;
   unidade?: string | null;
+  solicitante?: string | null;
   etiqueta?: string | null;
   categoria?: string | null;
 }
