@@ -35,7 +35,7 @@ export type AuditRow = {
   action: string;
   entity_type: string;
   entity_id: string | null;
-  payload: unknown;
+  payload: string | null;
 };
 
 export type DataAudit = {
@@ -142,7 +142,7 @@ export const getDataAudit = createServerFn({ method: "GET" })
       action: l.action,
       entity_type: l.entity_type,
       entity_id: l.entity_id ?? null,
-      payload: l.payload ?? null,
+      payload: l.payload == null ? null : JSON.stringify(l.payload, null, 2),
     }));
 
     return { counts, hidden, hiddenEntryTotal, orphans, logs };
