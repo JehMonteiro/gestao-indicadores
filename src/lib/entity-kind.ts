@@ -2,29 +2,17 @@ import type { Franchise } from "@/mocks/types";
 
 export type EntityKind = "empresa" | "franquia";
 
-/**
- * TEMPORÁRIO — heurística até a criação do campo `entities.entity_type`.
- * Quando o campo existir, substituir o corpo desta função por:
- *   return e.entity_type;
- * Nenhum outro arquivo deve conter lógica de classificação.
- */
-export function entityKind(e: Franchise): EntityKind {
-  const nome = (e.name ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-  const codigo = (e.code ?? "").trim();
-
-  // Empresas conhecidas do Grupo Nocta
-  const EMPRESAS = ["nocta seguros e beneficios", "nocta franquia", "fabio gomes"];
-  if (EMPRESAS.some((x) => nome === x || nome.includes(x))) return "empresa";
-
-  // Franquias: nome inicia com "franquia" ou código puramente numérico
-  if (nome.startsWith("franquia")) return "franquia";
-  if (/^\d+$/.test(codigo)) return "franquia";
-
-  return "empresa";
+/** Classificação real, baseada exclusivamente em `franchises.entity_type`. */
+export function entityKind(e: Franchise): EntityKind | null {
+  if (e.entity_type === "franquia") return "franquia";
+  if (e.entity_type === "empresa" || e.entity_type === "grupo") return "empresa";
+  return null;
 }
 
 export function isFranquia(e: Franchise) { return entityKind(e) === "franquia"; }
 export function isEmpresa(e: Franchise) { return entityKind(e) === "empresa"; }
+export function isGrupo(e: Franchise) { return e.entity_type === "grupo"; }
+export function isUnclassified(e: Franchise) { return entityKind(e) === null; }
 
 /** Tempo de operação legível a partir da data de início ("2 anos e 3 meses"). */
 export function operatingTime(startDate?: string): string {
