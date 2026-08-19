@@ -3,9 +3,8 @@ import { useMemo, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
 import { useVisibleIndicators } from "@/lib/permissions";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info, Store } from "lucide-react";
+import { Store } from "lucide-react";
 import { classify, weightedIndex } from "@/lib/format";
 import { isFranquia } from "@/lib/entity-kind";
 import {
