@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Search, Network } from "lucide-react";
 import type { Franchise } from "@/mocks/types";
-import { isEmpresa, isFranquia, operatingTime } from "@/lib/entity-kind";
+import { isEmpresa, isFranquia, isGrupo, operatingTime } from "@/lib/entity-kind";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -40,8 +40,15 @@ function EntitiesPage() {
   const user = useCurrentUser();
   const canEdit = user?.global_role === "superadmin" || user?.global_role === "admin_corporativo";
 
-  const empresas = useMemo(() => franchises.filter(isEmpresa), [franchises]);
+  const empresas = useMemo(
+    () => franchises.filter(isEmpresa).sort((a, b) => (isGrupo(b) ? 1 : 0) - (isGrupo(a) ? 1 : 0) || a.name.localeCompare(b.name)),
+    [franchises],
+  );
   const unidades = useMemo(() => franchises.filter(isFranquia), [franchises]);
+  const noctaFranquia = useMemo(
+    () => franchises.find((f) => f.entity_type === "empresa" && f.name.toLowerCase().includes("nocta franquia")),
+    [franchises],
+  );
 
   return (
     <div>
@@ -59,7 +66,7 @@ function EntitiesPage() {
           <CompaniesTab list={empresas} canEdit={canEdit} onSave={upsert} onDelete={remove} />
         </TabsContent>
         <TabsContent value="franquias">
-          <UnitsTab list={unidades} canEdit={canEdit} onSave={upsert} onDelete={remove} />
+          <UnitsTab list={unidades} canEdit={canEdit} onSave={upsert} onDelete={remove} parentId={noctaFranquia?.id} />
         </TabsContent>
       </Tabs>
     </div>
@@ -87,8 +94,17 @@ function CompaniesTab({ list, canEdit, onSave, onDelete }: {
             </TableRow></TableHeader>
             <TableBody>
               {list.map((f) => (
-                <TableRow key={f.id}>
-                  <TableCell className="font-medium">{f.name}</TableCell>
+                <TableRow key={f.id} className={isGrupo(f) ? "bg-primary/5" : undefined}>
+                  <TableCell className="font-medium">
+                    {isGrupo(f) ? (
+                      <span className="flex items-center gap-2">
+                        {f.name}
+                        <Badge variant="secondary">Grupo</Badge>
+                      </span>
+                    ) : (
+                      <span className="pl-4">{f.name}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="font-mono text-xs">{f.code}</TableCell>
                   <TableCell className="text-sm">{f.document || "—"}</TableCell>
                   <TableCell className="text-sm">{[f.city, f.state].filter(Boolean).join("/") || "—"}</TableCell>
@@ -112,8 +128,8 @@ function CompaniesTab({ list, canEdit, onSave, onDelete }: {
   );
 }
 
-function UnitsTab({ list, canEdit, onSave, onDelete }: {
-  list: Franchise[]; canEdit: boolean; onSave: (f: Franchise) => void; onDelete: (id: string) => void;
+function UnitsTab({ list, canEdit, onSave, onDelete, parentId }: {
+  list: Franchise[]; canEdit: boolean; onSave: (f: Franchise) => void; onDelete: (id: string) => void; parentId?: string;
 }) {
   const [q, setQ] = useState("");
   const [region, setRegion] = useState("all");
@@ -159,7 +175,7 @@ function UnitsTab({ list, canEdit, onSave, onDelete }: {
             <SelectItem value="inativa">Inativa</SelectItem>
           </SelectContent>
         </Select>
-        {canEdit && <EntityDialog kind="franquia" onSave={onSave} />}
+        {canEdit && <EntityDialog kind="franquia" parentId={parentId} onSave={onSave} />}
       </div>
 
       {filtered.length === 0 ? (
@@ -192,7 +208,7 @@ function UnitsTab({ list, canEdit, onSave, onDelete }: {
                     <TableCell className="text-right">
                       {canEdit && (
                         <EntityDialog
-                          kind="franquia" initial={f}
+                          kind="franquia" initial={f} parentId={parentId}
                           onSave={(x) => { onSave(x); toast.success("Atualizado"); }}
                           onDelete={() => { onDelete(f.id); toast.success("Removido"); }}
                         />
@@ -218,9 +234,10 @@ function UnitsTab({ list, canEdit, onSave, onDelete }: {
   );
 }
 
-function EntityDialog({ kind, initial, onSave, onDelete }: {
+function EntityDialog({ kind, initial, onSave, onDelete, parentId }: {
   kind: "empresa" | "franquia";
   initial?: Franchise;
+  parentId?: string;
   onSave: (f: Franchise) => void;
   onDelete?: () => void;
 }) {
@@ -244,10 +261,16 @@ function EntityDialog({ kind, initial, onSave, onDelete }: {
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3">
           {kind === "franquia" && (
-            <div className="sm:col-span-2">
-              <Label>Vinculada a</Label>
-              <Input value="Nocta Franquia" readOnly disabled />
-            </div>
+            <>
+              <div>
+                <Label>Tipo de entidade</Label>
+                <Input value="Franquia" readOnly disabled />
+              </div>
+              <div>
+                <Label>Vinculada a</Label>
+                <Input value="Nocta Franquia" readOnly disabled />
+              </div>
+            </>
           )}
           <div className="sm:col-span-2"><Label>Nome</Label><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
           <div><Label>Código</Label><Input value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })} /></div>
@@ -267,7 +290,10 @@ function EntityDialog({ kind, initial, onSave, onDelete }: {
           {onDelete && <Button variant="destructive" onClick={() => { onDelete(); setOpen(false); }}>Excluir</Button>}
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button onClick={() => {
-            const payload = initial ? f : { ...f, id: newId() };
+            const base = initial ? f : { ...f, id: newId() };
+            const payload: Franchise = kind === "franquia"
+              ? { ...base, entity_type: "franquia", parent_id: parentId ?? base.parent_id ?? null }
+              : { ...base, entity_type: base.entity_type ?? "empresa" };
             onSave(payload);
             setOpen(false);
             if (!initial) setF(blank());
