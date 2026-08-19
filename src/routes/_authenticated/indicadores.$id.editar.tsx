@@ -80,6 +80,10 @@ function EditIndicator() {
       toast.error("Selecione a empresa do indicador");
       return;
     }
+    if (!f.entity_scope) {
+      toast.error("Selecione o escopo do indicador");
+      return;
+    }
     const intError = firstIntegerError(f.value_type, [
       { label: "Meta padrão", value: f.default_target },
       { label: "Valor mínimo", value: f.minimum_value },
@@ -122,6 +126,25 @@ function EditIndicator() {
                 </SelectContent>
               </Select>
             </Field>
+            <Field label="Escopo">
+              <Select value={f.entity_scope ?? ""} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
+                <SelectTrigger><SelectValue placeholder="Selecione o escopo" /></SelectTrigger>
+                <SelectContent>
+                  {ENTITY_SCOPES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+            {f.entity_scope === "franquia" && (
+              <Field label="Unidade">
+                <Select value={f.entity_id || "rede"} onValueChange={(v) => set("entity_id", v === "rede" ? "" : v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rede">Toda a rede</SelectItem>
+                    {franchises.filter(isFranquia).map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
             <Field label="Setor">
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
