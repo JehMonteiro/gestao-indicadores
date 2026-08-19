@@ -1,8 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard, User2, ListChecks, ClipboardEdit, CheckSquare, Building2,
-  Store, Target, FileBarChart, Users, History, Settings, Activity, Menu, LogOut,
-  Bell, ChevronsUpDown, ShieldCheck,
+  LayoutDashboard, User2, ListChecks, ClipboardEdit, ClipboardCheck, Building2,
+  Store, Target, Crosshair, Flag, FlagTriangleRight, Network, FileBarChart, Users, History, Settings,
+  Activity, Menu, LogOut, Bell, ChevronsUpDown, ShieldCheck,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { canSeeRoute, useCurrentUser, useStore } from "@/mocks/store";
@@ -18,22 +18,32 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
-type NavItem = { to: string; label: string; icon: React.ComponentType<{ className?: string }> };
+type NavItem = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  /** Marca o item como par "Franquia" do item anterior (divisória sutil acima). */
+  pairTop?: boolean;
+};
 
 const NAV: { group: string; items: NavItem[] }[] = [
   { group: "Acompanhamento", items: [
     { to: "/visao-geral", label: "Visão geral", icon: Activity },
     { to: "/meu-painel", label: "Meu painel", icon: LayoutDashboard },
     { to: "/meus-indicadores", label: "Meus indicadores", icon: ListChecks },
+    { to: "/desempenho-franquias", label: "Franquias", icon: Store, pairTop: true },
   ]},
   { group: "Operação", items: [
     { to: "/lancamentos", label: "Lançamentos", icon: ClipboardEdit },
+    { to: "/lancamentos-franquia", label: "Lançamentos Franquia", icon: ClipboardCheck, pairTop: true },
   ]},
   { group: "Estrutura", items: [
     { to: "/indicadores", label: "Indicadores", icon: Target },
-    { to: "/metas", label: "Metas", icon: Target },
+    { to: "/indicadores-franquia", label: "Indicadores Franquia", icon: Crosshair, pairTop: true },
+    { to: "/metas", label: "Metas", icon: Flag },
+    { to: "/metas-franquia", label: "Metas Franquia", icon: FlagTriangleRight, pairTop: true },
     { to: "/setores", label: "Setores", icon: Building2 },
-    { to: "/franquias", label: "Empresas", icon: Store },
+    { to: "/franquias", label: "Empresas / Franquias", icon: Network },
     { to: "/usuarios", label: "Usuários", icon: Users },
   ]},
   { group: "Sistema", items: [
@@ -42,6 +52,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/configuracoes", label: "Configurações", icon: Settings },
   ]},
 ];
+
 
 function initials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
@@ -70,10 +81,11 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <div key={g.group}>
               <p className="px-3 mb-1 text-[10px] uppercase tracking-wider opacity-50 font-medium">{g.group}</p>
               <ul className="space-y-0.5">
-                {items.map((it) => {
+                {items.map((it, idx) => {
                   const active = pathname === it.to || pathname.startsWith(it.to + "/");
                   return (
-                    <li key={it.to}>
+                    <li key={it.to} className={cn(it.pairTop && idx > 0 && "border-t border-white/10 pt-0.5 mt-0.5")}>
+
                       <Link
                         to={it.to}
                         onClick={onNavigate}

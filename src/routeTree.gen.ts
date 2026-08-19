@@ -15,7 +15,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as AuthenticatedDesempenhoFranquiasRouteImport } from './routes/_authenticated/desempenho-franquias'
+import { Route as AuthenticatedIndicadoresFranquiaRouteImport } from './routes/_authenticated/indicadores-franquia'
+import { Route as AuthenticatedLancamentosFranquiaRouteImport } from './routes/_authenticated/lancamentos-franquia'
 import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
+import { Route as AuthenticatedMetasFranquiaRouteImport } from './routes/_authenticated/metas-franquia'
 import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
 import { Route as AuthenticatedMeusIndicadoresRouteImport } from './routes/_authenticated/meus-indicadores'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -64,11 +68,35 @@ const AuthenticatedConfiguracoesRoute =
     path: '/configuracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDesempenhoFranquiasRoute =
+  AuthenticatedDesempenhoFranquiasRouteImport.update({
+    id: '/desempenho-franquias',
+    path: '/desempenho-franquias',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresFranquiaRoute =
+  AuthenticatedIndicadoresFranquiaRouteImport.update({
+    id: '/indicadores-franquia',
+    path: '/indicadores-franquia',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLancamentosFranquiaRoute =
+  AuthenticatedLancamentosFranquiaRouteImport.update({
+    id: '/lancamentos-franquia',
+    path: '/lancamentos-franquia',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMetasRoute = AuthenticatedMetasRouteImport.update({
   id: '/metas',
   path: '/metas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMetasFranquiaRoute =
+  AuthenticatedMetasFranquiaRouteImport.update({
+    id: '/metas-franquia',
+    path: '/metas-franquia',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMeuPainelRoute = AuthenticatedMeuPainelRouteImport.update({
   id: '/meu-painel',
   path: '/meu-painel',
@@ -172,7 +200,11 @@ export interface FileRoutesByFullPath {
   '/definir-senha': typeof DefinirSenhaRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
+  '/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
+  '/lancamentos-franquia': typeof AuthenticatedLancamentosFranquiaRoute
   '/metas': typeof AuthenticatedMetasRoute
+  '/metas-franquia': typeof AuthenticatedMetasFranquiaRoute
   '/meu-painel': typeof AuthenticatedMeuPainelRoute
   '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -197,7 +229,11 @@ export interface FileRoutesByTo {
   '/definir-senha': typeof DefinirSenhaRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
+  '/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
+  '/lancamentos-franquia': typeof AuthenticatedLancamentosFranquiaRoute
   '/metas': typeof AuthenticatedMetasRoute
+  '/metas-franquia': typeof AuthenticatedMetasFranquiaRoute
   '/meu-painel': typeof AuthenticatedMeuPainelRoute
   '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -224,7 +260,11 @@ export interface FileRoutesById {
   '/definir-senha': typeof DefinirSenhaRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/_authenticated/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
+  '/_authenticated/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
+  '/_authenticated/lancamentos-franquia': typeof AuthenticatedLancamentosFranquiaRoute
   '/_authenticated/metas': typeof AuthenticatedMetasRoute
+  '/_authenticated/metas-franquia': typeof AuthenticatedMetasFranquiaRoute
   '/_authenticated/meu-painel': typeof AuthenticatedMeuPainelRoute
   '/_authenticated/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -251,7 +291,11 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/auditoria'
     | '/configuracoes'
+    | '/desempenho-franquias'
+    | '/indicadores-franquia'
+    | '/lancamentos-franquia'
     | '/metas'
+    | '/metas-franquia'
     | '/meu-painel'
     | '/meus-indicadores'
     | '/perfil'
@@ -276,7 +320,11 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/auditoria'
     | '/configuracoes'
+    | '/desempenho-franquias'
+    | '/indicadores-franquia'
+    | '/lancamentos-franquia'
     | '/metas'
+    | '/metas-franquia'
     | '/meu-painel'
     | '/meus-indicadores'
     | '/perfil'
@@ -302,7 +350,11 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/_authenticated/auditoria'
     | '/_authenticated/configuracoes'
+    | '/_authenticated/desempenho-franquias'
+    | '/_authenticated/indicadores-franquia'
+    | '/_authenticated/lancamentos-franquia'
     | '/_authenticated/metas'
+    | '/_authenticated/metas-franquia'
     | '/_authenticated/meu-painel'
     | '/_authenticated/meus-indicadores'
     | '/_authenticated/perfil'
@@ -373,11 +425,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/desempenho-franquias': {
+      id: '/_authenticated/desempenho-franquias'
+      path: '/desempenho-franquias'
+      fullPath: '/desempenho-franquias'
+      preLoaderRoute: typeof AuthenticatedDesempenhoFranquiasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores-franquia': {
+      id: '/_authenticated/indicadores-franquia'
+      path: '/indicadores-franquia'
+      fullPath: '/indicadores-franquia'
+      preLoaderRoute: typeof AuthenticatedIndicadoresFranquiaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lancamentos-franquia': {
+      id: '/_authenticated/lancamentos-franquia'
+      path: '/lancamentos-franquia'
+      fullPath: '/lancamentos-franquia'
+      preLoaderRoute: typeof AuthenticatedLancamentosFranquiaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/metas': {
       id: '/_authenticated/metas'
       path: '/metas'
       fullPath: '/metas'
       preLoaderRoute: typeof AuthenticatedMetasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/metas-franquia': {
+      id: '/_authenticated/metas-franquia'
+      path: '/metas-franquia'
+      fullPath: '/metas-franquia'
+      preLoaderRoute: typeof AuthenticatedMetasFranquiaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/meu-painel': {
@@ -520,7 +600,11 @@ const AuthenticatedIndicadoresIdRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
+  AuthenticatedDesempenhoFranquiasRoute: typeof AuthenticatedDesempenhoFranquiasRoute
+  AuthenticatedIndicadoresFranquiaRoute: typeof AuthenticatedIndicadoresFranquiaRoute
+  AuthenticatedLancamentosFranquiaRoute: typeof AuthenticatedLancamentosFranquiaRoute
   AuthenticatedMetasRoute: typeof AuthenticatedMetasRoute
+  AuthenticatedMetasFranquiaRoute: typeof AuthenticatedMetasFranquiaRoute
   AuthenticatedMeuPainelRoute: typeof AuthenticatedMeuPainelRoute
   AuthenticatedMeusIndicadoresRoute: typeof AuthenticatedMeusIndicadoresRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -542,7 +626,11 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
+  AuthenticatedDesempenhoFranquiasRoute: AuthenticatedDesempenhoFranquiasRoute,
+  AuthenticatedIndicadoresFranquiaRoute: AuthenticatedIndicadoresFranquiaRoute,
+  AuthenticatedLancamentosFranquiaRoute: AuthenticatedLancamentosFranquiaRoute,
   AuthenticatedMetasRoute: AuthenticatedMetasRoute,
+  AuthenticatedMetasFranquiaRoute: AuthenticatedMetasFranquiaRoute,
   AuthenticatedMeuPainelRoute: AuthenticatedMeuPainelRoute,
   AuthenticatedMeusIndicadoresRoute: AuthenticatedMeusIndicadoresRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
