@@ -1,11 +1,14 @@
-import { useMemo } from "react";
-import { X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import type { Chamado, FiltrosChamados } from "@/types/chamados";
 import { SITUACOES } from "@/types/chamados";
 
@@ -14,6 +17,57 @@ const TODOS = "__todos__";
 function unicos(vals: (string | null | undefined)[]): string[] {
   return Array.from(new Set(vals.filter((v): v is string => !!v && v.trim() !== ""))).sort((a, b) =>
     a.localeCompare(b, "pt-BR"),
+  );
+}
+
+/** Combobox com busca — usado em listas longas (solicitantes). */
+function ComboboxFiltro({
+  label, value, options, onChange,
+}: {
+  label: string;
+  value: string | null | undefined;
+  options: string[];
+  onChange: (v: string | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="space-y-1 min-w-[200px]">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            aria-label={label}
+            className="w-[200px] justify-between font-normal"
+          >
+            <span className="truncate">{value || "Todos"}</span>
+            <ChevronsUpDown className="size-4 opacity-50 shrink-0" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[260px] p-0" align="start">
+          <Command>
+            <CommandInput placeholder={`Buscar ${label.toLowerCase()}...`} />
+            <CommandList>
+              <CommandEmpty>Nenhum resultado.</CommandEmpty>
+              <CommandGroup>
+                <CommandItem onSelect={() => { onChange(null); setOpen(false); }}>
+                  <Check className={cn("mr-2 size-4", value ? "opacity-0" : "opacity-100")} />
+                  Todos
+                </CommandItem>
+                {options.map((o) => (
+                  <CommandItem key={o} value={o} onSelect={() => { onChange(o); setOpen(false); }}>
+                    <Check className={cn("mr-2 size-4", value === o ? "opacity-100" : "opacity-0")} />
+                    <span className="truncate">{o}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
 
