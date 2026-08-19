@@ -50,6 +50,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
   { group: "Sistema", items: [
     { to: "/relatorios", label: "Relatórios", icon: FileBarChart },
     { to: "/auditoria", label: "Auditoria", icon: History },
+    { to: "/auditoria-dados", label: "Auditoria de dados", icon: History },
     { to: "/configuracoes", label: "Configurações", icon: Settings },
   ]},
 ];
