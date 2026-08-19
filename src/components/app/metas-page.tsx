@@ -1,6 +1,4 @@
 import type { EntityKind } from "@/lib/entity-kind";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import { newId } from "@/lib/ids";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
@@ -71,23 +69,18 @@ export function MetasPage({ escopo = "empresa" }: { escopo?: EntityKind }) {
     }
     toast.success("Meta excluída");
   };
+  const scopedIndicatorIds = new Set(indicators.filter((i) => i.entity_scope === escopo).map((i) => i.id));
+  const scopedTargets = targets.filter((t) => scopedIndicatorIds.has(t.indicator_id));
+
   return (
     <div>
-      {escopo === "franquia" && (
-        <Alert className="mb-4">
-          <Info className="size-4" />
-          <AlertDescription>
-            A separação por escopo será aplicada quando o campo de entidade for criado. No momento esta tela exibe todos os registros.
-          </AlertDescription>
-        </Alert>
-      )}
       <PageHeader title={escopo === "franquia" ? "Metas Franquia" : "Metas"} description="Defina metas por período e indicador."
         actions={<TargetDialog onSave={handleSave} />}
       />
       <Card><Table>
         <TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead>Empresa</TableHead><TableHead>Setor</TableHead><TableHead>Responsável</TableHead><TableHead>Período</TableHead><TableHead>Meta</TableHead><TableHead className="w-[100px]">Ações</TableHead></TableRow></TableHeader>
         <TableBody>
-          {targets.slice(0, 50).map((t) => {
+          {scopedTargets.slice(0, 50).map((t) => {
             const ind = indicators.find((i) => i.id === t.indicator_id);
             const empresa = t.franchise_id
               ? franchises.find((f) => f.id === t.franchise_id)?.name ?? "—"

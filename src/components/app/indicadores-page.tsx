@@ -1,4 +1,5 @@
 import type { EntityKind } from "@/lib/entity-kind";
+import { filterByScope, unclassified } from "@/lib/entity-scope";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -43,7 +44,10 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
   const [kpiGroup, setKpiGroup] = useState<string>("all");
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
 
-  const filtered = indicators.filter((i) =>
+  const scoped = filterByScope(indicators, escopo);
+  const semEscopo = unclassified(indicators).length;
+
+  const filtered = scoped.filter((i) =>
     (q === "" || i.name.toLowerCase().includes(q.toLowerCase()) || i.code.toLowerCase().includes(q.toLowerCase())) &&
     (sectorId === "all" || i.owner_sector_id === sectorId) &&
     (status === "all" || i.status === status) &&
@@ -60,11 +64,12 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
 
   return (
     <div>
-      {escopo === "franquia" && (
+      {semEscopo > 0 && (
         <Alert className="mb-4">
           <Info className="size-4" />
-          <AlertDescription>
-            A separação por escopo será aplicada quando o campo de entidade for criado. No momento esta tela exibe todos os registros.
+          <AlertDescription className="flex flex-wrap items-center gap-2">
+            <span>{semEscopo} indicador(es) ainda sem escopo definido e não aparecem nestas listas.</span>
+            <Button asChild size="sm" variant="outline"><Link to="/classificacao-escopo">Classificar agora</Link></Button>
           </AlertDescription>
         </Alert>
       )}

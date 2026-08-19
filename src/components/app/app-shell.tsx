@@ -44,6 +44,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/metas-franquia", label: "Metas Franquia", icon: FlagTriangleRight },
     { to: "/setores", label: "Setores", icon: Building2 },
     { to: "/franquias", label: "Empresas / Franquias", icon: Network },
+    { to: "/classificacao-escopo", label: "Classificação de escopo", icon: Network },
     { to: "/usuarios", label: "Usuários", icon: Users },
   ]},
   { group: "Sistema", items: [

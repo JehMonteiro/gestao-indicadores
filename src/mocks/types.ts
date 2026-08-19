@@ -60,6 +60,7 @@ export interface Sector {
   id: string;
   name: string;
   code: string;
+  company_id?: string | null;
   description?: string;
   color: string; // tailwind-friendly token name or hex
   icon: string; // lucide icon name
@@ -77,10 +78,15 @@ export interface UserSector {
   joined_at: string;
 }
 
+export type EntityType = "grupo" | "empresa" | "franquia";
+export type EntityScope = "empresa" | "franquia";
+
 export interface Franchise {
   id: string;
   name: string;
   code: string;
+  entity_type?: EntityType | null;
+  parent_id?: string | null;
   legal_name?: string;
   trade_name?: string;
   document?: string; // CNPJ
@@ -123,6 +129,8 @@ export interface Indicator {
   category_id?: string;
   strategic_pillar?: string;
   kpi_group: KpiGroup;
+  entity_scope?: EntityScope | null;
+  entity_id?: string | null;
   scope: Scope;
   responsible_ids: string[];
   value_type: ValueType;

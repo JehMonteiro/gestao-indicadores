@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil } from "lucide-react";
 import type { Sector } from "@/mocks/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { isEmpresa } from "@/lib/entity-kind";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/setores/")({
@@ -62,6 +64,7 @@ function SectorsPage() {
 
 function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave: (s: Sector) => void; onDelete?: () => void }) {
   const [open, setOpen] = useState(false);
+  const empresas = useStore((s) => s.franchises).filter(isEmpresa);
   const [f, setF] = useState<Sector>(initial ?? {
     id: newId(), name: "", code: "", color: "#2563eb", icon: "Briefcase",
     active: true, display_order: 99, created_at: new Date().toISOString(),
@@ -81,6 +84,13 @@ function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave:
             <div><Label>Código</Label><Input value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })} /></div>
             <div><Label>Cor</Label><Input type="color" value={f.color} onChange={(e) => setF({ ...f, color: e.target.value })} /></div>
           </div>
+          <div>
+            <Label>Empresa</Label>
+            <Select value={f.company_id ?? ""} onValueChange={(v) => setF({ ...f, company_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
+              <SelectContent>{empresas.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
           <div><Label>Descrição</Label><Input value={f.description ?? ""} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
           <div className="flex items-center justify-between border rounded-md p-3">
             <div><p className="text-sm font-medium">Setor ativo</p></div>
@@ -91,6 +101,7 @@ function SectorDialog({ initial, onSave, onDelete }: { initial?: Sector; onSave:
           {onDelete && <Button variant="destructive" onClick={() => { onDelete(); setOpen(false); }}>Excluir</Button>}
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button onClick={() => {
+            if (!f.company_id) { toast.error("Selecione a empresa do setor"); return; }
             const payload = initial ? f : { ...f, id: newId() };
             onSave(payload);
             setOpen(false);

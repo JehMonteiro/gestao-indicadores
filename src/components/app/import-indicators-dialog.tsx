@@ -12,18 +12,18 @@ import { useStore, useCurrentUser } from "@/mocks/store";
 import { roundForType } from "@/lib/value-rules";
 import { dbWrite } from "@/lib/supabase-data";
 import type {
-  Direction, Frequency, Indicator, IndicatorStatus, ValueType,
+  Direction, EntityScope, Frequency, Indicator, IndicatorStatus, ValueType,
 } from "@/mocks/types";
 
 const TEMPLATE_HEADERS = [
-  "name", "objective", "owner_sector", "franchise",
+  "name", "objective", "entity_scope", "owner_sector", "franchise",
   "responsible", "status", "value_type", "frequency",
   "direction", "default_target", "warning_threshold",
   "critical_threshold", "start_date", "end_date",
 ];
 
 const TEMPLATE_EXAMPLE = [
-  "Faturamento mensal", "Atingir meta de receita", "Comercial", "Nocta Seguros e Benefícios",
+  "Faturamento mensal", "Atingir meta de receita", "empresa", "Comercial", "Nocta Seguros e Benefícios",
   "", "ativo", "moeda", "mensal",
   "maior_melhor", 100000, 80,
   60, "2026-01-01", "",
@@ -90,11 +90,8 @@ export function ImportIndicatorsDialog() {
   const slug = (s: string, max: number) =>
     stripAccents(s).toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, max);
 
-  const makeIndicatorCode = (name: string, franchiseRef: string) => {
-    const base = slug(name, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
-    const suffix = slug(franchiseRef, 10);
-    return suffix ? `${base}_${suffix}` : base;
-  };
+  const makeIndicatorCode = (name: string) =>
+    slug(name, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
 
   const getErrorMessage = (e: unknown) => {
     if (!e) return "erro desconhecido";
@@ -162,7 +159,13 @@ export function ImportIndicatorsDialog() {
           continue;
         }
 
-        const autoCode = makeIndicatorCode(name, franchise.code || franchise.name);
+        const autoCode = makeIndicatorCode(name);
+        const scopeRaw = lower(row.entity_scope);
+        if (scopeRaw !== "empresa" && scopeRaw !== "franquia") {
+          errors.push(`Linha ${line}: escopo deve ser "empresa" ou "franquia"`);
+          continue;
+        }
+        const entityScope = scopeRaw as EntityScope;
         const nameKey = lookupKey(name);
         const existing =
           knownIndicators.find((x) => x.code === autoCode) ??
@@ -188,6 +191,8 @@ export function ImportIndicatorsDialog() {
           shared_sector_ids: [],
           franchise_id: franchise.id,
           scope: "setor",
+          entity_scope: entityScope,
+          entity_id: entityScope === "franquia" ? franchise.id : null,
           responsible_ids: responsibleId ? [responsibleId] : [],
           kpi_group: parseKpiGroup(row.kpi_group) ?? inferKpiGroup(name, autoCode) ?? "resultado",
           value_type: resolvedValueType,

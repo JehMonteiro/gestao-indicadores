@@ -1,4 +1,7 @@
 import { newId } from "@/lib/ids";
+import { ENTITY_SCOPES } from "@/lib/entity-scope";
+import { makeUniqueIndicatorCode } from "@/lib/indicator-code";
+import { isFranquia } from "@/lib/entity-kind";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
@@ -11,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import type { Direction, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
+import type { Direction, EntityScope, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
 import { KPI_GROUPS } from "@/lib/format";
 import { toast } from "sonner";
 import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-rules";
@@ -25,6 +28,7 @@ export const Route = createFileRoute("/_authenticated/indicadores/novo")({
 
 function NewIndicator() {
   const sectors = useStore((s) => s.sectors);
+  const indicators = useStore((s) => s.indicators);
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
@@ -38,6 +42,8 @@ function NewIndicator() {
     owner_sector_id: sectors[0]?.id ?? "", franchise_id: "",
     responsible_id: "",
     kpi_group: "resultado" as KpiGroup,
+    entity_scope: "" as EntityScope | "",
+    entity_id: "",
     value_type: "inteiro" as ValueType,
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
@@ -59,6 +65,10 @@ function NewIndicator() {
       toast.error("Selecione a empresa do indicador");
       return;
     }
+    if (!f.entity_scope) {
+      toast.error("Selecione o escopo do indicador");
+      return;
+    }
     const intError = firstIntegerError(f.value_type, [
       { label: "Meta padrão", value: f.default_target },
       { label: "Valor mínimo", value: f.minimum_value },
@@ -66,13 +76,8 @@ function NewIndicator() {
       { label: "Peso", value: (f as { weight?: number }).weight },
     ]);
     if (intError) { toast.error(intError); return; }
-    const franchiseRef = franchises.find((fr) => fr.id === f.franchise_id);
-    const baseCode = f.name.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 24) || `IND_${Date.now().toString(36).toUpperCase()}`;
-    const suffix = (franchiseRef?.code || franchiseRef?.name || "")
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 10);
-    const autoCode = suffix ? `${baseCode}_${suffix}` : baseCode;
-    const { responsible_id, ...rest } = f;
+    const autoCode = makeUniqueIndicatorCode(f.name, indicators.map((i) => i.code));
+    const { responsible_id, entity_scope, entity_id, ...rest } = f;
     const ind: Indicator = {
       id: newId(),
       code: autoCode,
@@ -83,6 +88,8 @@ function NewIndicator() {
       created_by: user?.id ?? "u-admin",
       created_at: new Date().toISOString(),
       ...rest,
+      entity_scope: entity_scope as EntityScope,
+      entity_id: entity_id || null,
       end_date: rest.end_date || undefined,
     };
     await upsert(ind);
@@ -133,6 +140,25 @@ function NewIndicator() {
                 </SelectContent>
               </Select>
             </Field>
+            <Field label="Escopo">
+              <Select value={f.entity_scope} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
+                <SelectTrigger><SelectValue placeholder="Selecione o escopo" /></SelectTrigger>
+                <SelectContent>
+                  {ENTITY_SCOPES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+            {f.entity_scope === "franquia" && (
+              <Field label="Unidade">
+                <Select value={f.entity_id || "rede"} onValueChange={(v) => set("entity_id", v === "rede" ? "" : v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rede">Toda a rede</SelectItem>
+                    {franchises.filter(isFranquia).map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
             <Field label="Setor">
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>

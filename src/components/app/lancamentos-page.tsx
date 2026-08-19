@@ -1,6 +1,4 @@
 import type { EntityKind } from "@/lib/entity-kind";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
@@ -25,19 +23,14 @@ export function LancamentosPage({ escopo = "empresa" }: { escopo?: EntityKind })
   const franchises = useStore((s) => s.franchises);
   const entries = useStore((s) => s.entries);
   const [status, setStatus] = useState("all");
-  const filtered = entries.filter((e) => status === "all" || e.status === status)
+  const scopedIndicatorIds = new Set(indicators.filter((i) => i.entity_scope === escopo).map((i) => i.id));
+  const filtered = entries
+    .filter((e) => scopedIndicatorIds.has(e.indicator_id))
+    .filter((e) => status === "all" || e.status === status)
     .sort((a, b) => b.period_end.localeCompare(a.period_end));
 
   return (
     <div>
-      {escopo === "franquia" && (
-        <Alert className="mb-4">
-          <Info className="size-4" />
-          <AlertDescription>
-            A separação por escopo será aplicada quando o campo de entidade for criado. No momento esta tela exibe todos os registros.
-          </AlertDescription>
-        </Alert>
-      )}
       <PageHeader title={escopo === "franquia" ? "Lançamentos Franquia" : "Lançamentos"} description="Histórico e novos lançamentos de resultados."
         actions={<Button asChild><Link to="/lancamentos/novo"><Plus className="size-4" />Novo lançamento</Link></Button>}
       />
