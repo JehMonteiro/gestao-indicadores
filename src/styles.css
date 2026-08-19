@@ -44,6 +44,10 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
 
+  --color-kpi-movimento: var(--kpi-movimento);
+  --color-kpi-resultado: var(--kpi-resultado);
+  --color-kpi-qualidade: var(--kpi-qualidade);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -93,6 +97,12 @@
   --info: oklch(0.62 0.14 240);
   --info-foreground: oklch(0.99 0 0);
 
+  /* Grupos estratégicos de KPI — tons frios, nunca verde/amarelo/vermelho
+     (essas cores pertencem exclusivamente ao semáforo de performance). */
+  --kpi-movimento: oklch(0.62 0.12 210);
+  --kpi-resultado: oklch(0.55 0.19 295);
+  --kpi-qualidade: oklch(0.50 0.17 268);
+
   --border: oklch(0.90 0.012 250);
   --input: oklch(0.92 0.012 250);
   --ring: oklch(0.42 0.13 255);
@@ -136,6 +146,10 @@
   --warning-foreground: oklch(0.18 0.05 60);
   --info: oklch(0.68 0.13 240);
   --info-foreground: oklch(0.15 0.03 240);
+
+  --kpi-movimento: oklch(0.72 0.11 210);
+  --kpi-resultado: oklch(0.70 0.16 295);
+  --kpi-qualidade: oklch(0.66 0.15 268);
   --border: oklch(0.30 0.03 252);
   --input: oklch(0.32 0.03 252);
   --ring: oklch(0.70 0.14 250);
