@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, User2, ListChecks, ClipboardEdit, ClipboardCheck, Building2,
   Store, Target, Crosshair, Flag, FlagTriangleRight, Network, FileBarChart, Users, History, Settings,
-  Activity, Menu, LogOut, Bell, ChevronsUpDown, ShieldCheck,
+  Activity, Menu, LogOut, Bell, ChevronsUpDown, ShieldCheck, Headphones,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { canSeeRoute, useCurrentUser, useStore } from "@/mocks/store";
@@ -46,6 +46,9 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/franquias", label: "Empresas / Franquias", icon: Network },
     { to: "/classificacao-escopo", label: "Classificação de escopo", icon: Network },
     { to: "/usuarios", label: "Usuários", icon: Users },
+  ]},
+  { group: "Atendimento", items: [
+    { to: "/chamados", label: "Chamados", icon: Headphones },
   ]},
   { group: "Sistema", items: [
     { to: "/relatorios", label: "Relatórios", icon: FileBarChart },
