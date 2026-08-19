@@ -60,6 +60,7 @@ export interface Sector {
   id: string;
   name: string;
   code: string;
+  company_id?: string | null;
   description?: string;
   color: string; // tailwind-friendly token name or hex
   icon: string; // lucide icon name
@@ -128,6 +129,8 @@ export interface Indicator {
   category_id?: string;
   strategic_pillar?: string;
   kpi_group: KpiGroup;
+  entity_scope?: EntityScope | null;
+  entity_id?: string | null;
   scope: Scope;
   responsible_ids: string[];
   value_type: ValueType;
