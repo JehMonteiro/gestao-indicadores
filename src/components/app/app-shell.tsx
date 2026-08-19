@@ -81,10 +81,11 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <div key={g.group}>
               <p className="px-3 mb-1 text-[10px] uppercase tracking-wider opacity-50 font-medium">{g.group}</p>
               <ul className="space-y-0.5">
-                {items.map((it) => {
+                {items.map((it, idx) => {
                   const active = pathname === it.to || pathname.startsWith(it.to + "/");
                   return (
-                    <li key={it.to}>
+                    <li key={it.to} className={cn(it.pairTop && idx > 0 && "border-t border-white/10 pt-0.5 mt-0.5")}>
+
                       <Link
                         to={it.to}
                         onClick={onNavigate}
