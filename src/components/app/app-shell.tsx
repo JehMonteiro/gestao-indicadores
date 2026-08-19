@@ -31,15 +31,15 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/visao-geral", label: "Visão geral", icon: Activity },
     { to: "/meu-painel", label: "Meu painel", icon: LayoutDashboard },
     { to: "/meus-indicadores", label: "Meus indicadores", icon: ListChecks },
-    { to: "/desempenho-franquias", label: "Franquias", icon: Store, pairTop: true },
+    { to: "/desempenho-franquias", label: "Franquias", icon: Store },
   ]},
   { group: "Operação", items: [
     { to: "/lancamentos", label: "Lançamentos", icon: ClipboardEdit },
-    { to: "/lancamentos-franquia", label: "Lançamentos Franquia", icon: ClipboardCheck, pairTop: true },
+    { to: "/lancamentos-franquia", label: "Lançamentos Franquia", icon: ClipboardCheck },
   ]},
   { group: "Estrutura", items: [
     { to: "/indicadores", label: "Indicadores", icon: Target },
-    { to: "/indicadores-franquia", label: "Indicadores Franquia", icon: Crosshair, pairTop: true },
+    { to: "/indicadores-franquia", label: "Indicadores Franquia", icon: Crosshair },
     { to: "/metas", label: "Metas", icon: Flag },
     { to: "/metas-franquia", label: "Metas Franquia", icon: FlagTriangleRight, pairTop: true },
     { to: "/setores", label: "Setores", icon: Building2 },
