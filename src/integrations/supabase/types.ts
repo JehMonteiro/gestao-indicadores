@@ -247,6 +247,7 @@ export type Database = {
           id: string
           instructions: string | null
           is_demo: boolean
+          kpi_group: Database["public"]["Enums"]["kpi_group"]
           maximum_value: number | null
           minimum_value: number | null
           name: string
@@ -276,6 +277,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_demo?: boolean
+          kpi_group: Database["public"]["Enums"]["kpi_group"]
           maximum_value?: number | null
           minimum_value?: number | null
           name: string
@@ -305,6 +307,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_demo?: boolean
+          kpi_group?: Database["public"]["Enums"]["kpi_group"]
           maximum_value?: number | null
           minimum_value?: number | null
           name?: string
@@ -664,6 +667,7 @@ export type Database = {
         | "meta_exata"
       indicator_scope: "corporativo" | "setor" | "franquia"
       indicator_status: "rascunho" | "ativo" | "pausado" | "arquivado"
+      kpi_group: "movimento" | "resultado" | "qualidade"
       periodicity:
         | "diaria"
         | "semanal"
@@ -820,6 +824,7 @@ export const Constants = {
       ],
       indicator_scope: ["corporativo", "setor", "franquia"],
       indicator_status: ["rascunho", "ativo", "pausado", "arquivado"],
+      kpi_group: ["movimento", "resultado", "qualidade"],
       periodicity: [
         "diaria",
         "semanal",
