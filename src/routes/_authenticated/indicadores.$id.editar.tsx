@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import type { Direction, Frequency, Indicator, IndicatorStatus, ValueType } from "@/mocks/types";
+import type { Direction, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
+import { KPI_GROUPS } from "@/lib/format";
 import { toast } from "sonner";
 import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-rules";
 import { ShieldAlert } from "lucide-react";
@@ -111,6 +112,16 @@ function EditIndicator() {
         <Card>
           <CardHeader><CardTitle className="text-base">Classificação</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-3 gap-3">
+            <Field label="Grupo estratégico">
+              <Select value={f.kpi_group ?? "resultado"} onValueChange={(v) => set("kpi_group", v as KpiGroup)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {KPI_GROUPS.map((g) => (
+                    <SelectItem key={g.value} value={g.value}>{g.label} — {g.description}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label="Setor">
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
