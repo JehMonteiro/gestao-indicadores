@@ -129,7 +129,7 @@ function EditIndicator() {
               </Select>
             </Field>
             <Field label="Escopo">
-              <Select value={f.entity_scope ?? ""} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
+              <Select value={f.entity_scope ?? ""} onValueChange={(v) => setF((p) => (p ? { ...p, entity_scope: v as EntityScope, entity_id: "" } : p))}>
                 <SelectTrigger><SelectValue placeholder="Selecione o escopo" /></SelectTrigger>
                 <SelectContent>
                   {ENTITY_SCOPES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
