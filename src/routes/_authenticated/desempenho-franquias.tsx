@@ -60,12 +60,6 @@ function FranchisePerformance() {
         title="Desempenho das Franquias"
         description="Ranking e evolução das unidades da Nocta Franquia."
       />
-      <Alert className="mb-4">
-        <Info className="size-4" />
-        <AlertDescription>
-          A separação por escopo será aplicada quando o campo de entidade for criado. Os números abaixo ainda consideram todos os indicadores visíveis.
-        </AlertDescription>
-      </Alert>
 
       <div className="grid gap-4 sm:grid-cols-4 mb-4">
         <StatCard label="Unidades" value={String(units.length)} />
