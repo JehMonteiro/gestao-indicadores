@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as AuthenticatedIndicadoresFranquiaRouteImport } from './routes/_authenticated/indicadores-franquia'
 import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
 import { Route as AuthenticatedMeuPainelRouteImport } from './routes/_authenticated/meu-painel'
 import { Route as AuthenticatedMeusIndicadoresRouteImport } from './routes/_authenticated/meus-indicadores'
@@ -62,6 +63,12 @@ const AuthenticatedConfiguracoesRoute =
   AuthenticatedConfiguracoesRouteImport.update({
     id: '/configuracoes',
     path: '/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresFranquiaRoute =
+  AuthenticatedIndicadoresFranquiaRouteImport.update({
+    id: '/indicadores-franquia',
+    path: '/indicadores-franquia',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMetasRoute = AuthenticatedMetasRouteImport.update({
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/definir-senha': typeof DefinirSenhaRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
   '/metas': typeof AuthenticatedMetasRoute
   '/meu-painel': typeof AuthenticatedMeuPainelRoute
   '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
@@ -197,6 +205,7 @@ export interface FileRoutesByTo {
   '/definir-senha': typeof DefinirSenhaRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
   '/metas': typeof AuthenticatedMetasRoute
   '/meu-painel': typeof AuthenticatedMeuPainelRoute
   '/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
@@ -224,6 +233,7 @@ export interface FileRoutesById {
   '/definir-senha': typeof DefinirSenhaRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/_authenticated/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
   '/_authenticated/metas': typeof AuthenticatedMetasRoute
   '/_authenticated/meu-painel': typeof AuthenticatedMeuPainelRoute
   '/_authenticated/meus-indicadores': typeof AuthenticatedMeusIndicadoresRoute
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/auditoria'
     | '/configuracoes'
+    | '/indicadores-franquia'
     | '/metas'
     | '/meu-painel'
     | '/meus-indicadores'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/auditoria'
     | '/configuracoes'
+    | '/indicadores-franquia'
     | '/metas'
     | '/meu-painel'
     | '/meus-indicadores'
@@ -302,6 +314,7 @@ export interface FileRouteTypes {
     | '/definir-senha'
     | '/_authenticated/auditoria'
     | '/_authenticated/configuracoes'
+    | '/_authenticated/indicadores-franquia'
     | '/_authenticated/metas'
     | '/_authenticated/meu-painel'
     | '/_authenticated/meus-indicadores'
@@ -371,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/configuracoes'
       fullPath: '/configuracoes'
       preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicadores-franquia': {
+      id: '/_authenticated/indicadores-franquia'
+      path: '/indicadores-franquia'
+      fullPath: '/indicadores-franquia'
+      preLoaderRoute: typeof AuthenticatedIndicadoresFranquiaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/metas': {
@@ -520,6 +540,7 @@ const AuthenticatedIndicadoresIdRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
+  AuthenticatedIndicadoresFranquiaRoute: typeof AuthenticatedIndicadoresFranquiaRoute
   AuthenticatedMetasRoute: typeof AuthenticatedMetasRoute
   AuthenticatedMeuPainelRoute: typeof AuthenticatedMeuPainelRoute
   AuthenticatedMeusIndicadoresRoute: typeof AuthenticatedMeusIndicadoresRoute
@@ -542,6 +563,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
+  AuthenticatedIndicadoresFranquiaRoute: AuthenticatedIndicadoresFranquiaRoute,
   AuthenticatedMetasRoute: AuthenticatedMetasRoute,
   AuthenticatedMeuPainelRoute: AuthenticatedMeuPainelRoute,
   AuthenticatedMeusIndicadoresRoute: AuthenticatedMeusIndicadoresRoute,
