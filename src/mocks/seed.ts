@@ -33,11 +33,11 @@ export const seedProfiles: Profile[] = [
 
 // ===== Sectors =====
 export const seedSectors: Sector[] = [
-  { id: "s-com", name: "Comercial", code: "COM", kpi_group: "resultado", color: "#2563eb", icon: "Briefcase", active: true, display_order: 1, created_at: iso(today), description: "Vendas e relacionamento com prospects" },
-  { id: "s-mkt", name: "Marketing", code: "MKT", kpi_group: "resultado", color: "#db2777", icon: "Megaphone", active: true, display_order: 2, created_at: iso(today), description: "Aquisição e branding" },
-  { id: "s-ops", name: "Operações", code: "OPS", kpi_group: "resultado", color: "#0d9488", icon: "Settings", active: true, display_order: 3, created_at: iso(today) },
-  { id: "s-fin", name: "Financeiro", code: "FIN", kpi_group: "resultado", color: "#16a34a", icon: "DollarSign", active: true, display_order: 4, created_at: iso(today) },
-  { id: "s-sup", name: "Suporte ao Franqueado", code: "SUP", kpi_group: "resultado", color: "#f59e0b", icon: "LifeBuoy", active: true, display_order: 5, created_at: iso(today) },
+  { id: "s-com", name: "Comercial", code: "COM", color: "#2563eb", icon: "Briefcase", active: true, display_order: 1, created_at: iso(today), description: "Vendas e relacionamento com prospects" },
+  { id: "s-mkt", name: "Marketing", code: "MKT", color: "#db2777", icon: "Megaphone", active: true, display_order: 2, created_at: iso(today), description: "Aquisição e branding" },
+  { id: "s-ops", name: "Operações", code: "OPS", color: "#0d9488", icon: "Settings", active: true, display_order: 3, created_at: iso(today) },
+  { id: "s-fin", name: "Financeiro", code: "FIN", color: "#16a34a", icon: "DollarSign", active: true, display_order: 4, created_at: iso(today) },
+  { id: "s-sup", name: "Suporte ao Franqueado", code: "SUP", color: "#f59e0b", icon: "LifeBuoy", active: true, display_order: 5, created_at: iso(today) },
 ];
 
 // ===== User <-> Sector =====
@@ -53,9 +53,9 @@ export const seedUserSectors: UserSector[] = [
 
 // ===== Franchises =====
 export const seedFranchises: Franchise[] = [
-  { id: "f-camp", name: "Unidade Campinas", code: "CAMP", kpi_group: "resultado", legal_name: "Franquia Campinas Ltda", document: "12.345.678/0001-00", city: "Campinas", state: "SP", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 14)), manager_id: "u-gest-fr", created_at: iso(today) },
-  { id: "f-bh", name: "Unidade Belo Horizonte", code: "BH", kpi_group: "resultado", legal_name: "Franquia BH Ltda", document: "23.456.789/0001-00", city: "Belo Horizonte", state: "MG", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 8)), manager_id: "u-gest-fr", created_at: iso(today) },
-  { id: "f-poa", name: "Unidade Porto Alegre", code: "POA", kpi_group: "resultado", legal_name: "Franquia POA Ltda", city: "Porto Alegre", state: "RS", region: "Sul", status: "ativa", start_date: iso(subMonths(today, 3)), created_at: iso(today) },
+  { id: "f-camp", name: "Unidade Campinas", code: "CAMP", legal_name: "Franquia Campinas Ltda", document: "12.345.678/0001-00", city: "Campinas", state: "SP", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 14)), manager_id: "u-gest-fr", created_at: iso(today) },
+  { id: "f-bh", name: "Unidade Belo Horizonte", code: "BH", legal_name: "Franquia BH Ltda", document: "23.456.789/0001-00", city: "Belo Horizonte", state: "MG", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 8)), manager_id: "u-gest-fr", created_at: iso(today) },
+  { id: "f-poa", name: "Unidade Porto Alegre", code: "POA", legal_name: "Franquia POA Ltda", city: "Porto Alegre", state: "RS", region: "Sul", status: "ativa", start_date: iso(subMonths(today, 3)), created_at: iso(today) },
 ];
 
 export const seedUserFranchises: UserFranchise[] = [];
