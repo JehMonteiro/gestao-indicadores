@@ -7,6 +7,7 @@ import {
 import { Upload, Download, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { newId } from "@/lib/ids";
+import { inferKpiGroup, parseKpiGroup } from "@/lib/kpi-group";
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { roundForType } from "@/lib/value-rules";
 import { dbWrite } from "@/lib/supabase-data";
@@ -188,6 +189,7 @@ export function ImportIndicatorsDialog() {
           franchise_id: franchise.id,
           scope: "setor",
           responsible_ids: responsibleId ? [responsibleId] : [],
+          kpi_group: parseKpiGroup(row.kpi_group) ?? inferKpiGroup(name, autoCode) ?? "resultado",
           value_type: resolvedValueType,
           frequency: (validFrequencies.includes(frequency) ? frequency : "mensal") as Frequency,
           direction: (validDirections.includes(direction) ? direction : "maior_melhor") as Direction,
