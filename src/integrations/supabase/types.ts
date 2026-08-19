@@ -68,6 +68,90 @@ export type Database = {
         }
         Relationships: []
       }
+      chamados: {
+        Row: {
+          aberto_em: string | null
+          assunto: string | null
+          categoria: string | null
+          concluido_em: string | null
+          departamento_envio: string | null
+          departamento_recebimento: string | null
+          etiquetas: string[]
+          id: string
+          importado_em: string
+          importado_por: string | null
+          lote_id: string
+          no_prazo: boolean | null
+          prazo_estipulado: string | null
+          prazo_planejado: string | null
+          qtd_interacao: number
+          resolvido_em: string | null
+          respondido_em: string | null
+          responsavel: string | null
+          satisfacao_nota: number | null
+          situacao: string
+          solicitante: string | null
+          subcategoria: string | null
+          tma_horas: number | null
+          tmr_horas: number | null
+          unidade: string | null
+        }
+        Insert: {
+          aberto_em?: string | null
+          assunto?: string | null
+          categoria?: string | null
+          concluido_em?: string | null
+          departamento_envio?: string | null
+          departamento_recebimento?: string | null
+          etiquetas?: string[]
+          id?: string
+          importado_em?: string
+          importado_por?: string | null
+          lote_id?: string
+          no_prazo?: boolean | null
+          prazo_estipulado?: string | null
+          prazo_planejado?: string | null
+          qtd_interacao?: number
+          resolvido_em?: string | null
+          respondido_em?: string | null
+          responsavel?: string | null
+          satisfacao_nota?: number | null
+          situacao: string
+          solicitante?: string | null
+          subcategoria?: string | null
+          tma_horas?: number | null
+          tmr_horas?: number | null
+          unidade?: string | null
+        }
+        Update: {
+          aberto_em?: string | null
+          assunto?: string | null
+          categoria?: string | null
+          concluido_em?: string | null
+          departamento_envio?: string | null
+          departamento_recebimento?: string | null
+          etiquetas?: string[]
+          id?: string
+          importado_em?: string
+          importado_por?: string | null
+          lote_id?: string
+          no_prazo?: boolean | null
+          prazo_estipulado?: string | null
+          prazo_planejado?: string | null
+          qtd_interacao?: number
+          resolvido_em?: string | null
+          respondido_em?: string | null
+          responsavel?: string | null
+          satisfacao_nota?: number | null
+          situacao?: string
+          solicitante?: string | null
+          subcategoria?: string | null
+          tma_horas?: number | null
+          tmr_horas?: number | null
+          unidade?: string | null
+        }
+        Relationships: []
+      }
       franchises: {
         Row: {
           city: string | null
