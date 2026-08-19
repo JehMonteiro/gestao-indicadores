@@ -373,7 +373,7 @@ export function ChamadosGraficos({ chamados, loading }: { chamados: Chamado[]; l
                   dataKey="mediaInteracoes"
                   position="right"
                   className="fill-foreground text-xs"
-                  formatter={(v: number) => v.toFixed(1)}
+                  formatter={(v) => Number(v ?? 0).toFixed(1)}
                 />
               </Bar>
             </BarChart>
@@ -397,7 +397,7 @@ export function ChamadosGraficos({ chamados, loading }: { chamados: Chamado[]; l
               dataKey="percentual"
               position="right"
               className="fill-foreground text-xs"
-              formatter={(v: number) => `${v}%`}
+              formatter={(v) => `${Number(v ?? 0)}%`}
             />
           </Bar>
         </BarChart>
