@@ -344,6 +344,7 @@ export const dbWrite = {
       owner_sector_id: i.owner_sector_id || null,
       franchise_id: i.franchise_id ?? null,
       strategic_pillar: i.strategic_pillar ?? null,
+      kpi_group: (i.kpi_group ?? "resultado") as any,
       responsible_user_id: i.responsible_ids[0] || null,
       scope: i.scope as any,
       value_type: i.value_type as any,
