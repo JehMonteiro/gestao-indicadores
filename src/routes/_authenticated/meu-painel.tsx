@@ -1,253 +1,243 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { PageHeader, EmptyState, StatusDot } from "@/components/app/page-header";
-import { useCurrentUser, useStore } from "@/mocks/store";
-import { useOwnedIndicators, useVisibleIndicators } from "@/lib/permissions";
-import { classify, classificationStyles, computeAchievement, formatDate, formatValue, weightedIndex } from "@/lib/format";
-import { registeredEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
-import {
-  AnnualSummaryCard,
-  FranchiseRankingList,
-  IndexEvolutionCard,
-  buildIndicatorMetrics,
-  useFranchiseRanking,
-} from "@/components/app/dashboard-blocks";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, AlertTriangle, CheckCircle2, Clock, ListChecks, TrendingDown, TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle, BarChart2, ClipboardList, TrendingUp } from "lucide-react";
+import { useStore } from "@/mocks/store";
+import { useAuthProfile } from "@/hooks/use-auth";
+import { useMyDashboardData } from "@/lib/use-my-dashboard";
+import {
+  classify, classificationStyles, computeAchievement, formatValue, indicatorPeriodLabel, weightedIndex,
+} from "@/lib/format";
+import type { Classification } from "@/lib/format";
+import { resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
+import { currentPeriod, daysUntil, expectedEntriesInMonth, lastMonths } from "@/lib/period-utils";
+import {
+  MyDeadlines, MyEvolutionCard, MyIndicatorsTable, MyRecentHistory, MyStatusDonut,
+} from "@/components/app/meu-painel-blocks";
+import type { DeadlineItem, MyIndicatorRow, PeriodOption } from "@/components/app/meu-painel-blocks";
+import type { IndicatorEntry } from "@/mocks/types";
 
 export const Route = createFileRoute("/_authenticated/meu-painel")({
-  head: () => ({ meta: [{ title: "Meu painel — Gestão de Indicadores" }] }),
+  head: () => ({
+    meta: [
+      { title: "Meu painel — Gestão de Indicadores" },
+      { name: "description", content: "Painel pessoal com seus indicadores, lançamentos, desempenho e prazos." },
+      { property: "og:title", content: "Meu painel — Gestão de Indicadores" },
+      { property: "og:description", content: "Acompanhe seus indicadores, lançamentos e prazos em um só lugar." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: MyDashboard,
 });
 
+const PERIOD_MONTHS: Record<PeriodOption, number> = { "3m": 3, "6m": 6, "12m": 12 };
+
+function overlaps(a: { period_start: string; period_end: string }, start: string, end: string) {
+  return a.period_start <= end && a.period_end >= start;
+}
+
 function MyDashboard() {
-  const user = useCurrentUser();
-  const indicators = useVisibleIndicators();
-  const ownedIndicators = useOwnedIndicators();
-  const allEntries = useStore((s) => s.entries);
-  const allTargets = useStore((s) => s.targets);
+  const { data: auth } = useAuthProfile();
   const settings = useStore((s) => s.settings);
-  const allSectors = useStore((s) => s.sectors);
-  const allFranchises = useStore((s) => s.franchises);
-  const [period, setPeriod] = useState<"3m" | "6m" | "12m">("6m");
+  const { data, isLoading } = useMyDashboardData();
+  const [period, setPeriod] = useState<PeriodOption>("6m");
 
-  const visibleIds = useMemo(() => new Set(indicators.map((i) => i.id)), [indicators]);
-  const entries = useMemo(() => allEntries.filter((e) => visibleIds.has(e.indicator_id)), [allEntries, visibleIds]);
-  const targets = useMemo(() => allTargets.filter((t) => visibleIds.has(t.indicator_id)), [allTargets, visibleIds]);
-  const sectors = useMemo(() => {
-    const ids = new Set(indicators.flatMap((i) => [i.owner_sector_id, ...(i.shared_sector_ids ?? [])]));
-    return allSectors.filter((s) => ids.has(s.id));
-  }, [allSectors, indicators]);
-  const franchises = useMemo(() => {
-    const ids = new Set<string>([
-      ...indicators.map((i) => i.franchise_id).filter(Boolean) as string[],
-      ...targets.map((t) => t.franchise_id).filter(Boolean) as string[],
-      ...entries.map((e) => e.franchise_id).filter(Boolean) as string[],
-    ]);
-    return ids.size > 0 ? allFranchises.filter((f) => ids.has(f.id)) : allFranchises;
-  }, [allFranchises, indicators, targets, entries]);
+  const indicators = useMemo(() => data?.indicators ?? [], [data]);
+  const targets = useMemo(() => data?.targets ?? [], [data]);
+  const entries = useMemo(() => data?.entries ?? [], [data]);
+  const sectors = useMemo(() => data?.sectors ?? [], [data]);
+  const entryIndicators = useMemo(() => data?.entryIndicators ?? [], [data]);
 
-  const metricsByIndicator = useMemo(
-    () => buildIndicatorMetrics(indicators, entries, targets),
-    [indicators, entries, targets],
-  );
-  const franchiseRanking = useFranchiseRanking(franchises, metricsByIndicator, targets, entries);
+  const activeIndicators = useMemo(() => indicators.filter((i) => i.status === "ativo"), [indicators]);
 
-
-  const stats = useMemo(() => {
-    const metrics = indicators.map((ind) => {
+  /* ---- linhas da tabela / status atual ---- */
+  const rows = useMemo<MyIndicatorRow[]>(() => {
+    return activeIndicators.map((ind) => {
+      const p = currentPeriod(ind.frequency);
+      const indEntries = entries.filter((e) => e.indicator_id === ind.id);
+      const currentEntry = indEntries.find((e) => overlaps(e, p.start, p.end));
       const indTargets = targets.filter((t) => t.indicator_id === ind.id);
-      const e = registeredEntriesForIndicator(ind, entries).slice(-1)[0];
-      const t = e ? resolveTargetForEntry(ind, e, indTargets) : resolveTargetForIndicator(ind, indTargets);
-      const pct = computeAchievement(e, t, ind.direction);
-      return { ind, pct, target: t, entry: e };
+      const target = currentEntry
+        ? resolveTargetForEntry(ind, currentEntry, indTargets)
+        : resolveTargetForIndicator(ind, indTargets);
+      const percent = currentEntry ? computeAchievement(currentEntry, target, ind.direction) : null;
+      const sector = sectors.find((s) => s.id === ind.owner_sector_id);
+      const periodLabel = new Intl.DateTimeFormat("pt-BR", { month: "short", year: "numeric", timeZone: "UTC" })
+        .format(new Date(`${p.start}T00:00:00Z`))
+        .replace(".", "");
+      return {
+        indicator: ind,
+        sectorName: sector?.name,
+        periodLabel: periodLabel.charAt(0).toUpperCase() + periodLabel.slice(1),
+        actual: currentEntry?.actual_value,
+        target: target?.target_value,
+        percent,
+        classification: classify(percent, settings) as Classification,
+        entryId: currentEntry?.id,
+      };
     });
-    const counts = { atingido: 0, atencao: 0, critico: 0, sem_info: 0 };
-    for (const m of metrics) counts[classify(m.pct, settings)] += 1;
-    const idx = weightedIndex(metrics.map((m) => ({ percent: m.pct, weight: m.ind.weight })));
-    return { metrics, counts, idx };
-  }, [indicators, targets, entries, settings]);
+  }, [activeIndicators, entries, targets, sectors, settings]);
 
-  const pending = entries.filter((e) => e.user_id === user?.id && e.status === "rascunho");
-  const sectorChart = useMemo(() => {
-    return sectors.map((s) => {
-      const sectorMetrics = stats.metrics.filter((m) => m.ind.owner_sector_id === s.id);
-      const avg = weightedIndex(sectorMetrics.map((m) => ({ percent: m.pct, weight: m.ind.weight })));
-      return { setor: s.code, valor: avg ? Math.round(avg) : 0, fill: s.color };
+  const counts = useMemo(() => {
+    const base: Record<Classification, number> = { atingido: 0, atencao: 0, critico: 0, sem_info: 0 };
+    for (const r of rows) base[r.classification] += 1;
+    return base;
+  }, [rows]);
+
+  /* ---- cards ---- */
+  const now = new Date();
+  const monthStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
+  const monthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
+
+  const entriesThisMonth = entries.filter((e) => e.period_start >= monthStart && e.period_start <= monthEnd).length;
+  const expectedThisMonth = activeIndicators.reduce((s, i) => s + expectedEntriesInMonth(i.frequency), 0);
+
+  const myIndex = useMemo(
+    () => weightedIndex(rows.filter((r) => r.percent != null).map((r) => ({ percent: r.percent, weight: r.indicator.weight }))),
+    [rows],
+  );
+
+  const drafts = entries.filter((e) => e.status === "rascunho").length;
+  const missing = rows.filter((r) => !r.entryId).length;
+  const pending = drafts + missing;
+
+  /* ---- evolução ---- */
+  const evolution = useMemo(() => {
+    const months = lastMonths(PERIOD_MONTHS[period]);
+    return months.map((m) => {
+      const items = activeIndicators.map((ind) => {
+        const indTargets = targets.filter((t) => t.indicator_id === ind.id);
+        const e = entries.find(
+          (x) => x.indicator_id === ind.id && x.status === "registrado" && overlaps(x, m.start, m.end),
+        );
+        const t = e ? resolveTargetForEntry(ind, e, indTargets) : null;
+        return { percent: e ? computeAchievement(e, t, ind.direction) : null, weight: ind.weight };
+      });
+      return { label: m.label, valor: weightedIndex(items) };
     });
-  }, [sectors, stats]);
+  }, [activeIndicators, entries, targets, period]);
 
-  const pieData = [
-    { name: "Atingido", value: stats.counts.atingido, fill: "oklch(0.65 0.16 150)" },
-    { name: "Atenção", value: stats.counts.atencao, fill: "oklch(0.78 0.16 75)" },
-    { name: "Crítico", value: stats.counts.critico, fill: "oklch(0.58 0.22 27)" },
-    { name: "Sem info", value: stats.counts.sem_info, fill: "oklch(0.7 0 0)" },
-  ];
+  /* ---- prazos ---- */
+  const deadlines = useMemo<DeadlineItem[]>(() => {
+    return activeIndicators
+      .map((ind) => {
+        const p = currentPeriod(ind.frequency);
+        const done = entries.some((e) => e.indicator_id === ind.id && e.status === "registrado" && overlaps(e, p.start, p.end));
+        if (done) return null;
+        return {
+          indicator: ind,
+          frequencyLabel: indicatorPeriodLabel(ind),
+          dueDate: p.end,
+          daysLeft: daysUntil(p.end),
+        } as DeadlineItem;
+      })
+      .filter((d): d is DeadlineItem => d != null)
+      .sort((a, b) => a.daysLeft - b.daysLeft)
+      .slice(0, 5);
+  }, [activeIndicators, entries]);
+
+  /* ---- histórico ---- */
+  const recent = useMemo<IndicatorEntry[]>(
+    () => [...entries]
+      .sort((a, b) => (b.submitted_at ?? b.created_at).localeCompare(a.submitted_at ?? a.created_at))
+      .slice(0, 10),
+    [entries],
+  );
+
+  const firstName = auth?.profile?.full_name?.split(" ")[0] ?? "";
+  const today = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }).format(new Date());
+
+  const indexTone = myIndex == null
+    ? "bg-muted text-muted-foreground border-border"
+    : myIndex >= 100
+      ? classificationStyles("atingido").className
+      : myIndex >= 80
+        ? classificationStyles("atencao").className
+        : classificationStyles("critico").className;
 
   return (
-    <div>
-      <PageHeader
-        title={`Olá, ${user?.full_name.split(" ")[0]}`}
-        description="Resumo dos seus indicadores e pendências."
-        actions={
-          <Button asChild><Link to="/lancamentos">Lançar resultado</Link></Button>
-        }
-      />
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <KpiCard icon={ListChecks} label="Indicadores visíveis" value={indicators.length} />
-        <KpiCard icon={CheckCircle2} label="Atingidos" value={stats.counts.atingido} tone="success" />
-        <KpiCard icon={AlertTriangle} label="Em atenção" value={stats.counts.atencao} tone="warning" />
-        <KpiCard icon={TrendingDown} label="Críticos" value={stats.counts.critico} tone="destructive" />
+    <div className="space-y-4">
+      <div className="mb-2">
+        <h1 className="text-2xl font-semibold tracking-tight">Olá, {firstName} 👋</h1>
+        <p className="text-sm text-muted-foreground mt-1 first-letter:uppercase">{today}</p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base">Desempenho por setor</CardTitle></CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sectorChart}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                  <XAxis dataKey="setor" fontSize={12} />
-                  <YAxis fontSize={12} unit="%" tickFormatter={(v: number) => String(Math.round(v))} />
-                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)" }} formatter={(v: unknown) => (typeof v === "number" ? Math.round(v) : (v as never))} />
-                  <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
-                    {sectorChart.map((s, i) => (<Cell key={i} fill={s.fill} />))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">Distribuição</CardTitle></CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} dataKey="value" innerRadius={45} outerRadius={75} paddingAngle={2}>
-                    {pieData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-                  </Pie>
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard
+          icon={BarChart2} label="Meus indicadores ativos" loading={isLoading}
+          value={activeIndicators.length}
+        />
+        <KpiCard
+          icon={ClipboardList} label="Lançamentos no mês" loading={isLoading}
+          value={`${entriesThisMonth}`}
+          hint={`de ${expectedThisMonth} esperados`}
+        />
+        <KpiCard
+          icon={TrendingUp} label="Meu índice de desempenho" loading={isLoading}
+          value={myIndex != null ? `${Math.round(myIndex)}%` : "—"}
+          badge={<Badge variant="outline" className={indexTone}>
+            {myIndex == null ? "Sem dados" : myIndex >= 100 ? "Atingido" : myIndex >= 80 ? "Em atenção" : "Crítico"}
+          </Badge>}
+        />
+        <KpiCard
+          icon={AlertCircle} label="Pendências" loading={isLoading}
+          value={pending}
+          tone={pending === 0 ? undefined : pending > 3 ? "destructive" : "warning"}
+          hint={`${drafts} rascunho(s) · ${missing} sem lançamento`}
+        />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4 mt-4">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Meus indicadores</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            {stats.metrics.slice(0, 6).map((m) => {
-              const c = classify(m.pct, settings);
-              const cs = classificationStyles(c);
-              return (
-                <div key={m.ind.id} className="flex items-center justify-between gap-3 p-3 rounded-md border">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{m.ind.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {m.entry ? `Último: ${formatValue(m.entry.actual_value, m.ind.value_type)}` : "Sem lançamento"}
-                      {m.target ? ` · Meta: ${formatValue(m.target.target_value, m.ind.value_type)}` : " · Sem meta definida"}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-mono font-medium">{m.pct != null ? `${Math.round(m.pct)}%` : "—"}</p>
-                    <Badge variant="outline" className={cs.className}>{cs.label}</Badge>
-                  </div>
-                </div>
-              );
-            })}
-            {stats.metrics.length === 0 && (
-              <EmptyState title="Você ainda não tem indicadores visíveis" icon={<ListChecks className="size-5" />} />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">Próximas pendências</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            {pending.length === 0 && <EmptyState title="Nenhuma pendência" description="Você está em dia!" icon={<CheckCircle2 className="size-5" />} />}
-            {pending.slice(0, 6).map((p) => {
-              const ind = indicators.find((i) => i.id === p.indicator_id);
-              return (
-                <div key={p.id} className="flex items-center justify-between p-3 rounded-md border">
-                  <div>
-                    <p className="text-sm font-medium">{ind?.name}</p>
-                    <p className="text-xs text-muted-foreground">Período {formatDate(p.period_start)} — {formatDate(p.period_end)}</p>
-                  </div>
-                  <Badge variant="outline" className="capitalize">{p.status}</Badge>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+      <div className="grid lg:grid-cols-2 gap-4">
+        <MyEvolutionCard data={evolution} period={period} onPeriodChange={setPeriod} loading={isLoading} />
+        <MyStatusDonut counts={counts} loading={isLoading} />
       </div>
 
-      <Card className="mt-4">
-        <CardHeader><CardTitle className="text-base">Índice consolidado</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="text-3xl font-semibold font-mono">{stats.idx != null ? `${Math.round(stats.idx)}%` : "—"}</div>
-            <div className="flex-1">
-              <Progress value={Math.min(stats.idx ?? 0, 150)} max={150} />
-              <p className="text-xs text-muted-foreground mt-2">Média ponderada pelos pesos dos indicadores visíveis.</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <MyIndicatorsTable rows={rows} loading={isLoading} />
 
-      <div className="mt-4 flex justify-end">
-        <Select value={period} onValueChange={(v) => setPeriod(v as never)}>
-          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="3m">Últimos 3 meses</SelectItem>
-            <SelectItem value="6m">Últimos 6 meses</SelectItem>
-            <SelectItem value="12m">Últimos 12 meses</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="grid lg:grid-cols-2 gap-4">
+        <MyDeadlines items={deadlines} loading={isLoading} />
+        <MyRecentHistory entries={recent} indicators={entryIndicators} loading={isLoading} />
       </div>
 
-      <div className="mt-2">
-        <IndexEvolutionCard metrics={metricsByIndicator} period={period} />
+      <div className="flex justify-end">
+        <Button asChild><Link to="/lancamentos/novo">Lançar resultado</Link></Button>
       </div>
-
-      <Tabs defaultValue="franquias" className="mt-4">
-        <TabsList>
-          <TabsTrigger value="franquias">Ranking empresas</TabsTrigger>
-        </TabsList>
-        <TabsContent value="franquias">
-          <Card>
-            <CardContent className="p-4">
-              <FranchiseRankingList ranking={franchiseRanking} settings={settings} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      <AnnualSummaryCard indicators={ownedIndicators} entries={entries} targets={targets} settings={settings} />
     </div>
-
   );
 }
 
-function KpiCard({ icon: Icon, label, value, tone }: { icon: React.ComponentType<{ className?: string }>; label: string; value: number | string; tone?: "success" | "warning" | "destructive" | "info" }) {
-  const tones: Record<string, string> = { success: "text-success", warning: "text-warning", destructive: "text-destructive", info: "text-info" };
+function KpiCard({
+  icon: Icon, label, value, tone, hint, badge, loading,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number | string;
+  tone?: "success" | "warning" | "destructive" | "info";
+  hint?: string;
+  badge?: React.ReactNode;
+  loading?: boolean;
+}) {
+  const tones: Record<string, string> = {
+    success: "text-success", warning: "text-warning", destructive: "text-destructive", info: "text-info",
+  };
   return (
     <Card>
-      <CardContent className="p-4 flex items-start justify-between">
-        <div>
+      <CardContent className="p-4 flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-          <p className={`text-2xl font-semibold mt-1 font-mono ${tone ? tones[tone] : ""}`}>{value}</p>
+          {loading ? (
+            <Skeleton className="h-8 w-20 mt-2" />
+          ) : (
+            <>
+              <p className={`text-2xl font-semibold mt-1 font-mono ${tone ? tones[tone] : ""}`}>{value}</p>
+              {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+              {badge && <div className="mt-2">{badge}</div>}
+            </>
+          )}
         </div>
         <div className={`p-2 rounded-md bg-muted ${tone ? tones[tone] : "text-muted-foreground"}`}>
           <Icon className="size-4" />
@@ -255,4 +245,8 @@ function KpiCard({ icon: Icon, label, value, tone }: { icon: React.ComponentType
       </CardContent>
     </Card>
   );
+}
+
+export function formatValueSafe(v: number | undefined, type: Parameters<typeof formatValue>[1]) {
+  return v == null ? "—" : formatValue(v, type);
 }
