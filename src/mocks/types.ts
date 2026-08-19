@@ -77,10 +77,15 @@ export interface UserSector {
   joined_at: string;
 }
 
+export type EntityType = "grupo" | "empresa" | "franquia";
+export type EntityScope = "empresa" | "franquia";
+
 export interface Franchise {
   id: string;
   name: string;
   code: string;
+  entity_type?: EntityType | null;
+  parent_id?: string | null;
   legal_name?: string;
   trade_name?: string;
   document?: string; // CNPJ
