@@ -74,6 +74,7 @@ function mapIndicator(row: any, sharedSectorIds: string[] = []): Indicator {
     shared_sector_ids: sharedSectorIds,
     franchise_id: row.franchise_id ?? undefined,
     strategic_pillar: row.strategic_pillar ?? undefined,
+    kpi_group: (row.kpi_group ?? "resultado") as Indicator["kpi_group"],
     scope: row.scope,
     responsible_ids: row.responsible_user_id ? [row.responsible_user_id] : [],
     value_type: row.value_type,
