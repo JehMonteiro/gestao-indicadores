@@ -33,11 +33,11 @@ export const seedProfiles: Profile[] = [
 
 // ===== Sectors =====
 export const seedSectors: Sector[] = [
-  { id: "s-com", name: "Comercial", code: "COM", color: "#2563eb", icon: "Briefcase", active: true, display_order: 1, created_at: iso(today), description: "Vendas e relacionamento com prospects" },
-  { id: "s-mkt", name: "Marketing", code: "MKT", color: "#db2777", icon: "Megaphone", active: true, display_order: 2, created_at: iso(today), description: "Aquisição e branding" },
-  { id: "s-ops", name: "Operações", code: "OPS", color: "#0d9488", icon: "Settings", active: true, display_order: 3, created_at: iso(today) },
-  { id: "s-fin", name: "Financeiro", code: "FIN", color: "#16a34a", icon: "DollarSign", active: true, display_order: 4, created_at: iso(today) },
-  { id: "s-sup", name: "Suporte ao Franqueado", code: "SUP", color: "#f59e0b", icon: "LifeBuoy", active: true, display_order: 5, created_at: iso(today) },
+  { id: "s-com", name: "Comercial", code: "COM", kpi_group: "resultado", color: "#2563eb", icon: "Briefcase", active: true, display_order: 1, created_at: iso(today), description: "Vendas e relacionamento com prospects" },
+  { id: "s-mkt", name: "Marketing", code: "MKT", kpi_group: "resultado", color: "#db2777", icon: "Megaphone", active: true, display_order: 2, created_at: iso(today), description: "Aquisição e branding" },
+  { id: "s-ops", name: "Operações", code: "OPS", kpi_group: "resultado", color: "#0d9488", icon: "Settings", active: true, display_order: 3, created_at: iso(today) },
+  { id: "s-fin", name: "Financeiro", code: "FIN", kpi_group: "resultado", color: "#16a34a", icon: "DollarSign", active: true, display_order: 4, created_at: iso(today) },
+  { id: "s-sup", name: "Suporte ao Franqueado", code: "SUP", kpi_group: "resultado", color: "#f59e0b", icon: "LifeBuoy", active: true, display_order: 5, created_at: iso(today) },
 ];
 
 // ===== User <-> Sector =====
@@ -53,9 +53,9 @@ export const seedUserSectors: UserSector[] = [
 
 // ===== Franchises =====
 export const seedFranchises: Franchise[] = [
-  { id: "f-camp", name: "Unidade Campinas", code: "CAMP", legal_name: "Franquia Campinas Ltda", document: "12.345.678/0001-00", city: "Campinas", state: "SP", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 14)), manager_id: "u-gest-fr", created_at: iso(today) },
-  { id: "f-bh", name: "Unidade Belo Horizonte", code: "BH", legal_name: "Franquia BH Ltda", document: "23.456.789/0001-00", city: "Belo Horizonte", state: "MG", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 8)), manager_id: "u-gest-fr", created_at: iso(today) },
-  { id: "f-poa", name: "Unidade Porto Alegre", code: "POA", legal_name: "Franquia POA Ltda", city: "Porto Alegre", state: "RS", region: "Sul", status: "ativa", start_date: iso(subMonths(today, 3)), created_at: iso(today) },
+  { id: "f-camp", name: "Unidade Campinas", code: "CAMP", kpi_group: "resultado", legal_name: "Franquia Campinas Ltda", document: "12.345.678/0001-00", city: "Campinas", state: "SP", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 14)), manager_id: "u-gest-fr", created_at: iso(today) },
+  { id: "f-bh", name: "Unidade Belo Horizonte", code: "BH", kpi_group: "resultado", legal_name: "Franquia BH Ltda", document: "23.456.789/0001-00", city: "Belo Horizonte", state: "MG", region: "Sudeste", status: "ativa", start_date: iso(subMonths(today, 8)), manager_id: "u-gest-fr", created_at: iso(today) },
+  { id: "f-poa", name: "Unidade Porto Alegre", code: "POA", kpi_group: "resultado", legal_name: "Franquia POA Ltda", city: "Porto Alegre", state: "RS", region: "Sul", status: "ativa", start_date: iso(subMonths(today, 3)), created_at: iso(today) },
 ];
 
 export const seedUserFranchises: UserFranchise[] = [];
@@ -73,7 +73,7 @@ export const seedCategories: IndicatorCategory[] = [
 // ===== Indicators =====
 export const seedIndicators: Indicator[] = [
   {
-    id: "i-fat", name: "Faturamento mensal", code: "FAT-MES", description: "Soma de receitas no mês",
+    id: "i-fat", name: "Faturamento mensal", code: "FAT-MES", kpi_group: "resultado", description: "Soma de receitas no mês",
     objective: "Acompanhar resultado financeiro mensal", owner_sector_id: "s-fin", shared_sector_ids: ["s-com"],
     category_id: "c-fin", strategic_pillar: "Resultado", scope: "franquia",
     responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "moeda",
@@ -82,56 +82,56 @@ export const seedIndicators: Indicator[] = [
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
   },
   {
-    id: "i-novos", name: "Novos clientes", code: "NOV-CLI", owner_sector_id: "s-com", shared_sector_ids: [],
+    id: "i-novos", name: "Novos clientes", code: "NOV-CLI", kpi_group: "resultado", owner_sector_id: "s-com", shared_sector_ids: [],
     category_id: "c-clientes", scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"],
     value_type: "inteiro", frequency: "mensal", direction: "maior_melhor",
     default_target: 40, weight: 2,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
-    id: "i-conv", name: "Taxa de conversão", code: "CONV", owner_sector_id: "s-com", shared_sector_ids: ["s-mkt"], scope: "setor", responsible_ids: ["u-colab"], value_type: "percentual",
+    id: "i-conv", name: "Taxa de conversão", code: "CONV", kpi_group: "qualidade", owner_sector_id: "s-com", shared_sector_ids: ["s-mkt"], scope: "setor", responsible_ids: ["u-colab"], value_type: "percentual",
     frequency: "mensal", direction: "maior_melhor",
     default_target: 25, weight: 2,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
-    id: "i-ticket", name: "Ticket médio", code: "TICKET", owner_sector_id: "s-com", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "moeda",
+    id: "i-ticket", name: "Ticket médio", code: "TICKET", kpi_group: "resultado", owner_sector_id: "s-com", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "moeda",
     frequency: "mensal", direction: "maior_melhor",
     default_target: 850, weight: 1,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
-    id: "i-nps", name: "Índice de satisfação (NPS)", code: "NPS", owner_sector_id: "s-sup", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-gest-fr"], value_type: "nota",
+    id: "i-nps", name: "Índice de satisfação (NPS)", code: "NPS", kpi_group: "qualidade", owner_sector_id: "s-sup", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-gest-fr"], value_type: "nota",
     frequency: "mensal", direction: "maior_melhor",
     default_target: 75, weight: 2,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
   },
   {
-    id: "i-tma", name: "Tempo médio de atendimento", code: "TMA", owner_sector_id: "s-ops", shared_sector_ids: [], scope: "setor", responsible_ids: ["u-colab"], value_type: "tempo",
+    id: "i-tma", name: "Tempo médio de atendimento", code: "TMA", kpi_group: "movimento", owner_sector_id: "s-ops", shared_sector_ids: [], scope: "setor", responsible_ids: ["u-colab"], value_type: "tempo",
     frequency: "semanal", direction: "menor_melhor",
     default_target: 12, weight: 1,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
   },
   {
-    id: "i-leads", name: "Leads gerados", code: "LEADS", owner_sector_id: "s-mkt", shared_sector_ids: ["s-com"], scope: "setor", responsible_ids: ["u-gest-mkt"], value_type: "inteiro",
+    id: "i-leads", name: "Leads gerados", code: "LEADS", kpi_group: "movimento", owner_sector_id: "s-mkt", shared_sector_ids: ["s-com"], scope: "setor", responsible_ids: ["u-gest-mkt"], value_type: "inteiro",
     frequency: "mensal", direction: "maior_melhor",
     default_target: 1200, weight: 2,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-mkt", created_at: iso(today),
   },
   {
-    id: "i-renov", name: "Taxa de renovação", code: "RENOV", owner_sector_id: "s-com", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "percentual",
+    id: "i-renov", name: "Taxa de renovação", code: "RENOV", kpi_group: "resultado", owner_sector_id: "s-com", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-fr-camp", "u-fr-bh"], value_type: "percentual",
     frequency: "trimestral", direction: "maior_melhor",
     default_target: 85, weight: 2,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
-    id: "i-pdv", name: "Produtos por cliente", code: "PDV", owner_sector_id: "s-com", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-fr-camp"], value_type: "decimal",
+    id: "i-pdv", name: "Produtos por cliente", code: "PDV", kpi_group: "resultado", owner_sector_id: "s-com", shared_sector_ids: [], scope: "franquia", responsible_ids: ["u-fr-camp"], value_type: "decimal",
     frequency: "mensal", direction: "faixa_ideal", minimum_value: 3, maximum_value: 5, default_target: 4,
     weight: 1,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-gest-com", created_at: iso(today),
   },
   {
-    id: "i-pend", name: "Pendências operacionais", code: "PEND-OPS", owner_sector_id: "s-ops", shared_sector_ids: [], scope: "setor", responsible_ids: ["u-colab"], value_type: "inteiro",
+    id: "i-pend", name: "Pendências operacionais", code: "PEND-OPS", kpi_group: "qualidade", owner_sector_id: "s-ops", shared_sector_ids: [], scope: "setor", responsible_ids: ["u-colab"], value_type: "inteiro",
     frequency: "semanal", direction: "menor_melhor",
     default_target: 5, weight: 1,
     start_date: iso(subMonths(today, 6)), status: "ativo", created_by: "u-admin", created_at: iso(today),
