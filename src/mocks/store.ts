@@ -238,6 +238,7 @@ export function canSeeRoute(role: GlobalRole | undefined, route: string): boolea
     "/relatorios": ["superadmin", "admin_corporativo", "gestor_setor", "gestor_franquia", "auditor"],
     "/usuarios": ["superadmin", "admin_corporativo"],
     "/auditoria": ["superadmin", "admin_corporativo", "auditor"],
+    "/classificacao-escopo": ["superadmin"],
     "/configuracoes": ["superadmin"],
     "/perfil": ["superadmin", "admin_corporativo", "gestor_setor", "colaborador", "gestor_franquia", "franqueado", "auditor"],
   };
