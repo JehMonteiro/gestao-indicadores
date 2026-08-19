@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
 import { useOwnedIndicators, useVisibleIndicators } from "@/lib/permissions";
+import { KpiGroupBalanceCard } from "@/components/app/kpi-group-balance-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { classify, weightedIndex } from "@/lib/format";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -98,6 +99,10 @@ function Overview() {
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground uppercase">Atingidos</p><p className="text-2xl font-semibold font-mono mt-1 text-success">{totals.atingido}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground uppercase">Em atenção</p><p className="text-2xl font-semibold font-mono mt-1 text-warning">{totals.atencao}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground uppercase">Críticos</p><p className="text-2xl font-semibold font-mono mt-1 text-destructive">{totals.critico}</p></CardContent></Card>
+      </div>
+
+      <div className="mb-6">
+        <KpiGroupBalanceCard metrics={metricsByIndicator} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4">

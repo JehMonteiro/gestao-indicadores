@@ -1,6 +1,24 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { Direction, Indicator, IndicatorEntry, IndicatorTarget, SystemSettings, ValueType } from "@/mocks/types";
+import type { Direction, Indicator, IndicatorEntry, IndicatorTarget, KpiGroup, SystemSettings, ValueType } from "@/mocks/types";
+
+export const KPI_GROUPS: { value: KpiGroup; label: string; icon: string; description: string }[] = [
+  { value: "movimento", label: "Movimento", icon: "Rocket", description: "Mede esforço e atividade operacional" },
+  { value: "resultado", label: "Resultado", icon: "Trophy", description: "Mede entrega e crescimento" },
+  { value: "qualidade", label: "Qualidade", icon: "Star", description: "Mede eficiência operacional" },
+];
+
+export function kpiGroupStyles(group: KpiGroup): { label: string; className: string } {
+  switch (group) {
+    case "movimento":
+      return { label: "Movimento", className: "bg-kpi-movimento/10 text-kpi-movimento border-kpi-movimento/30" };
+    case "resultado":
+      return { label: "Resultado", className: "bg-kpi-resultado/10 text-kpi-resultado border-kpi-resultado/30" };
+    case "qualidade":
+      return { label: "Qualidade", className: "bg-kpi-qualidade/10 text-kpi-qualidade border-kpi-qualidade/30" };
+  }
+}
+
 
 export function formatDate(iso?: string, pattern = "dd/MM/yyyy"): string {
   if (!iso) return "—";

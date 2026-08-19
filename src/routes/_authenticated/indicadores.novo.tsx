@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import type { Direction, Frequency, Indicator, IndicatorStatus, ValueType } from "@/mocks/types";
+import type { Direction, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
+import { KPI_GROUPS } from "@/lib/format";
 import { toast } from "sonner";
 import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-rules";
 import { EmptyState } from "@/components/app/page-header";
@@ -36,6 +37,7 @@ function NewIndicator() {
     name: "", objective: "",
     owner_sector_id: sectors[0]?.id ?? "", franchise_id: "",
     responsible_id: "",
+    kpi_group: "resultado" as KpiGroup,
     value_type: "inteiro" as ValueType,
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
@@ -121,6 +123,16 @@ function NewIndicator() {
         <Card>
           <CardHeader><CardTitle className="text-base">Classificação</CardTitle></CardHeader>
           <CardContent className="grid sm:grid-cols-3 gap-3">
+            <Field label="Grupo estratégico">
+              <Select value={f.kpi_group} onValueChange={(v) => set("kpi_group", v as KpiGroup)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {KPI_GROUPS.map((g) => (
+                    <SelectItem key={g.value} value={g.value}>{g.label} — {g.description}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label="Setor">
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>

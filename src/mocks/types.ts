@@ -36,6 +36,8 @@ export type Frequency =
   | "semestral"
   | "anual";
 
+export type KpiGroup = "movimento" | "resultado" | "qualidade";
+
 export type Direction = "maior_melhor" | "menor_melhor" | "faixa_ideal" | "meta_exata";
 export type Scope = "corporativo" | "setor" | "franquia" | "usuario";
 export type IndicatorStatus = "rascunho" | "ativo" | "pausado" | "arquivado";
@@ -120,6 +122,7 @@ export interface Indicator {
   franchise_id?: string;
   category_id?: string;
   strategic_pillar?: string;
+  kpi_group: KpiGroup;
   scope: Scope;
   responsible_ids: string[];
   value_type: ValueType;

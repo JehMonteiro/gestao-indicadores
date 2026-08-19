@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { classify, classificationStyles, computeAchievement, formatValue, indicatorPeriodLabel } from "@/lib/format";
+import { classify, classificationStyles, computeAchievement, formatValue, indicatorPeriodLabel, KPI_GROUPS, kpiGroupStyles } from "@/lib/format";
 import { registeredEntriesForIndicator, resolveTargetForEntry, resolveTargetForIndicator } from "@/lib/metrics";
 import { Plus, Search, Target, Pencil, Trash2 } from "lucide-react";
 import {
@@ -42,12 +42,14 @@ function IndicatorsList() {
   const [q, setQ] = useState("");
   const [sectorId, setSectorId] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
+  const [kpiGroup, setKpiGroup] = useState<string>("all");
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = indicators.filter((i) =>
     (q === "" || i.name.toLowerCase().includes(q.toLowerCase()) || i.code.toLowerCase().includes(q.toLowerCase())) &&
     (sectorId === "all" || i.owner_sector_id === sectorId) &&
-    (status === "all" || i.status === status)
+    (status === "all" || i.status === status) &&
+    (kpiGroup === "all" || (i.kpi_group ?? "resultado") === kpiGroup)
   );
 
   const confirmDelete = () => {
@@ -70,7 +72,7 @@ function IndicatorsList() {
       />
 
       <Card className="mb-4">
-        <CardContent className="p-3 grid sm:grid-cols-[1fr_auto_auto] gap-2">
+        <CardContent className="p-3 grid sm:grid-cols-[1fr_auto_auto_auto] gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome ou código..." className="pl-8" />
@@ -80,6 +82,13 @@ function IndicatorsList() {
             <SelectContent>
               <SelectItem value="all">Todos os setores</SelectItem>
               {sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={kpiGroup} onValueChange={setKpiGroup}>
+            <SelectTrigger className="w-44"><SelectValue placeholder="Grupo" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os grupos</SelectItem>
+              {KPI_GROUPS.map((g) => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={status} onValueChange={setStatus}>
@@ -103,6 +112,7 @@ function IndicatorsList() {
             <TableHeader>
               <TableRow>
                 <TableHead>Indicador</TableHead>
+                <TableHead>Grupo</TableHead>
                 <TableHead>Setor</TableHead>
                 <TableHead>Empresa</TableHead>
                 <TableHead>Responsável</TableHead>
@@ -131,6 +141,7 @@ function IndicatorsList() {
                     <TableCell>
                       <Link to="/indicadores/$id" params={{ id: i.id }} className="hover:underline font-medium">{i.name}</Link>
                     </TableCell>
+                    <TableCell>{(() => { const st = kpiGroupStyles(i.kpi_group ?? "resultado"); return <Badge variant="outline" className={st.className}>{st.label}</Badge>; })()}</TableCell>
                     <TableCell>{sector && <Badge variant="outline" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</TableCell>
                     <TableCell className="text-sm">{franchise ? franchise.name : <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-sm">{responsibleNames || <span className="text-muted-foreground">—</span>}</TableCell>

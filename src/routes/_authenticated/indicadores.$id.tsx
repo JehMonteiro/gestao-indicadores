@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { classify, classificationStyles, computeAchievement, formatDate, formatMonth, formatValue, indicatorPeriodLabel } from "@/lib/format";
+import { classify, classificationStyles, computeAchievement, formatDate, formatMonth, formatValue, indicatorPeriodLabel, kpiGroupStyles } from "@/lib/format";
 import { resolveTargetForEntry, latestEntriesByPeriod } from "@/lib/metrics";
 import { Pencil } from "lucide-react";
 
@@ -58,6 +58,7 @@ function IndicatorDetail() {
       <div className="grid lg:grid-cols-3 gap-4 mb-4">
         <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Setor</p>{sector && <Badge variant="outline" className="mt-1" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Periodicidade</p><p className="text-sm mt-1">{indicatorPeriodLabel(ind)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Grupo estratégico</p>{(() => { const st = kpiGroupStyles(ind.kpi_group ?? "resultado"); return <Badge variant="outline" className={`mt-1 ${st.className}`}>{st.label}</Badge>; })()}</CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Status</p><Badge variant="secondary" className="mt-1 capitalize">{ind.status}</Badge></CardContent></Card>
       </div>
 
