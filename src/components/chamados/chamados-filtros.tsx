@@ -105,6 +105,7 @@ export function ChamadosFiltros({
     responsaveis: unicos(todos.map((c) => c.responsavel)),
     departamentos: unicos(todos.map((c) => c.departamento_recebimento)),
     unidades: unicos(todos.map((c) => c.unidade)),
+    solicitantes: unicos(todos.map((c) => c.solicitante)),
     etiquetas: unicos(todos.flatMap((c) => c.etiquetas ?? [])),
     categorias: unicos(todos.map((c) => c.categoria ?? "Sem categoria")),
   }), [todos]);
