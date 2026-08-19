@@ -1,5 +1,5 @@
 import { newId } from "@/lib/ids";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { useStore, useCurrentUser } from "@/mocks/store";
@@ -19,9 +19,6 @@ import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/franquias/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    aba: search.aba === "franquias" ? "franquias" : "empresas",
-  }),
   head: () => ({
     meta: [
       { title: "Empresas / Franquias — Gestão de Indicadores" },
@@ -36,8 +33,7 @@ export const Route = createFileRoute("/_authenticated/franquias/")({
 const PAGE_SIZE = 20;
 
 function EntitiesPage() {
-  const { aba } = Route.useSearch();
-  const navigate = useNavigate({ from: "/franquias" });
+  const [aba, setAba] = useState<"empresas" | "franquias">("empresas");
   const franchises = useStore((s) => s.franchises);
   const upsert = useStore((s) => s.upsertFranchise);
   const remove = useStore((s) => s.deleteFranchise);
@@ -53,7 +49,7 @@ function EntitiesPage() {
         title="Empresas / Franquias"
         description="Entidades do Grupo Nocta e unidades franqueadas."
       />
-      <Tabs value={aba} onValueChange={(v) => navigate({ search: { aba: v as "empresas" | "franquias" } })}>
+      <Tabs value={aba} onValueChange={(v) => setAba(v as "empresas" | "franquias")}>
         <TabsList className="mb-4">
           <TabsTrigger value="empresas">Empresas ({empresas.length})</TabsTrigger>
           <TabsTrigger value="franquias">Franquias ({unidades.length})</TabsTrigger>
