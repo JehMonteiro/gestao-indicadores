@@ -139,6 +139,7 @@ export function ChamadosFiltros({
           />
         </div>
         <SelectFiltro label="Responsável" value={filtros.responsavel} options={opcoes.responsaveis} onChange={(v) => set({ responsavel: v })} />
+        <ComboboxFiltro label="Solicitante" value={filtros.solicitante} options={opcoes.solicitantes} onChange={(v) => set({ solicitante: v })} />
         <SelectFiltro label="Departamento" value={filtros.departamento} options={opcoes.departamentos} onChange={(v) => set({ departamento: v })} />
         <SelectFiltro label="Unidade" value={filtros.unidade} options={opcoes.unidades} onChange={(v) => set({ unidade: v })} />
         <SelectFiltro label="Etiqueta" value={filtros.etiqueta} options={opcoes.etiquetas} onChange={(v) => set({ etiqueta: v })} />
