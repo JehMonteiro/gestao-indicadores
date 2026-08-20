@@ -106,29 +106,11 @@ function NewIndicator() {
 
   return (
     <div>
-      {lockedUnit && (
-        <nav aria-label="breadcrumb" className="mb-2 flex items-center gap-1 text-sm text-muted-foreground">
-          <Link to="/franquias" className="hover:underline">Franquias</Link>
-          <span>›</span>
-          {unidade ? (
-            <Link to="/franquias/$id" params={{ id: unidade }} className="hover:underline">{contextName || "Unidade"}</Link>
-          ) : (
-            <span>{contextName}</span>
-          )}
-          <span>›</span>
-          <span className="text-foreground">Novo indicador</span>
-        </nav>
-      )}
       <PageHeader
         title="Novo indicador"
-        description={
-          lockedUnit
-            ? `Indicador da unidade ${contextName || ""} — escopo e unidade definidos pelo contexto.`.trim()
-            : escopoParam === "franquia"
-              ? "Indicadores Franquia › Novo indicador — escopo definido pelo contexto."
-              : "Defina a estrutura, a regra de desempenho e a meta padrão."
-        }
+        description="Defina a estrutura, a regra de desempenho e a meta padrão."
       />
+
       <form onSubmit={submit} className="space-y-4 max-w-4xl">
         <Card>
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
