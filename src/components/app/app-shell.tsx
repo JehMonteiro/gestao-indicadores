@@ -39,7 +39,6 @@ const NAV: { group: string; items: NavItem[] }[] = [
   ]},
   { group: "Estrutura", items: [
     { to: "/indicadores", label: "Indicadores", icon: Target },
-    { to: "/indicadores-franquia", label: "Indicadores Franquia", icon: Crosshair },
     { to: "/metas", label: "Metas", icon: Flag },
     { to: "/metas-franquia", label: "Metas Franquia", icon: FlagTriangleRight },
     { to: "/setores", label: "Setores", icon: Building2 },
