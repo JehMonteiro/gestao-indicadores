@@ -338,6 +338,11 @@ export const dbWrite = {
       city: f.city || null,
       state: f.state || null,
       opened_at: f.start_date || null,
+      support_group: f.support_group ?? null,
+      created_in_system_at: f.created_in_system_at ?? null,
+      deactivated_at: f.deactivated_at ?? null,
+      franchise_model: f.franchise_model ?? null,
+      franchise_type: f.franchise_type ?? null,
       status: f.status === "ativa" ? "ativo" : "inativo",
     });
   },
