@@ -43,6 +43,7 @@ import { Route as AuthenticatedFranquiasIdIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedIndicadoresIdEditarRouteImport } from './routes/_authenticated/indicadores.$id.editar'
 import { Route as AuthenticatedFranquiasIdIndicadoresNovoRouteImport } from './routes/_authenticated/franquias.$id.indicadores.novo'
 import { Route as AuthenticatedFranquiasIdIndicadoresIndIdIndexRouteImport } from './routes/_authenticated/franquias.$id.indicadores.$indId.index'
+import { Route as AuthenticatedFranquiasIdIndicadoresIndIdEditarRouteImport } from './routes/_authenticated/franquias.$id.indicadores.$indId.editar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -234,6 +235,12 @@ const AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute =
     path: '/indicadores/$indId/',
     getParentRoute: () => AuthenticatedFranquiasIdRoute,
   } as any)
+const AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute =
+  AuthenticatedFranquiasIdIndicadoresIndIdEditarRouteImport.update({
+    id: '/indicadores/$indId/editar',
+    path: '/indicadores/$indId/editar',
+    getParentRoute: () => AuthenticatedFranquiasIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
   '/franquias/$id/': typeof AuthenticatedFranquiasIdIndexRoute
   '/franquias/$id/indicadores/novo': typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  '/franquias/$id/indicadores/$indId/editar': typeof AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute
   '/franquias/$id/indicadores/$indId/': typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -302,6 +310,7 @@ export interface FileRoutesByTo {
   '/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
   '/franquias/$id': typeof AuthenticatedFranquiasIdIndexRoute
   '/franquias/$id/indicadores/novo': typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  '/franquias/$id/indicadores/$indId/editar': typeof AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute
   '/franquias/$id/indicadores/$indId': typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 export interface FileRoutesById {
@@ -339,6 +348,7 @@ export interface FileRoutesById {
   '/_authenticated/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
   '/_authenticated/franquias/$id/': typeof AuthenticatedFranquiasIdIndexRoute
   '/_authenticated/franquias/$id/indicadores/novo': typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  '/_authenticated/franquias/$id/indicadores/$indId/editar': typeof AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute
   '/_authenticated/franquias/$id/indicadores/$indId/': typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/indicadores/$id/editar'
     | '/franquias/$id/'
     | '/franquias/$id/indicadores/novo'
+    | '/franquias/$id/indicadores/$indId/editar'
     | '/franquias/$id/indicadores/$indId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/indicadores/$id/editar'
     | '/franquias/$id'
     | '/franquias/$id/indicadores/novo'
+    | '/franquias/$id/indicadores/$indId/editar'
     | '/franquias/$id/indicadores/$indId'
   id:
     | '__root__'
@@ -446,6 +458,7 @@ export interface FileRouteTypes {
     | '/_authenticated/indicadores/$id/editar'
     | '/_authenticated/franquias/$id/'
     | '/_authenticated/franquias/$id/indicadores/novo'
+    | '/_authenticated/franquias/$id/indicadores/$indId/editar'
     | '/_authenticated/franquias/$id/indicadores/$indId/'
   fileRoutesById: FileRoutesById
 }
@@ -696,12 +709,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRouteImport
       parentRoute: typeof AuthenticatedFranquiasIdRoute
     }
+    '/_authenticated/franquias/$id/indicadores/$indId/editar': {
+      id: '/_authenticated/franquias/$id/indicadores/$indId/editar'
+      path: '/indicadores/$indId/editar'
+      fullPath: '/franquias/$id/indicadores/$indId/editar'
+      preLoaderRoute: typeof AuthenticatedFranquiasIdIndicadoresIndIdEditarRouteImport
+      parentRoute: typeof AuthenticatedFranquiasIdRoute
+    }
   }
 }
 
 interface AuthenticatedFranquiasIdRouteChildren {
   AuthenticatedFranquiasIdIndexRoute: typeof AuthenticatedFranquiasIdIndexRoute
   AuthenticatedFranquiasIdIndicadoresNovoRoute: typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute: typeof AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute
   AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute: typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 
@@ -710,6 +731,8 @@ const AuthenticatedFranquiasIdRouteChildren: AuthenticatedFranquiasIdRouteChildr
     AuthenticatedFranquiasIdIndexRoute: AuthenticatedFranquiasIdIndexRoute,
     AuthenticatedFranquiasIdIndicadoresNovoRoute:
       AuthenticatedFranquiasIdIndicadoresNovoRoute,
+    AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute:
+      AuthenticatedFranquiasIdIndicadoresIndIdEditarRoute,
     AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute:
       AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute,
   }
