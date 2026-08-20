@@ -1,5 +1,5 @@
 import { newId } from "@/lib/ids";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { useStore, useCurrentUser } from "@/mocks/store";
@@ -198,7 +198,9 @@ function UnitsTab({ list, canEdit, onSave, onDelete, parentId }: {
               <TableBody>
                 {rows.map((f) => (
                   <TableRow key={f.id}>
-                    <TableCell className="font-medium">{f.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link to="/franquias/$id" params={{ id: f.id }} className="hover:underline">{f.name}</Link>
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{f.code}</TableCell>
                     <TableCell className="text-sm">{[f.city, f.state].filter(Boolean).join("/") || "—"}</TableCell>
                     <TableCell className="text-sm">{f.region || "—"}</TableCell>
