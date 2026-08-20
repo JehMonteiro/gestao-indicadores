@@ -3,6 +3,7 @@
 // and write-through helpers used by the Zustand store actions.
 
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch-all";
 import { firstIntegerError } from "@/lib/value-rules";
 import type {
   AuditLog,
