@@ -102,7 +102,10 @@ function NewIndicator() {
     ]);
     if (intError) { toast.error(intError); return; }
     const autoCode = makeUniqueIndicatorCode(f.name, indicators.map((i) => i.code));
-    const { responsible_id, entity_scope, entity_id, ...rest } = f;
+    const { responsible_id, entity_scope: rawScope, entity_id: rawEntityId, ...rest } = f;
+    const entity_scope = unidade ? "franquia" : rawScope;
+    const entity_id = unidade ?? rawEntityId;
+    if (unidade) rest.franchise_id = unidade;
     const ind: Indicator = {
       id: newId(),
       code: autoCode,
