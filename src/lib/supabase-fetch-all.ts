@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-
 const PAGE_SIZE = 1000;
 
 /** Query já montada (colunas, filtros, ordenação) — o .range() é aplicado aqui. */
@@ -21,14 +19,14 @@ const isDev = (): boolean => {
  * Busca TODOS os registros contornando o limite padrão de 1000 linhas do PostgREST,
  * paginando com .range() até a página vir incompleta.
  *
+ * @param client Cliente Supabase a usar (navegador ou administrativo no servidor).
  * @param build  Recebe o cliente e devolve a query configurada, SEM .range().
  * @param table  Nome da tabela (apenas para log em desenvolvimento).
- * @param client Cliente alternativo (ex.: cliente administrativo no servidor).
  */
-export async function fetchAll<T>(
+export async function fetchAllWith<T>(
+  client: AnyClient,
   build: (sb: any) => unknown,
   table = "tabela",
-  client: AnyClient = supabase as unknown as AnyClient,
 ): Promise<T[]> {
   const all: T[] = [];
   let page = 0;
@@ -53,11 +51,8 @@ export async function fetchAll<T>(
   return all;
 }
 
-/** Variante para código de servidor, com cliente explícito (ex.: supabaseAdmin). */
-export function fetchAllWith<T>(
-  client: AnyClient,
-  build: (sb: any) => unknown,
-  table = "tabela",
-): Promise<T[]> {
-  return fetchAll<T>(build, table, client);
+/** Versão para o navegador: usa o cliente Supabase padrão da aplicação. */
+export async function fetchAll<T>(build: (sb: any) => unknown, table = "tabela"): Promise<T[]> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  return fetchAllWith<T>(supabase as unknown as AnyClient, build, table);
 }
