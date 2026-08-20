@@ -51,7 +51,7 @@ function FranchiseDetail() {
         <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
           <CardTitle className="text-base">Indicadores da unidade</CardTitle>
           <Button size="sm" asChild>
-            <Link to="/indicadores/novo" search={{ escopo: "franquia", unidade: id }}>Novo indicador</Link>
+            <Link to="/indicadores/novo" search={{ escopo: "franquia" as const, unidade: id, empresa: f.name }}>Novo indicador</Link>
           </Button>
         </CardHeader>
         <CardContent className="space-y-2">
