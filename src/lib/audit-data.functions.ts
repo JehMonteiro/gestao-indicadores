@@ -1,6 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+type EntryRow = {
+  id: string;
+  indicator_id: string;
+  period_start: string;
+  period_end: string;
+  actual_value: number | null;
+  status: string | null;
+};
+
+type IndicatorRow = { id: string; name: string; code: string; entity_scope: string | null };
+
+type ProfileRow = { id: string; full_name: string | null; email: string | null };
+
 export type RawCounts = {
   entries: number;
   entriesByStatus: Record<string, number>;
