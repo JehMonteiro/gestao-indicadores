@@ -45,13 +45,15 @@ function NewIndicator() {
   const navigate = useNavigate();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
+  const contextFranchise = unidade ? franchises.find((fr) => fr.id === unidade) : undefined;
+
   const [f, setF] = useState({
     name: "", objective: "",
-    owner_sector_id: sectors[0]?.id ?? "", franchise_id: "",
+    owner_sector_id: sectors[0]?.id ?? "", franchise_id: contextFranchise?.id ?? "",
     responsible_id: "",
     kpi_group: "resultado" as KpiGroup,
-    entity_scope: "" as EntityScope | "",
-    entity_id: "",
+    entity_scope: (escopoParam ?? "") as EntityScope | "",
+    entity_id: contextFranchise?.id ?? "",
     value_type: "inteiro" as ValueType,
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
