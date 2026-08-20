@@ -2,7 +2,7 @@ import { newId } from "@/lib/ids";
 import { ENTITY_SCOPES } from "@/lib/entity-scope";
 import { makeUniqueIndicatorCode } from "@/lib/indicator-code";
 import { isFranquia } from "@/lib/entity-kind";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,20 +21,25 @@ import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-ru
 import { EmptyState } from "@/components/app/page-header";
 import { ShieldAlert } from "lucide-react";
 
-type NovoSearch = { escopo?: EntityScope; unidade?: string };
+type NovoSearch = { escopo?: EntityScope; unidade?: string; empresa?: string };
 
 export const Route = createFileRoute("/_authenticated/indicadores/novo")({
   validateSearch: (search: Record<string, unknown>): NovoSearch => {
     const escopo = search.escopo === "empresa" || search.escopo === "franquia" ? (search.escopo as EntityScope) : undefined;
     const unidade = typeof search.unidade === "string" && search.unidade ? search.unidade : undefined;
-    return { escopo, ...(escopo === "franquia" && unidade ? { unidade } : {}) };
+    const empresa = typeof search.empresa === "string" && search.empresa ? search.empresa : undefined;
+    return {
+      escopo,
+      ...(escopo === "franquia" && unidade ? { unidade } : {}),
+      ...(escopo === "franquia" && unidade && empresa ? { empresa } : {}),
+    };
   },
   head: () => ({ meta: [{ title: "Novo indicador" }] }),
   component: NewIndicator,
 });
 
 function NewIndicator() {
-  const { escopo: escopoParam, unidade } = Route.useSearch();
+  const { escopo: escopoParam, unidade, empresa: empresaParam } = Route.useSearch();
   const sectors = useStore((s) => s.sectors);
   const indicators = useStore((s) => s.indicators);
   const franchises = useStore((s) => s.franchises);
@@ -46,14 +51,16 @@ function NewIndicator() {
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
   const contextFranchise = unidade ? franchises.find((fr) => fr.id === unidade) : undefined;
+  const contextName = contextFranchise?.name ?? empresaParam ?? "";
+  const lockedUnit = !!unidade;
 
   const [f, setF] = useState({
     name: "", objective: "",
-    owner_sector_id: sectors[0]?.id ?? "", franchise_id: contextFranchise?.id ?? "",
+    owner_sector_id: sectors[0]?.id ?? "", franchise_id: unidade ?? "",
     responsible_id: "",
     kpi_group: "resultado" as KpiGroup,
     entity_scope: (escopoParam ?? "") as EntityScope | "",
-    entity_id: contextFranchise?.id ?? "",
+    entity_id: unidade ?? "",
     value_type: "inteiro" as ValueType,
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
@@ -65,13 +72,13 @@ function NewIndicator() {
 
   const set = <K extends keyof typeof f>(k: K, v: typeof f[K]) => setF((p) => ({ ...p, [k]: v }));
 
-  // A loja pode hidratar depois do primeiro render: sincroniza o contexto quando a franquia aparecer.
+  // A loja pode hidratar depois do primeiro render: mantém o contexto travado pelos search params.
   useEffect(() => {
-    if (!contextFranchise) return;
-    setF((p) => (p.entity_id === contextFranchise.id && p.franchise_id === contextFranchise.id
+    if (!unidade) return;
+    setF((p) => (p.entity_id === unidade && p.franchise_id === unidade && p.entity_scope === "franquia"
       ? p
-      : { ...p, entity_id: contextFranchise.id, franchise_id: contextFranchise.id, entity_scope: "franquia" }));
-  }, [contextFranchise]);
+      : { ...p, entity_id: unidade, franchise_id: unidade, entity_scope: "franquia" }));
+  }, [unidade]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +102,10 @@ function NewIndicator() {
     ]);
     if (intError) { toast.error(intError); return; }
     const autoCode = makeUniqueIndicatorCode(f.name, indicators.map((i) => i.code));
-    const { responsible_id, entity_scope, entity_id, ...rest } = f;
+    const { responsible_id, entity_scope: rawScope, entity_id: rawEntityId, ...rest } = f;
+    const entity_scope = unidade ? "franquia" : rawScope;
+    const entity_id = unidade ?? rawEntityId;
+    if (unidade) rest.franchise_id = unidade;
     const ind: Indicator = {
       id: newId(),
       code: autoCode,
@@ -139,11 +149,24 @@ function NewIndicator() {
 
   return (
     <div>
+      {lockedUnit && (
+        <nav aria-label="breadcrumb" className="mb-2 flex items-center gap-1 text-sm text-muted-foreground">
+          <Link to="/franquias" className="hover:underline">Franquias</Link>
+          <span>›</span>
+          {unidade ? (
+            <Link to="/franquias/$id" params={{ id: unidade }} className="hover:underline">{contextName || "Unidade"}</Link>
+          ) : (
+            <span>{contextName}</span>
+          )}
+          <span>›</span>
+          <span className="text-foreground">Novo indicador</span>
+        </nav>
+      )}
       <PageHeader
         title="Novo indicador"
         description={
-          contextFranchise
-            ? `Franquias › ${contextFranchise.name} › Novo indicador`
+          lockedUnit
+            ? `Indicador da unidade ${contextName || ""} — escopo e unidade definidos pelo contexto.`.trim()
             : escopoParam === "franquia"
               ? "Indicadores Franquia › Novo indicador — escopo definido pelo contexto."
               : "Defina a estrutura, a regra de desempenho e a meta padrão."
@@ -172,7 +195,7 @@ function NewIndicator() {
               </Select>
             </Field>
             <Field label="Escopo">
-              <Select value={f.entity_scope} disabled={!!escopoParam} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
+              <Select value={f.entity_scope} disabled={!!escopoParam || lockedUnit} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
                 <SelectTrigger><SelectValue placeholder="Selecione o escopo" /></SelectTrigger>
                 <SelectContent>
                   {ENTITY_SCOPES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
@@ -182,14 +205,14 @@ function NewIndicator() {
             </Field>
             {f.entity_scope === "franquia" && (
               <Field label="Unidade">
-                <Select value={f.entity_id || "rede"} disabled={!!contextFranchise} onValueChange={(v) => set("entity_id", v === "rede" ? "" : v)}>
+                <Select value={f.entity_id || "rede"} disabled={lockedUnit} onValueChange={(v) => set("entity_id", v === "rede" ? "" : v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="rede">Toda a rede</SelectItem>
                     {franchises.filter(isFranquia).map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                {contextFranchise && <p className="mt-1 text-xs text-muted-foreground">Definida pelo contexto</p>}
+                {lockedUnit && <p className="mt-1 text-xs text-muted-foreground">Definida pelo contexto</p>}
               </Field>
             )}
             <Field label="Setor">
@@ -199,8 +222,8 @@ function NewIndicator() {
               </Select>
             </Field>
             <Field label="Empresa">
-              {contextFranchise ? (
-                <Input value={contextFranchise.name} disabled />
+              {lockedUnit ? (
+                <Input value={contextName} disabled />
               ) : (
                 <Select value={f.franchise_id} onValueChange={(v) => set("franchise_id", v)}>
                   <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
