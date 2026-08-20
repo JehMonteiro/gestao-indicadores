@@ -157,7 +157,11 @@ export type Database = {
           city: string | null
           code: string
           created_at: string
+          created_in_system_at: string | null
+          deactivated_at: string | null
           entity_type: Database["public"]["Enums"]["entity_type"] | null
+          franchise_model: string | null
+          franchise_type: string | null
           id: string
           is_demo: boolean
           name: string
@@ -165,13 +169,18 @@ export type Database = {
           parent_id: string | null
           state: string | null
           status: string
+          support_group: string | null
           updated_at: string
         }
         Insert: {
           city?: string | null
           code: string
           created_at?: string
+          created_in_system_at?: string | null
+          deactivated_at?: string | null
           entity_type?: Database["public"]["Enums"]["entity_type"] | null
+          franchise_model?: string | null
+          franchise_type?: string | null
           id?: string
           is_demo?: boolean
           name: string
@@ -179,13 +188,18 @@ export type Database = {
           parent_id?: string | null
           state?: string | null
           status?: string
+          support_group?: string | null
           updated_at?: string
         }
         Update: {
           city?: string | null
           code?: string
           created_at?: string
+          created_in_system_at?: string | null
+          deactivated_at?: string | null
           entity_type?: Database["public"]["Enums"]["entity_type"] | null
+          franchise_model?: string | null
+          franchise_type?: string | null
           id?: string
           is_demo?: boolean
           name?: string
@@ -193,6 +207,7 @@ export type Database = {
           parent_id?: string | null
           state?: string | null
           status?: string
+          support_group?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -97,6 +97,11 @@ export interface Franchise {
   start_date: string;
   manager_id?: string;
   notes?: string;
+  support_group?: string | null;
+  created_in_system_at?: string | null;
+  deactivated_at?: string | null;
+  franchise_model?: string | null;
+  franchise_type?: string | null;
   created_at: string;
 }
 

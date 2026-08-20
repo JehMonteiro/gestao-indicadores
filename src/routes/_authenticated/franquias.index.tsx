@@ -16,6 +16,7 @@ import { Plus, Pencil, Search, Network } from "lucide-react";
 import type { Franchise } from "@/mocks/types";
 import { isEmpresa, isFranquia, isGrupo, operatingTime } from "@/lib/entity-kind";
 import { formatDate } from "@/lib/format";
+import { ImportFranchisesDialog } from "@/components/app/import-franchises-dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/franquias/")({
@@ -175,6 +176,7 @@ function UnitsTab({ list, canEdit, onSave, onDelete, parentId }: {
             <SelectItem value="inativa">Inativa</SelectItem>
           </SelectContent>
         </Select>
+        {canEdit && <ImportFranchisesDialog parentId={parentId} />}
         {canEdit && <EntityDialog kind="franquia" parentId={parentId} onSave={onSave} />}
       </div>
 

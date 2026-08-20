@@ -63,6 +63,11 @@ function mapFranchise(row: any): Franchise {
     region: row.state ?? "",
     status: row.status === "ativo" ? "ativa" : "inativa",
     start_date: row.opened_at ?? row.created_at,
+    support_group: row.support_group ?? null,
+    created_in_system_at: row.created_in_system_at ?? null,
+    deactivated_at: row.deactivated_at ?? null,
+    franchise_model: row.franchise_model ?? null,
+    franchise_type: row.franchise_type ?? null,
     created_at: row.created_at,
   };
 }
@@ -333,6 +338,11 @@ export const dbWrite = {
       city: f.city || null,
       state: f.state || null,
       opened_at: f.start_date || null,
+      support_group: f.support_group ?? null,
+      created_in_system_at: f.created_in_system_at ?? null,
+      deactivated_at: f.deactivated_at ?? null,
+      franchise_model: f.franchise_model ?? null,
+      franchise_type: f.franchise_type ?? null,
       status: f.status === "ativa" ? "ativo" : "inativo",
     });
   },
