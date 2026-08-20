@@ -89,7 +89,7 @@ export const getDataAudit = createServerFn({ method: "GET" })
     const counts: RawCounts = {
       entries: entries.length,
       entriesByStatus,
-      targets: (targetsRes.data ?? []).length,
+      targets: targetRows.length,
       indicators: indicators.length,
       indicatorsNoScope: indicators.filter((i) => i.entity_scope == null).length,
       indicatorsEmpresa: indicators.filter((i) => i.entity_scope === "empresa").length,
