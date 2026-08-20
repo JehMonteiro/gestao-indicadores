@@ -64,12 +64,32 @@ export const getDataAudit = createServerFn({ method: "GET" })
     const [entries, targetRows, indicators, profiles, logsRes] = await Promise.all([
       fetchAllWith<any>(
         supabaseAdmin,
-        (sb) => sb.from("indicator_entries").select("id, indicator_id, period_start, period_end, actual_value, status").order("id", { ascending: true }),
+        (sb) =>
+          sb
+            .from("indicator_entries")
+            .select("id, indicator_id, period_start, period_end, actual_value, status")
+            .order("id", { ascending: true }),
         "indicator_entries",
       ),
-      fetchAllWith<any>(supabaseAdmin, (sb) => sb.from("targets").select("id").order("id", { ascending: true }), "targets"),
-      fetchAllWith<any>(supabaseAdmin, (sb) => sb.from("indicators").select("id, name, code, entity_scope").order("id", { ascending: true }), "indicators"),
-      fetchAllWith<any>(supabaseAdmin, (sb) => sb.from("profiles").select("id, full_name, email").order("id", { ascending: true }), "profiles"),
+      fetchAllWith<any>(
+        supabaseAdmin,
+        (sb) => sb.from("targets").select("id").order("id", { ascending: true }),
+        "targets",
+      ),
+      fetchAllWith<any>(
+        supabaseAdmin,
+        (sb) =>
+          sb
+            .from("indicators")
+            .select("id, name, code, entity_scope")
+            .order("id", { ascending: true }),
+        "indicators",
+      ),
+      fetchAllWith<any>(
+        supabaseAdmin,
+        (sb) => sb.from("profiles").select("id, full_name, email").order("id", { ascending: true }),
+        "profiles",
+      ),
       supabaseAdmin
         .from("audit_logs")
         .select("id, created_at, user_id, action, entity_type, entity_id, payload")
@@ -133,9 +153,7 @@ export const getDataAudit = createServerFn({ method: "GET" })
         actual_value: Number(e.actual_value ?? 0),
       }));
 
-    const nameById = new Map(
-      profiles.map((p) => [p.id, p.full_name || p.email || p.id] as const),
-    );
+    const nameById = new Map(profiles.map((p) => [p.id, p.full_name || p.email || p.id] as const));
     const logs: AuditRow[] = (logsRes.data ?? []).map((l) => ({
       id: l.id,
       created_at: l.created_at,

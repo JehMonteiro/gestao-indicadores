@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const PAGE_SIZE = 1000;
 
 /** Query já montada (colunas, filtros, ordenação) — o .range() é aplicado aqui. */
