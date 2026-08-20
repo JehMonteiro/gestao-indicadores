@@ -2,7 +2,7 @@ import type { EntityKind } from "@/lib/entity-kind";
 import { filterByScope, unclassified } from "@/lib/entity-scope";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, EmptyState } from "@/components/app/page-header";
 import { useStore } from "@/mocks/store";
@@ -24,9 +24,12 @@ import {
 import { toast } from "sonner";
 import { useCurrentUser } from "@/mocks/store";
 import { ImportIndicatorsDialog } from "@/components/app/import-indicators-dialog";
+import { SelecionarFranquiaDialog } from "@/components/app/selecionar-franquia-dialog";
 
 export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind }) {
+  const navigate = useNavigate();
   const indicators = useVisibleIndicators();
+
   const { isAdmin } = useIsAdmin();
   const sectors = useStore((s) => s.sectors);
   const franchises = useStore((s) => s.franchises);
@@ -78,7 +81,16 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
           <div className="flex gap-2">
             <ImportIndicatorsDialog />
             {escopo === "franquia" ? (
-              <Button asChild><Link to="/franquias"><Plus className="size-4" />Novo indicador</Link></Button>
+              <SelecionarFranquiaDialog
+                trigger={
+                  <Button>
+                    <Plus className="size-4" />Novo indicador
+                  </Button>
+                }
+                onSelect={(franchiseId) =>
+                  navigate({ to: "/franquias/$id/indicadores/novo", params: { id: franchiseId } })
+                }
+              />
             ) : (
               <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>
             )}
