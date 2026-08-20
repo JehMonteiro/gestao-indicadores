@@ -231,7 +231,6 @@ export function canSeeRoute(role: GlobalRole | undefined, route: string): boolea
     "/setores": ["superadmin", "admin_corporativo", "gestor_setor", "auditor"],
     "/franquias": ["superadmin", "admin_corporativo", "gestor_franquia", "auditor"],
     "/indicadores": ["superadmin", "admin_corporativo", "gestor_setor", "auditor"],
-    "/indicadores-franquia": ["superadmin", "admin_corporativo", "gestor_setor", "auditor"],
     "/metas": ["superadmin", "admin_corporativo", "gestor_setor", "gestor_franquia"],
     "/metas-franquia": ["superadmin", "admin_corporativo", "gestor_setor", "gestor_franquia"],
 

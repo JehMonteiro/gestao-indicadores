@@ -77,7 +77,7 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
         actions={isAdmin ? (
           <div className="flex gap-2">
             <ImportIndicatorsDialog />
-            <Button asChild><Link to="/indicadores/novo" search={{ escopo }}><Plus className="size-4" />Novo indicador</Link></Button>
+            <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>
           </div>
         ) : null}
       />

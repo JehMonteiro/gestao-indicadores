@@ -19,7 +19,6 @@ import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedClassificacaoEscopoRouteImport } from './routes/_authenticated/classificacao-escopo'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedDesempenhoFranquiasRouteImport } from './routes/_authenticated/desempenho-franquias'
-import { Route as AuthenticatedIndicadoresFranquiaRouteImport } from './routes/_authenticated/indicadores-franquia'
 import { Route as AuthenticatedLancamentosFranquiaRouteImport } from './routes/_authenticated/lancamentos-franquia'
 import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
 import { Route as AuthenticatedMetasFranquiaRouteImport } from './routes/_authenticated/metas-franquia'
@@ -96,12 +95,6 @@ const AuthenticatedDesempenhoFranquiasRoute =
   AuthenticatedDesempenhoFranquiasRouteImport.update({
     id: '/desempenho-franquias',
     path: '/desempenho-franquias',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedIndicadoresFranquiaRoute =
-  AuthenticatedIndicadoresFranquiaRouteImport.update({
-    id: '/indicadores-franquia',
-    path: '/indicadores-franquia',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedLancamentosFranquiaRoute =
@@ -252,7 +245,6 @@ export interface FileRoutesByFullPath {
   '/classificacao-escopo': typeof AuthenticatedClassificacaoEscopoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
-  '/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
   '/lancamentos-franquia': typeof AuthenticatedLancamentosFranquiaRoute
   '/metas': typeof AuthenticatedMetasRoute
   '/metas-franquia': typeof AuthenticatedMetasFranquiaRoute
@@ -288,7 +280,6 @@ export interface FileRoutesByTo {
   '/classificacao-escopo': typeof AuthenticatedClassificacaoEscopoRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
-  '/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
   '/lancamentos-franquia': typeof AuthenticatedLancamentosFranquiaRoute
   '/metas': typeof AuthenticatedMetasRoute
   '/metas-franquia': typeof AuthenticatedMetasFranquiaRoute
@@ -325,7 +316,6 @@ export interface FileRoutesById {
   '/_authenticated/classificacao-escopo': typeof AuthenticatedClassificacaoEscopoRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/desempenho-franquias': typeof AuthenticatedDesempenhoFranquiasRoute
-  '/_authenticated/indicadores-franquia': typeof AuthenticatedIndicadoresFranquiaRoute
   '/_authenticated/lancamentos-franquia': typeof AuthenticatedLancamentosFranquiaRoute
   '/_authenticated/metas': typeof AuthenticatedMetasRoute
   '/_authenticated/metas-franquia': typeof AuthenticatedMetasFranquiaRoute
@@ -363,7 +353,6 @@ export interface FileRouteTypes {
     | '/classificacao-escopo'
     | '/configuracoes'
     | '/desempenho-franquias'
-    | '/indicadores-franquia'
     | '/lancamentos-franquia'
     | '/metas'
     | '/metas-franquia'
@@ -399,7 +388,6 @@ export interface FileRouteTypes {
     | '/classificacao-escopo'
     | '/configuracoes'
     | '/desempenho-franquias'
-    | '/indicadores-franquia'
     | '/lancamentos-franquia'
     | '/metas'
     | '/metas-franquia'
@@ -435,7 +423,6 @@ export interface FileRouteTypes {
     | '/_authenticated/classificacao-escopo'
     | '/_authenticated/configuracoes'
     | '/_authenticated/desempenho-franquias'
-    | '/_authenticated/indicadores-franquia'
     | '/_authenticated/lancamentos-franquia'
     | '/_authenticated/metas'
     | '/_authenticated/metas-franquia'
@@ -539,13 +526,6 @@ declare module '@tanstack/react-router' {
       path: '/desempenho-franquias'
       fullPath: '/desempenho-franquias'
       preLoaderRoute: typeof AuthenticatedDesempenhoFranquiasRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/indicadores-franquia': {
-      id: '/_authenticated/indicadores-franquia'
-      path: '/indicadores-franquia'
-      fullPath: '/indicadores-franquia'
-      preLoaderRoute: typeof AuthenticatedIndicadoresFranquiaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/lancamentos-franquia': {
@@ -764,7 +744,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClassificacaoEscopoRoute: typeof AuthenticatedClassificacaoEscopoRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedDesempenhoFranquiasRoute: typeof AuthenticatedDesempenhoFranquiasRoute
-  AuthenticatedIndicadoresFranquiaRoute: typeof AuthenticatedIndicadoresFranquiaRoute
   AuthenticatedLancamentosFranquiaRoute: typeof AuthenticatedLancamentosFranquiaRoute
   AuthenticatedMetasRoute: typeof AuthenticatedMetasRoute
   AuthenticatedMetasFranquiaRoute: typeof AuthenticatedMetasFranquiaRoute
@@ -793,7 +772,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClassificacaoEscopoRoute: AuthenticatedClassificacaoEscopoRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedDesempenhoFranquiasRoute: AuthenticatedDesempenhoFranquiasRoute,
-  AuthenticatedIndicadoresFranquiaRoute: AuthenticatedIndicadoresFranquiaRoute,
   AuthenticatedLancamentosFranquiaRoute: AuthenticatedLancamentosFranquiaRoute,
   AuthenticatedMetasRoute: AuthenticatedMetasRoute,
   AuthenticatedMetasFranquiaRoute: AuthenticatedMetasFranquiaRoute,
@@ -827,13 +805,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
