@@ -109,6 +109,10 @@ function NewIndicator() {
     }
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
     toast.success("Indicador criado com sucesso");
+    if (unidade) {
+      navigate({ to: "/franquias/$id", params: { id: unidade } });
+      return;
+    }
     navigate({ to: "/indicadores/$id", params: { id: ind.id } });
   };
 
