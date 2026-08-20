@@ -62,7 +62,7 @@ export const getDataAudit = createServerFn({ method: "GET" })
 
     // fetchAll — contorna limite 1000 do PostgREST
     const [entries, targetRows, indicators, profiles, logsRes] = await Promise.all([
-      fetchAllWith<any>(
+      fetchAllWith<EntryRow>(
         supabaseAdmin,
         (sb) =>
           sb
@@ -71,12 +71,12 @@ export const getDataAudit = createServerFn({ method: "GET" })
             .order("id", { ascending: true }),
         "indicator_entries",
       ),
-      fetchAllWith<any>(
+      fetchAllWith<{ id: string }>(
         supabaseAdmin,
         (sb) => sb.from("targets").select("id").order("id", { ascending: true }),
         "targets",
       ),
-      fetchAllWith<any>(
+      fetchAllWith<IndicatorRow>(
         supabaseAdmin,
         (sb) =>
           sb
@@ -85,7 +85,7 @@ export const getDataAudit = createServerFn({ method: "GET" })
             .order("id", { ascending: true }),
         "indicators",
       ),
-      fetchAllWith<any>(
+      fetchAllWith<ProfileRow>(
         supabaseAdmin,
         (sb) => sb.from("profiles").select("id, full_name, email").order("id", { ascending: true }),
         "profiles",
