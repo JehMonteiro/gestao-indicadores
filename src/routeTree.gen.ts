@@ -42,6 +42,7 @@ import { Route as AuthenticatedSetoresIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFranquiasIdIndexRouteImport } from './routes/_authenticated/franquias.$id.index'
 import { Route as AuthenticatedIndicadoresIdEditarRouteImport } from './routes/_authenticated/indicadores.$id.editar'
 import { Route as AuthenticatedFranquiasIdIndicadoresNovoRouteImport } from './routes/_authenticated/franquias.$id.indicadores.novo'
+import { Route as AuthenticatedFranquiasIdIndicadoresIndIdIndexRouteImport } from './routes/_authenticated/franquias.$id.indicadores.$indId.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -227,6 +228,12 @@ const AuthenticatedFranquiasIdIndicadoresNovoRoute =
     path: '/indicadores/novo',
     getParentRoute: () => AuthenticatedFranquiasIdRoute,
   } as any)
+const AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute =
+  AuthenticatedFranquiasIdIndicadoresIndIdIndexRouteImport.update({
+    id: '/indicadores/$indId/',
+    path: '/indicadores/$indId/',
+    getParentRoute: () => AuthenticatedFranquiasIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -261,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
   '/franquias/$id/': typeof AuthenticatedFranquiasIdIndexRoute
   '/franquias/$id/indicadores/novo': typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  '/franquias/$id/indicadores/$indId/': typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -294,6 +302,7 @@ export interface FileRoutesByTo {
   '/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
   '/franquias/$id': typeof AuthenticatedFranquiasIdIndexRoute
   '/franquias/$id/indicadores/novo': typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  '/franquias/$id/indicadores/$indId': typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -330,6 +339,7 @@ export interface FileRoutesById {
   '/_authenticated/indicadores/$id/editar': typeof AuthenticatedIndicadoresIdEditarRoute
   '/_authenticated/franquias/$id/': typeof AuthenticatedFranquiasIdIndexRoute
   '/_authenticated/franquias/$id/indicadores/novo': typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  '/_authenticated/franquias/$id/indicadores/$indId/': typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -366,6 +376,7 @@ export interface FileRouteTypes {
     | '/indicadores/$id/editar'
     | '/franquias/$id/'
     | '/franquias/$id/indicadores/novo'
+    | '/franquias/$id/indicadores/$indId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -399,6 +410,7 @@ export interface FileRouteTypes {
     | '/indicadores/$id/editar'
     | '/franquias/$id'
     | '/franquias/$id/indicadores/novo'
+    | '/franquias/$id/indicadores/$indId'
   id:
     | '__root__'
     | '/'
@@ -434,6 +446,7 @@ export interface FileRouteTypes {
     | '/_authenticated/indicadores/$id/editar'
     | '/_authenticated/franquias/$id/'
     | '/_authenticated/franquias/$id/indicadores/novo'
+    | '/_authenticated/franquias/$id/indicadores/$indId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -676,12 +689,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFranquiasIdIndicadoresNovoRouteImport
       parentRoute: typeof AuthenticatedFranquiasIdRoute
     }
+    '/_authenticated/franquias/$id/indicadores/$indId/': {
+      id: '/_authenticated/franquias/$id/indicadores/$indId/'
+      path: '/indicadores/$indId'
+      fullPath: '/franquias/$id/indicadores/$indId/'
+      preLoaderRoute: typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRouteImport
+      parentRoute: typeof AuthenticatedFranquiasIdRoute
+    }
   }
 }
 
 interface AuthenticatedFranquiasIdRouteChildren {
   AuthenticatedFranquiasIdIndexRoute: typeof AuthenticatedFranquiasIdIndexRoute
   AuthenticatedFranquiasIdIndicadoresNovoRoute: typeof AuthenticatedFranquiasIdIndicadoresNovoRoute
+  AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute: typeof AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute
 }
 
 const AuthenticatedFranquiasIdRouteChildren: AuthenticatedFranquiasIdRouteChildren =
@@ -689,6 +710,8 @@ const AuthenticatedFranquiasIdRouteChildren: AuthenticatedFranquiasIdRouteChildr
     AuthenticatedFranquiasIdIndexRoute: AuthenticatedFranquiasIdIndexRoute,
     AuthenticatedFranquiasIdIndicadoresNovoRoute:
       AuthenticatedFranquiasIdIndicadoresNovoRoute,
+    AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute:
+      AuthenticatedFranquiasIdIndicadoresIndIdIndexRoute,
   }
 
 const AuthenticatedFranquiasIdRouteWithChildren =
