@@ -72,13 +72,13 @@ function NewIndicator() {
 
   const set = <K extends keyof typeof f>(k: K, v: typeof f[K]) => setF((p) => ({ ...p, [k]: v }));
 
-  // A loja pode hidratar depois do primeiro render: sincroniza o contexto quando a franquia aparecer.
+  // A loja pode hidratar depois do primeiro render: mantém o contexto travado pelos search params.
   useEffect(() => {
-    if (!contextFranchise) return;
-    setF((p) => (p.entity_id === contextFranchise.id && p.franchise_id === contextFranchise.id
+    if (!unidade) return;
+    setF((p) => (p.entity_id === unidade && p.franchise_id === unidade && p.entity_scope === "franquia"
       ? p
-      : { ...p, entity_id: contextFranchise.id, franchise_id: contextFranchise.id, entity_scope: "franquia" }));
-  }, [contextFranchise]);
+      : { ...p, entity_id: unidade, franchise_id: unidade, entity_scope: "franquia" }));
+  }, [unidade]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
