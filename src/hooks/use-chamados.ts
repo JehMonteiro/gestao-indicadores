@@ -34,30 +34,14 @@ function mapRow(r: Record<string, unknown>): Chamado {
   };
 }
 
-const PAGE_SIZE = 1000;
-
-/** Busca todos os chamados paginando até esgotar os resultados (o backend limita 1000 por consulta). */
+/** Busca todos os chamados paginando até esgotar os resultados. */
 export async function fetchAllChamados(): Promise<Chamado[]> {
-  const all: Chamado[] = [];
-  let page = 0;
-  for (;;) {
-    const from = page * PAGE_SIZE;
-    const { data, error } = await supabase
-      .from("chamados")
-      .select("*")
-      .order("aberto_em", { ascending: false })
-      .order("id", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw error;
-    const rows = data ?? [];
-    for (const r of rows) all.push(mapRow(r as Record<string, unknown>));
-    if (rows.length < PAGE_SIZE) break;
-    page++;
-  }
-  if (import.meta.env.DEV) {
-    console.log(`[chamados] ${all.length} registros carregados`);
-  }
-  return all;
+  // fetchAll — contorna limite 1000 do PostgREST
+  const rows = await fetchAll<Record<string, unknown>>(
+    (sb) => sb.from("chamados").select("*").order("aberto_em", { ascending: false }).order("id", { ascending: true }),
+    "chamados",
+  );
+  return rows.map(mapRow);
 }
 
 /** Todos os chamados (sem filtros) — base para opções de filtro e estado vazio. */
