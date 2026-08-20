@@ -139,7 +139,16 @@ function NewIndicator() {
 
   return (
     <div>
-      <PageHeader title="Novo indicador" description="Defina a estrutura, a regra de desempenho e a meta padrão." />
+      <PageHeader
+        title="Novo indicador"
+        description={
+          contextFranchise
+            ? `Franquias › ${contextFranchise.name} › Novo indicador`
+            : escopoParam === "franquia"
+              ? "Indicadores Franquia › Novo indicador — escopo definido pelo contexto."
+              : "Defina a estrutura, a regra de desempenho e a meta padrão."
+        }
+      />
       <form onSubmit={submit} className="space-y-4 max-w-4xl">
         <Card>
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
