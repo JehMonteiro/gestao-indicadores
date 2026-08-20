@@ -58,26 +58,27 @@ export const getDataAudit = createServerFn({ method: "GET" })
     if (!(roles ?? []).some((r) => r.role === "superadmin")) throw new Error("Forbidden");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { fetchAllWith } = await import("@/lib/supabase-fetch-all");
 
-    const [entriesRes, targetsRes, indicatorsRes, profilesRes, logsRes] = await Promise.all([
-      supabaseAdmin
-        .from("indicator_entries")
-        .select("id, indicator_id, period_start, period_end, actual_value, status"),
-      supabaseAdmin.from("targets").select("id"),
-      supabaseAdmin.from("indicators").select("id, name, code, entity_scope"),
-      supabaseAdmin.from("profiles").select("id, full_name, email"),
+    // fetchAll — contorna limite 1000 do PostgREST
+    const [entries, targetRows, indicators, profiles, logsRes] = await Promise.all([
+      fetchAllWith<any>(
+        supabaseAdmin,
+        (sb) => sb.from("indicator_entries").select("id, indicator_id, period_start, period_end, actual_value, status").order("id", { ascending: true }),
+        "indicator_entries",
+      ),
+      fetchAllWith<any>(supabaseAdmin, (sb) => sb.from("targets").select("id").order("id", { ascending: true }), "targets"),
+      fetchAllWith<any>(supabaseAdmin, (sb) => sb.from("indicators").select("id, name, code, entity_scope").order("id", { ascending: true }), "indicators"),
+      fetchAllWith<any>(supabaseAdmin, (sb) => sb.from("profiles").select("id, full_name, email").order("id", { ascending: true }), "profiles"),
       supabaseAdmin
         .from("audit_logs")
         .select("id, created_at, user_id, action, entity_type, entity_id, payload")
         .in("action", ["delete", "update"])
         .in("entity_type", ["indicator", "entry", "target"])
         .order("created_at", { ascending: false })
+        // Limite intencional: a tela mostra apenas os últimos 200 registros de auditoria
         .limit(200),
     ]);
-
-    const entries = entriesRes.data ?? [];
-    const indicators = indicatorsRes.data ?? [];
-    const profiles = profilesRes.data ?? [];
 
     const entriesByStatus: Record<string, number> = {};
     for (const e of entries) {
