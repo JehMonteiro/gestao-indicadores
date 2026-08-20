@@ -284,7 +284,17 @@ function NewIndicator() {
         </Card>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/indicadores" })}>Cancelar</Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (unidade) navigate({ to: "/franquias/$id", params: { id: unidade } });
+              else if (escopoParam === "franquia") navigate({ to: "/indicadores-franquia" });
+              else navigate({ to: "/indicadores" });
+            }}
+          >
+            Cancelar
+          </Button>
           <Button type="submit">Salvar indicador</Button>
         </div>
       </form>
