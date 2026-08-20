@@ -101,10 +101,11 @@ export function useMyDashboardData() {
     queryFn: async () => {
       const uid = userId as string;
 
-      const [{ data: myTargetRows }, { data: ownIndicatorRows }, { data: entryRows }] = await Promise.all([
-        supabase.from("targets").select("*").or(`user_id.eq.${uid},created_by.eq.${uid}`),
-        supabase.from("indicators").select("*").eq("responsible_user_id", uid),
-        supabase.from("indicator_entries").select("*").eq("user_id", uid),
+      // fetchAll — contorna limite 1000 do PostgREST
+      const [myTargetRows, ownIndicatorRows, entryRows] = await Promise.all([
+        fetchAll<any>((sb) => sb.from("targets").select("*").or(`user_id.eq.${uid},created_by.eq.${uid}`).order("id", { ascending: true }), "targets"),
+        fetchAll<any>((sb) => sb.from("indicators").select("*").eq("responsible_user_id", uid).order("id", { ascending: true }), "indicators"),
+        fetchAll<any>((sb) => sb.from("indicator_entries").select("*").eq("user_id", uid).order("id", { ascending: true }), "indicator_entries"),
       ]);
 
       const indicatorIds = new Set<string>([
