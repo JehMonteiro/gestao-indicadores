@@ -57,26 +57,14 @@ function NewIndicator() {
       toast.error("Preencha nome e setor proprietário");
       return;
     }
-    if (!f.franchise_id) {
-      toast.error("Selecione a empresa do indicador");
-      return;
-    }
-    if (!f.entity_scope) {
-      toast.error("Selecione o escopo do indicador");
-      return;
-    }
     const intError = firstIntegerError(f.value_type, [
       { label: "Meta padrão", value: f.default_target },
       { label: "Valor mínimo", value: f.minimum_value },
       { label: "Valor máximo", value: f.maximum_value },
-      { label: "Peso", value: (f as { weight?: number }).weight },
     ]);
     if (intError) { toast.error(intError); return; }
     const autoCode = makeUniqueIndicatorCode(f.name, indicators.map((i) => i.code));
-    const { responsible_id, entity_scope: rawScope, entity_id: rawEntityId, ...rest } = f;
-    const entity_scope = unidade ? "franquia" : rawScope;
-    const entity_id = unidade ?? rawEntityId;
-    if (unidade) rest.franchise_id = unidade;
+    const { responsible_id, ...rest } = f;
     const ind: Indicator = {
       id: newId(),
       code: autoCode,
@@ -87,8 +75,9 @@ function NewIndicator() {
       created_by: user?.id ?? "u-admin",
       created_at: new Date().toISOString(),
       ...rest,
-      entity_scope: entity_scope as EntityScope,
-      entity_id: entity_id || null,
+      entity_scope: "empresa",
+      entity_id: null,
+      franchise_id: undefined,
       end_date: rest.end_date || undefined,
     };
     await upsert(ind);
@@ -98,12 +87,9 @@ function NewIndicator() {
     }
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
     toast.success("Indicador criado com sucesso");
-    if (unidade) {
-      navigate({ to: "/franquias/$id", params: { id: unidade } });
-      return;
-    }
     navigate({ to: "/indicadores/$id", params: { id: ind.id } });
   };
+
 
   if (!adminLoading && !isAdmin) {
     return (
