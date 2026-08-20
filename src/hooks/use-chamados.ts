@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch-all";
 import type { Chamado, FiltrosChamados, LoteChamados } from "@/types/chamados";
 import { SITUACOES_ABERTAS } from "@/types/chamados";
 
