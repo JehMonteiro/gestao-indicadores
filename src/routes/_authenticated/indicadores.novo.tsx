@@ -2,7 +2,7 @@ import { newId } from "@/lib/ids";
 import { ENTITY_SCOPES } from "@/lib/entity-scope";
 import { makeUniqueIndicatorCode } from "@/lib/indicator-code";
 import { isFranquia } from "@/lib/entity-kind";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
