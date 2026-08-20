@@ -13,11 +13,22 @@ export const Route = createFileRoute("/_authenticated/franquias/$id")({
 
 function FranchiseDetail() {
   const { id } = Route.useParams();
-  const f = useStore((s) => s.franchises).find((x) => x.id === id);
+  const franchises = useStore((s) => s.franchises);
+  const f = franchises.find((x) => x.id === id);
   const profiles = useStore((s) => s.profiles);
   const userFranchises = useStore((s) => s.userFranchises);
   const indicators = useStore((s) => s.indicators);
-  if (!f) throw notFound();
+  // A loja hidrata de forma assíncrona: não declarar 404 antes dos dados chegarem.
+  if (!f) {
+    if (franchises.length === 0) {
+      return (
+        <div>
+          <PageHeader title="Carregando franquia…" description="Buscando os dados da unidade." />
+        </div>
+      );
+    }
+    throw notFound();
+  }
   const members = userFranchises.filter((uf) => uf.franchise_id === id);
   const unitIndicators = indicators.filter((i) => i.entity_scope === "franquia" && i.entity_id === id);
   return (
