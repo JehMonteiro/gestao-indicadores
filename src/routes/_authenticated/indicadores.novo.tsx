@@ -21,13 +21,18 @@ import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-ru
 import { EmptyState } from "@/components/app/page-header";
 import { ShieldAlert } from "lucide-react";
 
-type NovoSearch = { escopo?: EntityScope; unidade?: string };
+type NovoSearch = { escopo?: EntityScope; unidade?: string; empresa?: string };
 
 export const Route = createFileRoute("/_authenticated/indicadores/novo")({
   validateSearch: (search: Record<string, unknown>): NovoSearch => {
     const escopo = search.escopo === "empresa" || search.escopo === "franquia" ? (search.escopo as EntityScope) : undefined;
     const unidade = typeof search.unidade === "string" && search.unidade ? search.unidade : undefined;
-    return { escopo, ...(escopo === "franquia" && unidade ? { unidade } : {}) };
+    const empresa = typeof search.empresa === "string" && search.empresa ? search.empresa : undefined;
+    return {
+      escopo,
+      ...(escopo === "franquia" && unidade ? { unidade } : {}),
+      ...(escopo === "franquia" && unidade && empresa ? { empresa } : {}),
+    };
   },
   head: () => ({ meta: [{ title: "Novo indicador" }] }),
   component: NewIndicator,
