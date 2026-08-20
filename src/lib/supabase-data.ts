@@ -63,6 +63,11 @@ function mapFranchise(row: any): Franchise {
     region: row.state ?? "",
     status: row.status === "ativo" ? "ativa" : "inativa",
     start_date: row.opened_at ?? row.created_at,
+    support_group: row.support_group ?? null,
+    created_in_system_at: row.created_in_system_at ?? null,
+    deactivated_at: row.deactivated_at ?? null,
+    franchise_model: row.franchise_model ?? null,
+    franchise_type: row.franchise_type ?? null,
     created_at: row.created_at,
   };
 }
