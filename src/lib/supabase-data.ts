@@ -226,23 +226,24 @@ export async function loadAllFromSupabase(userId: string) {
     profiles,
     roles,
   ] = await Promise.all([
-    supabase.from("sectors").select("*").order("name"),
-    supabase.from("franchises").select("*").order("name"),
-    supabase.from("indicators").select("*").order("name"),
-    supabase.from("indicator_shared_sectors" as any).select("indicator_id, sector_id"),
-    supabase.from("targets").select("*"),
-    supabase.from("indicator_entries").select("*").order("period_end", { ascending: false }),
-    supabase.from("user_sectors").select("*"),
-    supabase.from("user_franchises").select("*"),
-    supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(500),
+    // fetchAll — contorna limite 1000 do PostgREST
+    fetchAll<any>((sb) => sb.from("sectors").select("*").order("name"), "sectors"),
+    fetchAll<any>((sb) => sb.from("franchises").select("*").order("name"), "franchises"),
+    fetchAll<any>((sb) => sb.from("indicators").select("*").order("name"), "indicators"),
+    fetchAll<any>((sb) => sb.from("indicator_shared_sectors").select("indicator_id, sector_id"), "indicator_shared_sectors"),
+    fetchAll<any>((sb) => sb.from("targets").select("*"), "targets"),
+    fetchAll<any>((sb) => sb.from("indicator_entries").select("*").order("period_end", { ascending: false }).order("id", { ascending: true }), "indicator_entries"),
+    fetchAll<any>((sb) => sb.from("user_sectors").select("*"), "user_sectors"),
+    fetchAll<any>((sb) => sb.from("user_franchises").select("*"), "user_franchises"),
+    fetchAll<any>((sb) => sb.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }).order("id", { ascending: true }), "notifications"),
+    fetchAll<any>((sb) => sb.from("audit_logs").select("*").order("created_at", { ascending: false }).order("id", { ascending: true }), "audit_logs"),
     supabase.from("app_settings").select("*").maybeSingle(),
-    supabase.from("profiles").select("*"),
-    supabase.from("user_roles").select("user_id, role"),
+    fetchAll<any>((sb) => sb.from("profiles").select("*"), "profiles"),
+    fetchAll<any>((sb) => sb.from("user_roles").select("user_id, role").order("user_id", { ascending: true }), "user_roles"),
   ]);
 
   const sharedByIndicator = new Map<string, string[]>();
-  ((sharedSectors.data ?? []) as any[]).forEach((r: any) => {
+  (sharedSectors as any[]).forEach((r: any) => {
     const list = sharedByIndicator.get(r.indicator_id) ?? [];
     list.push(r.sector_id);
     sharedByIndicator.set(r.indicator_id, list);
