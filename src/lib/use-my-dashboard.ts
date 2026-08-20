@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+
 import { useSession } from "@/hooks/use-auth";
+import { fetchAll } from "@/lib/supabase-fetch-all";
 import type { Indicator, IndicatorEntry, IndicatorTarget, Sector } from "@/mocks/types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -101,10 +102,35 @@ export function useMyDashboardData() {
     queryFn: async () => {
       const uid = userId as string;
 
-      const [{ data: myTargetRows }, { data: ownIndicatorRows }, { data: entryRows }] = await Promise.all([
-        supabase.from("targets").select("*").or(`user_id.eq.${uid},created_by.eq.${uid}`),
-        supabase.from("indicators").select("*").eq("responsible_user_id", uid),
-        supabase.from("indicator_entries").select("*").eq("user_id", uid),
+      // fetchAll — contorna limite 1000 do PostgREST
+      const [myTargetRows, ownIndicatorRows, entryRows] = await Promise.all([
+        fetchAll<any>(
+          (sb) =>
+            sb
+              .from("targets")
+              .select("*")
+              .or(`user_id.eq.${uid},created_by.eq.${uid}`)
+              .order("id", { ascending: true }),
+          "targets",
+        ),
+        fetchAll<any>(
+          (sb) =>
+            sb
+              .from("indicators")
+              .select("*")
+              .eq("responsible_user_id", uid)
+              .order("id", { ascending: true }),
+          "indicators",
+        ),
+        fetchAll<any>(
+          (sb) =>
+            sb
+              .from("indicator_entries")
+              .select("*")
+              .eq("user_id", uid)
+              .order("id", { ascending: true }),
+          "indicator_entries",
+        ),
       ]);
 
       const indicatorIds = new Set<string>([
@@ -112,20 +138,46 @@ export function useMyDashboardData() {
         ...(myTargetRows ?? []).map((r: any) => r.indicator_id as string),
       ]);
 
-      const entryIndicatorIds = [...new Set((entryRows ?? []).map((r: any) => r.indicator_id as string))];
-      const missingIds = [...new Set([
-        ...[...indicatorIds].filter((id) => !(ownIndicatorRows ?? []).some((r: any) => r.id === id)),
-        ...entryIndicatorIds.filter((id) => !indicatorIds.has(id)),
-      ])];
+      const entryIndicatorIds: string[] = [
+        ...new Set((entryRows ?? []).map((r: any) => r.indicator_id as string)),
+      ];
+      const missingIds: string[] = [
+        ...new Set([
+          ...[...indicatorIds].filter(
+            (id) => !(ownIndicatorRows ?? []).some((r: any) => r.id === id),
+          ),
+          ...entryIndicatorIds.filter((id) => !indicatorIds.has(id)),
+        ]),
+      ];
 
-      const [{ data: extraIndicatorRows }, { data: targetRows }, { data: sectorRows }] = await Promise.all([
+      // fetchAll — contorna limite 1000 do PostgREST
+      const [extraIndicatorRows, targetRows, sectorRows] = await Promise.all([
         missingIds.length
-          ? supabase.from("indicators").select("*").in("id", missingIds)
-          : Promise.resolve({ data: [] as any[] }),
+          ? fetchAll<any>(
+              (sb) =>
+                sb
+                  .from("indicators")
+                  .select("*")
+                  .in("id", missingIds)
+                  .order("id", { ascending: true }),
+              "indicators",
+            )
+          : Promise.resolve([] as any[]),
         indicatorIds.size
-          ? supabase.from("targets").select("*").in("indicator_id", [...indicatorIds])
-          : Promise.resolve({ data: [] as any[] }),
-        supabase.from("sectors").select("*"),
+          ? fetchAll<any>(
+              (sb) =>
+                sb
+                  .from("targets")
+                  .select("*")
+                  .in("indicator_id", [...indicatorIds])
+                  .order("id", { ascending: true }),
+              "targets",
+            )
+          : Promise.resolve([] as any[]),
+        fetchAll<any>(
+          (sb) => sb.from("sectors").select("*").order("id", { ascending: true }),
+          "sectors",
+        ),
       ]);
 
       const extras = (extraIndicatorRows ?? []).map(toIndicator);

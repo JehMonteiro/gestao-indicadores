@@ -3,6 +3,7 @@
 // and write-through helpers used by the Zustand store actions.
 
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch-all";
 import { firstIntegerError } from "@/lib/value-rules";
 import type {
   AuditLog,
@@ -226,35 +227,36 @@ export async function loadAllFromSupabase(userId: string) {
     profiles,
     roles,
   ] = await Promise.all([
-    supabase.from("sectors").select("*").order("name"),
-    supabase.from("franchises").select("*").order("name"),
-    supabase.from("indicators").select("*").order("name"),
-    supabase.from("indicator_shared_sectors" as any).select("indicator_id, sector_id"),
-    supabase.from("targets").select("*"),
-    supabase.from("indicator_entries").select("*").order("period_end", { ascending: false }),
-    supabase.from("user_sectors").select("*"),
-    supabase.from("user_franchises").select("*"),
-    supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(500),
+    // fetchAll — contorna limite 1000 do PostgREST
+    fetchAll<any>((sb) => sb.from("sectors").select("*").order("name"), "sectors"),
+    fetchAll<any>((sb) => sb.from("franchises").select("*").order("name"), "franchises"),
+    fetchAll<any>((sb) => sb.from("indicators").select("*").order("name"), "indicators"),
+    fetchAll<any>((sb) => sb.from("indicator_shared_sectors").select("indicator_id, sector_id"), "indicator_shared_sectors"),
+    fetchAll<any>((sb) => sb.from("targets").select("*"), "targets"),
+    fetchAll<any>((sb) => sb.from("indicator_entries").select("*").order("period_end", { ascending: false }).order("id", { ascending: true }), "indicator_entries"),
+    fetchAll<any>((sb) => sb.from("user_sectors").select("*"), "user_sectors"),
+    fetchAll<any>((sb) => sb.from("user_franchises").select("*"), "user_franchises"),
+    fetchAll<any>((sb) => sb.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }).order("id", { ascending: true }), "notifications"),
+    fetchAll<any>((sb) => sb.from("audit_logs").select("*").order("created_at", { ascending: false }).order("id", { ascending: true }), "audit_logs"),
     supabase.from("app_settings").select("*").maybeSingle(),
-    supabase.from("profiles").select("*"),
-    supabase.from("user_roles").select("user_id, role"),
+    fetchAll<any>((sb) => sb.from("profiles").select("*"), "profiles"),
+    fetchAll<any>((sb) => sb.from("user_roles").select("user_id, role").order("user_id", { ascending: true }), "user_roles"),
   ]);
 
   const sharedByIndicator = new Map<string, string[]>();
-  ((sharedSectors.data ?? []) as any[]).forEach((r: any) => {
+  (sharedSectors as any[]).forEach((r: any) => {
     const list = sharedByIndicator.get(r.indicator_id) ?? [];
     list.push(r.sector_id);
     sharedByIndicator.set(r.indicator_id, list);
   });
 
   const rolesByUser = new Map<string, GlobalRole[]>();
-  (roles.data ?? []).forEach((r: any) => {
+  roles.forEach((r: any) => {
     const list = rolesByUser.get(r.user_id) ?? [];
     list.push(r.role);
     rolesByUser.set(r.user_id, list);
   });
-  const mappedProfiles: Profile[] = (profiles.data ?? []).map((p: any) => {
+  const mappedProfiles: Profile[] = profiles.map((p: any) => {
     const list = rolesByUser.get(p.id) ?? [];
     const role = ROLE_ORDER.find((r) => list.includes(r)) ?? "colaborador";
     return mapProfile(p, role);
@@ -268,15 +270,15 @@ export async function loadAllFromSupabase(userId: string) {
 
   return {
     profiles: mappedProfiles,
-    sectors: (sectors.data ?? []).map(mapSector),
-    franchises: (franchises.data ?? []).map(mapFranchise),
-    indicators: (indicators.data ?? []).map((row: any) => mapIndicator(row, sharedByIndicator.get(row.id) ?? [])),
-    targets: (targets.data ?? []).map(mapTarget),
-    entries: (entries.data ?? []).map(mapEntry),
-    userSectors: (userSectors.data ?? []).map(mapUserSector),
-    userFranchises: (userFranchises.data ?? []).map(mapUserFranchise),
-    notifications: (notifications.data ?? []).map(mapNotification),
-    auditLogs: (auditLogs.data ?? []).map(mapAudit),
+    sectors: sectors.map(mapSector),
+    franchises: franchises.map(mapFranchise),
+    indicators: indicators.map((row: any) => mapIndicator(row, sharedByIndicator.get(row.id) ?? [])),
+    targets: targets.map(mapTarget),
+    entries: entries.map(mapEntry),
+    userSectors: userSectors.map(mapUserSector),
+    userFranchises: userFranchises.map(mapUserFranchise),
+    notifications: notifications.map(mapNotification),
+    auditLogs: auditLogs.map(mapAudit),
     settings: sys,
     categories: [],
   };

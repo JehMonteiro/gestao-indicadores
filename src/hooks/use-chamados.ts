@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAll } from "@/lib/supabase-fetch-all";
 import type { Chamado, FiltrosChamados, LoteChamados } from "@/types/chamados";
 import { SITUACOES_ABERTAS } from "@/types/chamados";
 
@@ -34,30 +35,19 @@ function mapRow(r: Record<string, unknown>): Chamado {
   };
 }
 
-const PAGE_SIZE = 1000;
-
-/** Busca todos os chamados paginando até esgotar os resultados (o backend limita 1000 por consulta). */
+/** Busca todos os chamados paginando até esgotar os resultados. */
 export async function fetchAllChamados(): Promise<Chamado[]> {
-  const all: Chamado[] = [];
-  let page = 0;
-  for (;;) {
-    const from = page * PAGE_SIZE;
-    const { data, error } = await supabase
-      .from("chamados")
-      .select("*")
-      .order("aberto_em", { ascending: false })
-      .order("id", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw error;
-    const rows = data ?? [];
-    for (const r of rows) all.push(mapRow(r as Record<string, unknown>));
-    if (rows.length < PAGE_SIZE) break;
-    page++;
-  }
-  if (import.meta.env.DEV) {
-    console.log(`[chamados] ${all.length} registros carregados`);
-  }
-  return all;
+  // fetchAll — contorna limite 1000 do PostgREST
+  const rows = await fetchAll<Record<string, unknown>>(
+    (sb) =>
+      sb
+        .from("chamados")
+        .select("*")
+        .order("aberto_em", { ascending: false })
+        .order("id", { ascending: true }),
+    "chamados",
+  );
+  return rows.map(mapRow);
 }
 
 /** Todos os chamados (sem filtros) — base para opções de filtro e estado vazio. */
@@ -91,7 +81,8 @@ export function calcularKPIs(chamados: Chamado[]) {
   const emAberto = chamados.filter((c) => SITUACOES_ABERTAS.includes(c.situacao)).length;
   const concluidos = chamados.filter((c) => ["Concluído", "Resolvido"].includes(c.situacao)).length;
 
-  const media = (vals: number[]) => (vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
+  const media = (vals: number[]) =>
+    vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
 
   const tmaMedio = media(chamados.map((c) => c.tma_horas).filter((v): v is number => v != null));
   const tmrMedio = media(chamados.map((c) => c.tmr_horas).filter((v): v is number => v != null));
@@ -129,10 +120,15 @@ export function useLotesChamados(chamados: Chamado[]) {
   return useQuery({
     queryKey: ["chamados", "lotes", chamados.length],
     queryFn: async (): Promise<LoteChamados[]> => {
-      const ids = Array.from(new Set(chamados.map((c) => c.importado_por).filter(Boolean))) as string[];
+      const ids = Array.from(
+        new Set(chamados.map((c) => c.importado_por).filter(Boolean)),
+      ) as string[];
       let nomes = new Map<string, string>();
       if (ids.length) {
-        const { data } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+        const { data } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", ids);
         nomes = new Map((data ?? []).map((p) => [p.id, p.full_name || p.email || p.id] as const));
       }
       const byLote = new Map<string, Chamado[]>();
@@ -143,7 +139,10 @@ export function useLotesChamados(chamados: Chamado[]) {
       }
       return Array.from(byLote.entries())
         .map(([lote_id, itens]) => {
-          const datas = itens.map((i) => i.aberto_em).filter(Boolean).sort() as string[];
+          const datas = itens
+            .map((i) => i.aberto_em)
+            .filter(Boolean)
+            .sort() as string[];
           const first = itens[0]!;
           return {
             lote_id,

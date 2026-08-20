@@ -1,6 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+type EntryRow = {
+  id: string;
+  indicator_id: string;
+  period_start: string;
+  period_end: string;
+  actual_value: number | null;
+  status: string | null;
+};
+
+type IndicatorRow = { id: string; name: string; code: string; entity_scope: string | null };
+
+type ProfileRow = { id: string; full_name: string | null; email: string | null };
+
 export type RawCounts = {
   entries: number;
   entriesByStatus: Record<string, number>;
@@ -58,26 +71,47 @@ export const getDataAudit = createServerFn({ method: "GET" })
     if (!(roles ?? []).some((r) => r.role === "superadmin")) throw new Error("Forbidden");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { fetchAllWith } = await import("@/lib/supabase-fetch-all");
 
-    const [entriesRes, targetsRes, indicatorsRes, profilesRes, logsRes] = await Promise.all([
-      supabaseAdmin
-        .from("indicator_entries")
-        .select("id, indicator_id, period_start, period_end, actual_value, status"),
-      supabaseAdmin.from("targets").select("id"),
-      supabaseAdmin.from("indicators").select("id, name, code, entity_scope"),
-      supabaseAdmin.from("profiles").select("id, full_name, email"),
+    // fetchAll — contorna limite 1000 do PostgREST
+    const [entries, targetRows, indicators, profiles, logsRes] = await Promise.all([
+      fetchAllWith<EntryRow>(
+        supabaseAdmin,
+        (sb) =>
+          sb
+            .from("indicator_entries")
+            .select("id, indicator_id, period_start, period_end, actual_value, status")
+            .order("id", { ascending: true }),
+        "indicator_entries",
+      ),
+      fetchAllWith<{ id: string }>(
+        supabaseAdmin,
+        (sb) => sb.from("targets").select("id").order("id", { ascending: true }),
+        "targets",
+      ),
+      fetchAllWith<IndicatorRow>(
+        supabaseAdmin,
+        (sb) =>
+          sb
+            .from("indicators")
+            .select("id, name, code, entity_scope")
+            .order("id", { ascending: true }),
+        "indicators",
+      ),
+      fetchAllWith<ProfileRow>(
+        supabaseAdmin,
+        (sb) => sb.from("profiles").select("id, full_name, email").order("id", { ascending: true }),
+        "profiles",
+      ),
       supabaseAdmin
         .from("audit_logs")
         .select("id, created_at, user_id, action, entity_type, entity_id, payload")
         .in("action", ["delete", "update"])
         .in("entity_type", ["indicator", "entry", "target"])
         .order("created_at", { ascending: false })
+        // Limite intencional: a tela mostra apenas os últimos 200 registros de auditoria
         .limit(200),
     ]);
-
-    const entries = entriesRes.data ?? [];
-    const indicators = indicatorsRes.data ?? [];
-    const profiles = profilesRes.data ?? [];
 
     const entriesByStatus: Record<string, number> = {};
     for (const e of entries) {
@@ -88,7 +122,7 @@ export const getDataAudit = createServerFn({ method: "GET" })
     const counts: RawCounts = {
       entries: entries.length,
       entriesByStatus,
-      targets: (targetsRes.data ?? []).length,
+      targets: targetRows.length,
       indicators: indicators.length,
       indicatorsNoScope: indicators.filter((i) => i.entity_scope == null).length,
       indicatorsEmpresa: indicators.filter((i) => i.entity_scope === "empresa").length,
@@ -132,9 +166,7 @@ export const getDataAudit = createServerFn({ method: "GET" })
         actual_value: Number(e.actual_value ?? 0),
       }));
 
-    const nameById = new Map(
-      profiles.map((p) => [p.id, p.full_name || p.email || p.id] as const),
-    );
+    const nameById = new Map(profiles.map((p) => [p.id, p.full_name || p.email || p.id] as const));
     const logs: AuditRow[] = (logsRes.data ?? []).map((l) => ({
       id: l.id,
       created_at: l.created_at,
