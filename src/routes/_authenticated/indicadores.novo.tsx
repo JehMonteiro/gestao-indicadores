@@ -133,45 +133,13 @@ function NewIndicator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Escopo">
-              <Select value={f.entity_scope} disabled={!!escopoParam || lockedUnit} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
-                <SelectTrigger><SelectValue placeholder="Selecione o escopo" /></SelectTrigger>
-                <SelectContent>
-                  {ENTITY_SCOPES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              {escopoParam && <p className="mt-1 text-xs text-muted-foreground">Definido pelo contexto</p>}
-            </Field>
-            {f.entity_scope === "franquia" && (
-              <Field label="Unidade">
-                <Select value={f.entity_id || "rede"} disabled={lockedUnit} onValueChange={(v) => set("entity_id", v === "rede" ? "" : v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="rede">Toda a rede</SelectItem>
-                    {franchises.filter(isFranquia).map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                {lockedUnit && <p className="mt-1 text-xs text-muted-foreground">Definida pelo contexto</p>}
-              </Field>
-            )}
             <Field label="Setor">
               <Select value={f.owner_sector_id} onValueChange={(v) => set("owner_sector_id", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            <Field label="Empresa">
-              {lockedUnit ? (
-                <Input value={contextName} disabled />
-              ) : (
-                <Select value={f.franchise_id} onValueChange={(v) => set("franchise_id", v)}>
-                  <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
-                  <SelectContent>
-                    {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}
-            </Field>
+
             <Field label="Colaborador responsável">
               <Select value={f.responsible_id || "none"} onValueChange={(v) => set("responsible_id", v === "none" ? "" : v)}>
                 <SelectTrigger><SelectValue placeholder="— Sem responsável" /></SelectTrigger>
