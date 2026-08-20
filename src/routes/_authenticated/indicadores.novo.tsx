@@ -199,12 +199,16 @@ function NewIndicator() {
               </Select>
             </Field>
             <Field label="Empresa">
-              <Select value={f.franchise_id} onValueChange={(v) => set("franchise_id", v)}>
-                <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
-                <SelectContent>
-                  {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              {contextFranchise ? (
+                <Input value={contextFranchise.name} disabled />
+              ) : (
+                <Select value={f.franchise_id} onValueChange={(v) => set("franchise_id", v)}>
+                  <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
+                  <SelectContent>
+                    {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
             </Field>
             <Field label="Colaborador responsável">
               <Select value={f.responsible_id || "none"} onValueChange={(v) => set("responsible_id", v === "none" ? "" : v)}>
