@@ -16,8 +16,10 @@ function FranchiseDetail() {
   const f = useStore((s) => s.franchises).find((x) => x.id === id);
   const profiles = useStore((s) => s.profiles);
   const userFranchises = useStore((s) => s.userFranchises);
+  const indicators = useStore((s) => s.indicators);
   if (!f) throw notFound();
   const members = userFranchises.filter((uf) => uf.franchise_id === id);
+  const unitIndicators = indicators.filter((i) => i.entity_scope === "franquia" && i.entity_id === id);
   return (
     <div>
       <PageHeader title={f.name} description={`${f.city}/${f.state} · ${f.region}`}
