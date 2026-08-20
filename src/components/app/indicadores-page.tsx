@@ -81,7 +81,16 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
           <div className="flex gap-2">
             <ImportIndicatorsDialog />
             {escopo === "franquia" ? (
-              <Button asChild><Link to="/franquias"><Plus className="size-4" />Novo indicador</Link></Button>
+              <SelecionarFranquiaDialog
+                trigger={
+                  <Button>
+                    <Plus className="size-4" />Novo indicador
+                  </Button>
+                }
+                onSelect={(franchiseId) =>
+                  navigate({ to: "/franquias/$id/indicadores/novo", params: { id: franchiseId } })
+                }
+              />
             ) : (
               <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>
             )}
