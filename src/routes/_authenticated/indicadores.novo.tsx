@@ -1,9 +1,7 @@
 import { newId } from "@/lib/ids";
-import { ENTITY_SCOPES } from "@/lib/entity-scope";
 import { makeUniqueIndicatorCode } from "@/lib/indicator-code";
-import { isFranquia } from "@/lib/entity-kind";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,35 +12,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore, useCurrentUser } from "@/mocks/store";
 import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import type { Direction, EntityScope, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
+import type { Direction, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
 import { KPI_GROUPS } from "@/lib/format";
 import { toast } from "sonner";
 import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-rules";
 import { EmptyState } from "@/components/app/page-header";
 import { ShieldAlert } from "lucide-react";
 
-type NovoSearch = { escopo?: EntityScope; unidade?: string; empresa?: string };
-
 export const Route = createFileRoute("/_authenticated/indicadores/novo")({
-  validateSearch: (search: Record<string, unknown>): NovoSearch => {
-    const escopo = search.escopo === "empresa" || search.escopo === "franquia" ? (search.escopo as EntityScope) : undefined;
-    const unidade = typeof search.unidade === "string" && search.unidade ? search.unidade : undefined;
-    const empresa = typeof search.empresa === "string" && search.empresa ? search.empresa : undefined;
-    return {
-      escopo,
-      ...(escopo === "franquia" && unidade ? { unidade } : {}),
-      ...(escopo === "franquia" && unidade && empresa ? { empresa } : {}),
-    };
-  },
   head: () => ({ meta: [{ title: "Novo indicador" }] }),
   component: NewIndicator,
 });
 
 function NewIndicator() {
-  const { escopo: escopoParam, unidade, empresa: empresaParam } = Route.useSearch();
   const sectors = useStore((s) => s.sectors);
   const indicators = useStore((s) => s.indicators);
-  const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
   const upsert = useStore((s) => s.upsertIndicator);
   const logAudit = useStore((s) => s.logAudit);
@@ -50,17 +34,11 @@ function NewIndicator() {
   const navigate = useNavigate();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
-  const contextFranchise = unidade ? franchises.find((fr) => fr.id === unidade) : undefined;
-  const contextName = contextFranchise?.name ?? empresaParam ?? "";
-  const lockedUnit = !!unidade;
-
   const [f, setF] = useState({
     name: "", objective: "",
-    owner_sector_id: sectors[0]?.id ?? "", franchise_id: unidade ?? "",
+    owner_sector_id: sectors[0]?.id ?? "",
     responsible_id: "",
     kpi_group: "resultado" as KpiGroup,
-    entity_scope: (escopoParam ?? "") as EntityScope | "",
-    entity_id: unidade ?? "",
     value_type: "inteiro" as ValueType,
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
@@ -72,13 +50,6 @@ function NewIndicator() {
 
   const set = <K extends keyof typeof f>(k: K, v: typeof f[K]) => setF((p) => ({ ...p, [k]: v }));
 
-  // A loja pode hidratar depois do primeiro render: mantém o contexto travado pelos search params.
-  useEffect(() => {
-    if (!unidade) return;
-    setF((p) => (p.entity_id === unidade && p.franchise_id === unidade && p.entity_scope === "franquia"
-      ? p
-      : { ...p, entity_id: unidade, franchise_id: unidade, entity_scope: "franquia" }));
-  }, [unidade]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
