@@ -77,7 +77,11 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
         actions={isAdmin ? (
           <div className="flex gap-2">
             <ImportIndicatorsDialog />
-            <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>
+            {escopo === "franquia" ? (
+              <Button asChild><Link to="/franquias"><Plus className="size-4" />Novo indicador</Link></Button>
+            ) : (
+              <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>
+            )}
           </div>
         ) : null}
       />
@@ -88,13 +92,15 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
             <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome ou código..." className="pl-8" />
           </div>
-          <Select value={sectorId} onValueChange={setSectorId}>
-            <SelectTrigger className="w-48"><SelectValue placeholder="Setor" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os setores</SelectItem>
-              {sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          {escopo !== "franquia" && (
+            <Select value={sectorId} onValueChange={setSectorId}>
+              <SelectTrigger className="w-48"><SelectValue placeholder="Setor" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os setores</SelectItem>
+                {sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
           <Select value={kpiGroup} onValueChange={setKpiGroup}>
             <SelectTrigger className="w-44"><SelectValue placeholder="Grupo" /></SelectTrigger>
             <SelectContent>
@@ -124,7 +130,7 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
               <TableRow>
                 <TableHead>Indicador</TableHead>
                 <TableHead>Grupo</TableHead>
-                <TableHead>Setor</TableHead>
+                {escopo !== "franquia" && <TableHead>Setor</TableHead>}
                 <TableHead>Empresa</TableHead>
                 <TableHead>Responsável</TableHead>
                 <TableHead>Periodicidade</TableHead>
@@ -147,13 +153,26 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
                 const pct = computeAchievement(e, t, i.direction);
                 const c = classify(pct, settings);
                 const cs = classificationStyles(c);
+                const franchiseId = i.franchise_id ?? i.entity_id ?? "";
                 return (
                   <TableRow key={i.id} className="cursor-pointer">
                     <TableCell>
-                      <Link to="/indicadores/$id" params={{ id: i.id }} className="hover:underline font-medium">{i.name}</Link>
+                      {escopo === "franquia" ? (
+                        <Link
+                          to="/franquias/$id/indicadores/$indId"
+                          params={{ id: franchiseId, indId: i.id }}
+                          className="hover:underline font-medium"
+                        >
+                          {i.name}
+                        </Link>
+                      ) : (
+                        <Link to="/indicadores/$id" params={{ id: i.id }} className="hover:underline font-medium">{i.name}</Link>
+                      )}
                     </TableCell>
                     <TableCell>{(() => { const st = kpiGroupStyles(i.kpi_group ?? "resultado"); return <Badge variant="outline" className={st.className}>{st.label}</Badge>; })()}</TableCell>
-                    <TableCell>{sector && <Badge variant="outline" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</TableCell>
+                    {escopo !== "franquia" && (
+                      <TableCell>{sector && <Badge variant="outline" style={{ borderColor: sector.color, color: sector.color }}>{sector.name}</Badge>}</TableCell>
+                    )}
                     <TableCell className="text-sm">{franchise ? franchise.name : <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-sm">{responsibleNames || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-sm">{indicatorPeriodLabel(i)}</TableCell>
@@ -163,9 +182,15 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
                     {isAdmin && (
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button asChild size="icon" variant="ghost" title="Editar">
-                            <Link to="/indicadores/$id/editar" params={{ id: i.id }}><Pencil className="size-4" /></Link>
-                          </Button>
+                          {escopo === "franquia" ? (
+                            <Button asChild size="icon" variant="ghost" title="Editar">
+                              <Link to="/franquias/$id/indicadores/$indId/editar" params={{ id: franchiseId, indId: i.id }}><Pencil className="size-4" /></Link>
+                            </Button>
+                          ) : (
+                            <Button asChild size="icon" variant="ghost" title="Editar">
+                              <Link to="/indicadores/$id/editar" params={{ id: i.id }}><Pencil className="size-4" /></Link>
+                            </Button>
+                          )}
                           <Button size="icon" variant="ghost" title="Excluir" onClick={() => setToDelete({ id: i.id, name: i.name })}>
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
