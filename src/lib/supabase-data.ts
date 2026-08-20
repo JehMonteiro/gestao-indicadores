@@ -251,12 +251,12 @@ export async function loadAllFromSupabase(userId: string) {
   });
 
   const rolesByUser = new Map<string, GlobalRole[]>();
-  (roles.data ?? []).forEach((r: any) => {
+  roles.forEach((r: any) => {
     const list = rolesByUser.get(r.user_id) ?? [];
     list.push(r.role);
     rolesByUser.set(r.user_id, list);
   });
-  const mappedProfiles: Profile[] = (profiles.data ?? []).map((p: any) => {
+  const mappedProfiles: Profile[] = profiles.map((p: any) => {
     const list = rolesByUser.get(p.id) ?? [];
     const role = ROLE_ORDER.find((r) => list.includes(r)) ?? "colaborador";
     return mapProfile(p, role);
