@@ -16,8 +16,10 @@ function FranchiseDetail() {
   const f = useStore((s) => s.franchises).find((x) => x.id === id);
   const profiles = useStore((s) => s.profiles);
   const userFranchises = useStore((s) => s.userFranchises);
+  const indicators = useStore((s) => s.indicators);
   if (!f) throw notFound();
   const members = userFranchises.filter((uf) => uf.franchise_id === id);
+  const unitIndicators = indicators.filter((i) => i.entity_scope === "franquia" && i.entity_id === id);
   return (
     <div>
       <PageHeader title={f.name} description={`${f.city}/${f.state} · ${f.region}`}
@@ -44,6 +46,37 @@ function FranchiseDetail() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mt-4">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
+          <CardTitle className="text-base">Indicadores da unidade</CardTitle>
+          <Button size="sm" asChild>
+            <Link to="/indicadores/novo" search={{ escopo: "franquia", unidade: id }}>Novo indicador</Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {unitIndicators.map((i) => (
+            <Link
+              key={i.id}
+              to="/indicadores/$id"
+              params={{ id: i.id }}
+              className="flex items-center justify-between gap-3 border rounded-md p-2 text-sm hover:bg-muted/50"
+            >
+              <span className="min-w-0">
+                <span className="block truncate">{i.name}</span>
+                <span className="block text-xs text-muted-foreground">{i.code}</span>
+              </span>
+              <span className="flex items-center gap-2 shrink-0">
+                <Badge variant="outline" className="capitalize">{i.kpi_group ?? "resultado"}</Badge>
+                <Badge variant="secondary" className="capitalize">{i.status}</Badge>
+              </span>
+            </Link>
+          ))}
+          {unitIndicators.length === 0 && (
+            <p className="text-sm text-muted-foreground">Nenhum indicador cadastrado para esta unidade.</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

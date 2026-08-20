@@ -3,7 +3,7 @@ import { ENTITY_SCOPES } from "@/lib/entity-scope";
 import { makeUniqueIndicatorCode } from "@/lib/indicator-code";
 import { isFranquia } from "@/lib/entity-kind";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,12 +21,20 @@ import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-ru
 import { EmptyState } from "@/components/app/page-header";
 import { ShieldAlert } from "lucide-react";
 
+type NovoSearch = { escopo?: EntityScope; unidade?: string };
+
 export const Route = createFileRoute("/_authenticated/indicadores/novo")({
+  validateSearch: (search: Record<string, unknown>): NovoSearch => {
+    const escopo = search.escopo === "empresa" || search.escopo === "franquia" ? (search.escopo as EntityScope) : undefined;
+    const unidade = typeof search.unidade === "string" && search.unidade ? search.unidade : undefined;
+    return { escopo, ...(escopo === "franquia" && unidade ? { unidade } : {}) };
+  },
   head: () => ({ meta: [{ title: "Novo indicador" }] }),
   component: NewIndicator,
 });
 
 function NewIndicator() {
+  const { escopo: escopoParam, unidade } = Route.useSearch();
   const sectors = useStore((s) => s.sectors);
   const indicators = useStore((s) => s.indicators);
   const franchises = useStore((s) => s.franchises);
@@ -37,13 +45,15 @@ function NewIndicator() {
   const navigate = useNavigate();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
+  const contextFranchise = unidade ? franchises.find((fr) => fr.id === unidade) : undefined;
+
   const [f, setF] = useState({
     name: "", objective: "",
-    owner_sector_id: sectors[0]?.id ?? "", franchise_id: "",
+    owner_sector_id: sectors[0]?.id ?? "", franchise_id: contextFranchise?.id ?? "",
     responsible_id: "",
     kpi_group: "resultado" as KpiGroup,
-    entity_scope: "" as EntityScope | "",
-    entity_id: "",
+    entity_scope: (escopoParam ?? "") as EntityScope | "",
+    entity_id: contextFranchise?.id ?? "",
     value_type: "inteiro" as ValueType,
     frequency: "mensal" as Frequency, direction: "maior_melhor" as Direction,
     default_target: 0, minimum_value: undefined as number | undefined, maximum_value: undefined as number | undefined,
@@ -54,6 +64,14 @@ function NewIndicator() {
   });
 
   const set = <K extends keyof typeof f>(k: K, v: typeof f[K]) => setF((p) => ({ ...p, [k]: v }));
+
+  // A loja pode hidratar depois do primeiro render: sincroniza o contexto quando a franquia aparecer.
+  useEffect(() => {
+    if (!contextFranchise) return;
+    setF((p) => (p.entity_id === contextFranchise.id && p.franchise_id === contextFranchise.id
+      ? p
+      : { ...p, entity_id: contextFranchise.id, franchise_id: contextFranchise.id, entity_scope: "franquia" }));
+  }, [contextFranchise]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +117,10 @@ function NewIndicator() {
     }
     logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
     toast.success("Indicador criado com sucesso");
+    if (unidade) {
+      navigate({ to: "/franquias/$id", params: { id: unidade } });
+      return;
+    }
     navigate({ to: "/indicadores/$id", params: { id: ind.id } });
   };
 
@@ -117,7 +139,16 @@ function NewIndicator() {
 
   return (
     <div>
-      <PageHeader title="Novo indicador" description="Defina a estrutura, a regra de desempenho e a meta padrão." />
+      <PageHeader
+        title="Novo indicador"
+        description={
+          contextFranchise
+            ? `Franquias › ${contextFranchise.name} › Novo indicador`
+            : escopoParam === "franquia"
+              ? "Indicadores Franquia › Novo indicador — escopo definido pelo contexto."
+              : "Defina a estrutura, a regra de desempenho e a meta padrão."
+        }
+      />
       <form onSubmit={submit} className="space-y-4 max-w-4xl">
         <Card>
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
@@ -141,22 +172,24 @@ function NewIndicator() {
               </Select>
             </Field>
             <Field label="Escopo">
-              <Select value={f.entity_scope} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
+              <Select value={f.entity_scope} disabled={!!escopoParam} onValueChange={(v) => setF((p) => ({ ...p, entity_scope: v as EntityScope, entity_id: "" }))}>
                 <SelectTrigger><SelectValue placeholder="Selecione o escopo" /></SelectTrigger>
                 <SelectContent>
                   {ENTITY_SCOPES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {escopoParam && <p className="mt-1 text-xs text-muted-foreground">Definido pelo contexto</p>}
             </Field>
             {f.entity_scope === "franquia" && (
               <Field label="Unidade">
-                <Select value={f.entity_id || "rede"} onValueChange={(v) => set("entity_id", v === "rede" ? "" : v)}>
+                <Select value={f.entity_id || "rede"} disabled={!!contextFranchise} onValueChange={(v) => set("entity_id", v === "rede" ? "" : v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="rede">Toda a rede</SelectItem>
                     {franchises.filter(isFranquia).map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {contextFranchise && <p className="mt-1 text-xs text-muted-foreground">Definida pelo contexto</p>}
               </Field>
             )}
             <Field label="Setor">
@@ -166,12 +199,16 @@ function NewIndicator() {
               </Select>
             </Field>
             <Field label="Empresa">
-              <Select value={f.franchise_id} onValueChange={(v) => set("franchise_id", v)}>
-                <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
-                <SelectContent>
-                  {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              {contextFranchise ? (
+                <Input value={contextFranchise.name} disabled />
+              ) : (
+                <Select value={f.franchise_id} onValueChange={(v) => set("franchise_id", v)}>
+                  <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
+                  <SelectContent>
+                    {franchises.map((fr) => <SelectItem key={fr.id} value={fr.id}>{fr.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
             </Field>
             <Field label="Colaborador responsável">
               <Select value={f.responsible_id || "none"} onValueChange={(v) => set("responsible_id", v === "none" ? "" : v)}>
@@ -247,7 +284,17 @@ function NewIndicator() {
         </Card>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/indicadores" })}>Cancelar</Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (unidade) navigate({ to: "/franquias/$id", params: { id: unidade } });
+              else if (escopoParam === "franquia") navigate({ to: "/indicadores-franquia" });
+              else navigate({ to: "/indicadores" });
+            }}
+          >
+            Cancelar
+          </Button>
           <Button type="submit">Salvar indicador</Button>
         </div>
       </form>
