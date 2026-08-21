@@ -194,7 +194,11 @@ export function FranquiaIndicadorForm({
       <nav aria-label="breadcrumb" className="mb-2 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
         <Link to="/franquias" className="hover:underline">Franquias</Link>
         <span>›</span>
-        <Link to="/franquias/$id" params={{ id: franchiseId }} className="hover:underline">{franchise?.name ?? "Unidade"}</Link>
+        {allFranchises || !franchiseId ? (
+          <span>Todas as franquias</span>
+        ) : (
+          <Link to="/franquias/$id" params={{ id: franchiseId }} className="hover:underline">{franchise?.name ?? "Unidade"}</Link>
+        )}
         <span>›</span>
         <span>Indicadores</span>
         <span>›</span>
@@ -202,15 +206,24 @@ export function FranquiaIndicadorForm({
       </nav>
 
       <PageHeader
-        title={existing ? `Editar: ${existing.name}` : "Novo indicador da franquia"}
-        description={`Indicador da unidade ${franchise?.name ?? ""}`.trim()}
+        title={existing ? `Editar: ${existing.name}` : allFranchises ? "Novo indicador para todas as franquias" : "Novo indicador da franquia"}
+        description={allFranchises
+          ? `Será criado um indicador independente para cada uma das ${unidades.length} unidades.`
+          : `Indicador da unidade ${franchise?.name ?? ""}`.trim()}
       />
 
       <form onSubmit={submit} className="space-y-4 max-w-4xl">
         <Card>
           <CardHeader><CardTitle className="text-base">Identificação</CardTitle></CardHeader>
           <CardContent className="grid gap-3">
-            <Field label="Franquia"><Input value={franchise?.name ?? ""} readOnly disabled /></Field>
+            <Field label="Franquia">
+              <Input
+                value={allFranchises ? `Todas as franquias (${unidades.length} unidades)` : franchise?.name ?? ""}
+                readOnly
+                disabled
+              />
+            </Field>
+
             <Field label="Nome"><Input value={f.name} onChange={(e) => set("name", e.target.value)} required /></Field>
             <Field label="Objetivo"><Textarea value={f.objective} onChange={(e) => set("objective", e.target.value)} /></Field>
           </CardContent>
