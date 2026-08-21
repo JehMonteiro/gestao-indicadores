@@ -66,7 +66,11 @@ function emptyForm(): FormState {
   };
 }
 
-export function FranquiaIndicadorForm({ franchiseId, existing }: { franchiseId: string; existing?: Indicator }) {
+export function FranquiaIndicadorForm({
+  franchiseId,
+  existing,
+  allFranchises = false,
+}: { franchiseId?: string; existing?: Indicator; allFranchises?: boolean }) {
   const franchises = useStore((s) => s.franchises);
   const profiles = useStore((s) => s.profiles);
   const userFranchises = useStore((s) => s.userFranchises);
@@ -77,13 +81,57 @@ export function FranquiaIndicadorForm({ franchiseId, existing }: { franchiseId: 
   const navigate = useNavigate();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
+  const unidades = franchises.filter(isFranquia);
   const franchise = franchises.find((fr) => fr.id === franchiseId);
   const [f, setF] = useState<FormState>(existing ? fromIndicator(existing) : emptyForm());
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setF((p) => ({ ...p, [k]: v }));
 
   const linkedIds = new Set(userFranchises.filter((uf) => uf.franchise_id === franchiseId).map((uf) => uf.user_id));
   const linkedProfiles = profiles.filter((p) => linkedIds.has(p.id));
-  const responsibleOptions = linkedProfiles.length > 0 ? linkedProfiles : profiles;
+  const responsibleOptions = allFranchises
+    ? profiles
+    : linkedProfiles.length > 0 ? linkedProfiles : profiles;
+
+  const buildIndicator = (targetId: string, code: string, base?: Indicator): Indicator => ({
+    ...(base ?? {
+      id: newId(),
+      code,
+      name: f.name,
+      shared_sector_ids: [],
+      owner_sector_id: "",
+      responsible_ids: [],
+      scope: "franquia" as const,
+      weight: 1,
+      kpi_group: f.kpi_group,
+      value_type: f.value_type,
+      frequency: f.frequency,
+      direction: f.direction,
+      start_date: f.start_date,
+      status: f.status,
+      created_by: user?.id ?? "",
+      created_at: new Date().toISOString(),
+    }),
+    name: f.name,
+    objective: f.objective || undefined,
+    owner_sector_id: "",
+    responsible_ids: f.responsible_id ? [f.responsible_id] : [],
+    kpi_group: f.kpi_group,
+    value_type: f.value_type,
+    frequency: f.frequency,
+    direction: f.direction,
+    default_target: f.default_target,
+    minimum_value: f.minimum_value,
+    maximum_value: f.maximum_value,
+    warning_threshold: f.warning_threshold,
+    critical_threshold: f.critical_threshold,
+    start_date: f.start_date,
+    end_date: f.end_date || undefined,
+    status: f.status,
+    scope: "franquia",
+    entity_scope: "franquia",
+    entity_id: targetId,
+    franchise_id: targetId,
+  });
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,48 +143,31 @@ export function FranquiaIndicadorForm({ franchiseId, existing }: { franchiseId: 
     ]);
     if (intError) { toast.error(intError); return; }
 
-    const base: Indicator = existing ?? {
-      id: newId(),
-      code: makeUniqueIndicatorCode(f.name, indicators.map((i) => i.code)),
-      name: f.name,
-      shared_sector_ids: [],
-      owner_sector_id: "",
-      responsible_ids: [],
-      scope: "franquia",
-      weight: 1,
-      kpi_group: f.kpi_group,
-      value_type: f.value_type,
-      frequency: f.frequency,
-      direction: f.direction,
-      start_date: f.start_date,
-      status: f.status,
-      created_by: user?.id ?? "",
-      created_at: new Date().toISOString(),
-    };
+    if (allFranchises) {
+      if (unidades.length === 0) { toast.error("Nenhuma franquia cadastrada"); return; }
+      const usedCodes = indicators.map((i) => i.code);
+      for (const u of unidades) {
+        const code = makeUniqueIndicatorCode(f.name, usedCodes);
+        usedCodes.push(code);
+        const ind = buildIndicator(u.id, code);
+        await upsert(ind);
+        logAudit({ user_id: user?.id ?? "", action: "create", entity_type: "indicator", entity_id: ind.id });
+      }
+      if (user?.id) {
+        const data = await loadAllFromSupabase(user.id);
+        useStore.getState().hydrate(data);
+      }
+      toast.success(`${unidades.length} indicadores criados`);
+      navigate({ to: "/indicadores-franquia" });
+      return;
+    }
 
-    const ind: Indicator = {
-      ...base,
-      name: f.name,
-      objective: f.objective || undefined,
-      owner_sector_id: "",
-      responsible_ids: f.responsible_id ? [f.responsible_id] : [],
-      kpi_group: f.kpi_group,
-      value_type: f.value_type,
-      frequency: f.frequency,
-      direction: f.direction,
-      default_target: f.default_target,
-      minimum_value: f.minimum_value,
-      maximum_value: f.maximum_value,
-      warning_threshold: f.warning_threshold,
-      critical_threshold: f.critical_threshold,
-      start_date: f.start_date,
-      end_date: f.end_date || undefined,
-      status: f.status,
-      scope: "franquia",
-      entity_scope: "franquia",
-      entity_id: franchiseId,
-      franchise_id: franchiseId,
-    };
+    if (!franchiseId) { toast.error("Franquia não encontrada"); return; }
+    const ind = buildIndicator(
+      franchiseId,
+      makeUniqueIndicatorCode(f.name, indicators.map((i) => i.code)),
+      existing,
+    );
 
     await upsert(ind);
     if (user?.id) {
@@ -147,6 +178,7 @@ export function FranquiaIndicadorForm({ franchiseId, existing }: { franchiseId: 
     toast.success(existing ? "Indicador atualizado" : "Indicador criado com sucesso");
     navigate({ to: "/franquias/$id", params: { id: franchiseId } });
   };
+
 
   if (!adminLoading && !isAdmin) {
     return (
