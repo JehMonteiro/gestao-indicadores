@@ -12,6 +12,8 @@ import { loadAllFromSupabase } from "@/lib/supabase-data";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { newId } from "@/lib/ids";
 import { makeUniqueIndicatorCode } from "@/lib/indicator-code";
+import { isFranquia } from "@/lib/entity-kind";
+
 import { KPI_GROUPS } from "@/lib/format";
 import { firstIntegerError, numericStep, blockDecimalKeys } from "@/lib/value-rules";
 import type { Direction, Frequency, Indicator, IndicatorStatus, KpiGroup, ValueType } from "@/mocks/types";
