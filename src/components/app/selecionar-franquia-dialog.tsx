@@ -12,12 +12,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Search, Store } from "lucide-react";
+import { Building2, Search, Store } from "lucide-react";
 
 interface SelecionarFranquiaDialogProps {
   trigger: React.ReactNode;
-  onSelect: (franchiseId: string) => void;
+  onSelect: (franchiseId: string | "all") => void;
 }
+
 
 export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranquiaDialogProps) {
   const [open, setOpen] = useState(false);
@@ -40,11 +41,12 @@ export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranqu
     );
   }, [unidades, q]);
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: string | "all") => {
     setOpen(false);
     setQ("");
     onSelect(id);
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -57,6 +59,20 @@ export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranqu
           </DialogTitle>
         </DialogHeader>
 
+        <Button
+          variant="outline"
+          className="w-full justify-start h-auto py-2 px-3 text-left"
+          onClick={() => handleSelect("all")}
+        >
+          <Building2 className="size-4 shrink-0" />
+          <span className="min-w-0">
+            <span className="block truncate font-medium text-sm">Todas as franquias</span>
+            <span className="block text-xs text-muted-foreground truncate">
+              Cria um indicador para cada uma das {unidades.length} unidades
+            </span>
+          </span>
+        </Button>
+
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
@@ -66,6 +82,7 @@ export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranqu
             className="pl-8"
           />
         </div>
+
 
         <ScrollArea className="h-72 rounded-md border">
           {filtered.length === 0 ? (

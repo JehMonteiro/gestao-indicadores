@@ -8,5 +8,6 @@ export const Route = createFileRoute("/_authenticated/franquias/$id/indicadores/
 
 function NovoIndicadorFranquia() {
   const { id } = Route.useParams();
+  if (id === "todas") return <FranquiaIndicadorForm allFranchises />;
   return <FranquiaIndicadorForm franchiseId={id} />;
 }
