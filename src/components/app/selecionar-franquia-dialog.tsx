@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Search, Store } from "lucide-react";
+import { Building2, Search, Store } from "lucide-react";
 
 interface SelecionarFranquiaDialogProps {
   trigger: React.ReactNode;
