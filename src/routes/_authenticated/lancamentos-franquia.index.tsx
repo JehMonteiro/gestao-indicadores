@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LancamentosPage } from "@/components/app/lancamentos-page";
 
-export const Route = createFileRoute("/_authenticated/lancamentos-franquia")({
+export const Route = createFileRoute("/_authenticated/lancamentos-franquia/")({
   head: () => ({
     meta: [
       { title: "Lançamentos Franquia — Gestão de Indicadores" },
