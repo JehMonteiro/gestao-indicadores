@@ -19,6 +19,10 @@ const statusColors: Record<string, string> = {
 };
 
 export function LancamentosPage({ escopo = "empresa" }: { escopo?: EntityKind }) {
+  const isFranquia = escopo === "franquia";
+  const rotaNovo = isFranquia ? "/lancamentos-franquia/novo" : "/lancamentos/novo";
+  const rotaDetalhe = isFranquia ? "/lancamentos-franquia/$id" : "/lancamentos/$id";
+
   const indicators = useStore((s) => s.indicators);
   const franchises = useStore((s) => s.franchises);
   const entries = useStore((s) => s.entries);
@@ -29,10 +33,11 @@ export function LancamentosPage({ escopo = "empresa" }: { escopo?: EntityKind })
     .filter((e) => status === "all" || e.status === status)
     .sort((a, b) => b.period_end.localeCompare(a.period_end));
 
+
   return (
     <div>
       <PageHeader title={escopo === "franquia" ? "Lançamentos Franquia" : "Lançamentos"} description="Histórico e novos lançamentos de resultados."
-        actions={<Button asChild><Link to="/lancamentos/novo"><Plus className="size-4" />Novo lançamento</Link></Button>}
+        actions={<Button asChild><Link to={rotaNovo}><Plus className="size-4" />Novo lançamento</Link></Button>}
       />
 
       <Card className="mb-4"><CardContent className="p-3 flex gap-2">
@@ -47,10 +52,14 @@ export function LancamentosPage({ escopo = "empresa" }: { escopo?: EntityKind })
         </Select>
       </CardContent></Card>
 
-      {filtered.length === 0 ? (
+      {isFranquia && scopedIndicatorIds.size === 0 ? (
+        <EmptyState title="Nenhum indicador de franquia cadastrado" description="Para registrar lançamentos de franquia, primeiro cadastre indicadores com escopo de franquia." icon={<ClipboardEdit className="size-5" />}
+          action={<Button asChild><Link to="/indicadores-franquia">Ir para Indicadores Franquia</Link></Button>} />
+      ) : filtered.length === 0 ? (
         <EmptyState title="Nenhum lançamento" description="Comece registrando o resultado de um indicador." icon={<ClipboardEdit className="size-5" />}
-          action={<Button asChild><Link to="/lancamentos/novo">Novo lançamento</Link></Button>} />
+          action={<Button asChild><Link to={rotaNovo}>Novo lançamento</Link></Button>} />
       ) : (
+
         <Card><Table>
           <TableHeader><TableRow>
             <TableHead>Indicador</TableHead>
@@ -73,7 +82,7 @@ export function LancamentosPage({ escopo = "empresa" }: { escopo?: EntityKind })
                   <TableCell className="font-mono">{formatValue(e.actual_value, ind?.value_type ?? "inteiro")}</TableCell>
                   <TableCell>{formatDate(e.updated_at)}</TableCell>
                   <TableCell><Badge variant="outline" className={`capitalize ${statusColors[e.status]}`}>{e.status}</Badge></TableCell>
-                  <TableCell><Link to="/lancamentos/$id" params={{ id: e.id }} className="text-primary hover:underline text-sm">Ver</Link></TableCell>
+                  <TableCell><Link to={rotaDetalhe} params={{ id: e.id }} className="text-primary hover:underline text-sm">Ver</Link></TableCell>
                 </TableRow>
               );
             })}
