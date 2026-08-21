@@ -314,7 +314,7 @@ export function FranquiaIndicadorForm({
         </Card>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/franquias/$id", params: { id: franchiseId } })}>Cancelar</Button>
+          <Button type="button" variant="outline" onClick={() => (allFranchises || !franchiseId ? navigate({ to: "/indicadores-franquia" }) : navigate({ to: "/franquias/$id", params: { id: franchiseId } }))}>Cancelar</Button>
           <Button type="submit">{existing ? "Salvar alterações" : "Salvar indicador"}</Button>
         </div>
       </form>
