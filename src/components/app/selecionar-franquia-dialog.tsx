@@ -41,11 +41,12 @@ export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranqu
     );
   }, [unidades, q]);
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: string | "all") => {
     setOpen(false);
     setQ("");
     onSelect(id);
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
