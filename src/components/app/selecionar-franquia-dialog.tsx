@@ -59,6 +59,20 @@ export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranqu
           </DialogTitle>
         </DialogHeader>
 
+        <Button
+          variant="outline"
+          className="w-full justify-start h-auto py-2 px-3 text-left"
+          onClick={() => handleSelect("all")}
+        >
+          <Building2 className="size-4 shrink-0" />
+          <span className="min-w-0">
+            <span className="block truncate font-medium text-sm">Todas as franquias</span>
+            <span className="block text-xs text-muted-foreground truncate">
+              Cria um indicador para cada uma das {unidades.length} unidades
+            </span>
+          </span>
+        </Button>
+
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
@@ -68,6 +82,7 @@ export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranqu
             className="pl-8"
           />
         </div>
+
 
         <ScrollArea className="h-72 rounded-md border">
           {filtered.length === 0 ? (
