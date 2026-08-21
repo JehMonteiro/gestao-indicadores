@@ -16,8 +16,9 @@ import { Search, Store } from "lucide-react";
 
 interface SelecionarFranquiaDialogProps {
   trigger: React.ReactNode;
-  onSelect: (franchiseId: string) => void;
+  onSelect: (franchiseId: string | "all") => void;
 }
+
 
 export function SelecionarFranquiaDialog({ trigger, onSelect }: SelecionarFranquiaDialogProps) {
   const [open, setOpen] = useState(false);
