@@ -88,8 +88,9 @@ export function IndicadoresPage({ escopo = "empresa" }: { escopo?: EntityKind })
                   </Button>
                 }
                 onSelect={(franchiseId) =>
-                  navigate({ to: "/franquias/$id/indicadores/novo", params: { id: franchiseId } })
+                  navigate({ to: "/franquias/$id/indicadores/novo", params: { id: franchiseId === "all" ? "todas" : franchiseId } })
                 }
+
               />
             ) : (
               <Button asChild><Link to="/indicadores/novo"><Plus className="size-4" />Novo indicador</Link></Button>
