@@ -38,14 +38,14 @@ export function useAuthProfile() {
         "admin_corporativo",
         "gestor_setor",
         "gestor_franquia",
-        "analista" as GlobalRole,
+        "analista",
         "colaborador",
         "franqueado",
         "auditor",
       ];
       const list = (roles ?? []).map((r) => r.role as GlobalRole);
-      const role = order.find((r) => list.includes(r)) ?? ("colaborador" as GlobalRole);
-      return { profile, role, user: user as User };
+      const role = order.find((r) => list.includes(r)) ?? "colaborador";
+      return { profile, role, roles: list, user: user as User };
     },
   });
 }

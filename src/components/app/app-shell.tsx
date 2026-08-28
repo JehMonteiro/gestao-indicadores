@@ -1,11 +1,11 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard, User2, ListChecks, ClipboardEdit, ClipboardCheck, Building2,
-  Store, Target, Crosshair, Flag, FlagTriangleRight, Network, FileBarChart, Users, History, Settings,
-  Activity, Menu, LogOut, Bell, ChevronsUpDown, ShieldCheck, Headphones,
+  User2, Menu, LogOut, Bell, ChevronsUpDown, ShieldCheck,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { canSeeRoute, useCurrentUser, useStore } from "@/mocks/store";
+import { useCurrentUser, useStore } from "@/mocks/store";
+import { MENU_ENTRIES, resolveMenuKey, type MenuEntry } from "@/lib/menu-registry";
+import { useMenuAccess } from "@/hooks/use-menu-access";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -18,55 +18,44 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
-type NavItem = {
-  to: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  /** Marca o item como par "Franquia" do item anterior (divisória sutil acima). */
-  pairTop?: boolean;
-};
-
-const NAV: { group: string; items: NavItem[] }[] = [
-  { group: "Acompanhamento", items: [
-    { to: "/visao-geral", label: "Visão geral", icon: Activity },
-    { to: "/meu-painel", label: "Meu painel", icon: LayoutDashboard },
-    { to: "/meus-indicadores", label: "Meus indicadores", icon: ListChecks },
-    { to: "/desempenho-franquias", label: "Franquias", icon: Store },
-  ]},
-  { group: "Operação", items: [
-    { to: "/lancamentos", label: "Lançamentos", icon: ClipboardEdit },
-    { to: "/lancamentos-franquia", label: "Lançamentos Franquia", icon: ClipboardCheck },
-  ]},
-  { group: "Estrutura", items: [
-    { to: "/indicadores", label: "Indicadores", icon: Target },
-    { to: "/indicadores-franquia", label: "Indicadores Franquia", icon: Target },
-    { to: "/metas", label: "Metas", icon: Flag },
-    { to: "/metas-franquia", label: "Metas Franquia", icon: FlagTriangleRight },
-    { to: "/setores", label: "Setores", icon: Building2 },
-    { to: "/franquias", label: "Empresas / Franquias", icon: Network },
-    { to: "/classificacao-escopo", label: "Classificação de escopo", icon: Network },
-    { to: "/usuarios", label: "Usuários", icon: Users },
-  ]},
-  { group: "Atendimento", items: [
-    { to: "/chamados", label: "Chamados", icon: Headphones },
-  ]},
-  { group: "Sistema", items: [
-    { to: "/relatorios", label: "Relatórios", icon: FileBarChart },
-    { to: "/auditoria", label: "Auditoria", icon: History },
-    { to: "/auditoria-dados", label: "Auditoria de dados", icon: History },
-    { to: "/configuracoes", label: "Configurações", icon: Settings },
-  ]},
-];
-
-
 function initials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 }
 
+/** Grupos na ordem em que aparecem no registry. */
+function groupEntries(entries: MenuEntry[]): { group: string; items: MenuEntry[] }[] {
+  const out: { group: string; items: MenuEntry[] }[] = [];
+  for (const entry of entries) {
+    let bucket = out.find((g) => g.group === entry.group);
+    if (!bucket) { bucket = { group: entry.group, items: [] }; out.push(bucket); }
+    bucket.items.push(entry);
+  }
+  return out;
+}
+
+function SidebarSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[4, 2, 8, 1, 4].map((count, gi) => (
+        <div key={gi}>
+          <div className="mx-3 mb-2 h-2 w-20 rounded bg-white/15 animate-pulse" />
+          <div className="space-y-1">
+            {Array.from({ length: count }).map((_, i) => (
+              <div key={i} className="mx-2 h-8 rounded-md bg-white/10 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
-  const user = useCurrentUser();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const role = user?.global_role;
+  const { can, loading } = useMenuAccess();
+  const activeKey = resolveMenuKey(pathname);
+  const groups = groupEntries(MENU_ENTRIES.filter((e) => can(e.key)));
+
   return (
     <aside className="h-full flex flex-col bg-gradient-to-br from-auth-panel to-auth-panel-deep text-white w-64 border-r border-white/20">
       <div className="px-5 py-4 flex items-center gap-2 border-b border-white/20">
@@ -79,38 +68,33 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
-        {NAV.map((g) => {
-          const items = g.items.filter((i) => canSeeRoute(role, i.to));
-          if (!items.length) return null;
-          return (
-            <div key={g.group}>
-              <p className="px-3 mb-1 text-[10px] uppercase tracking-wider opacity-50 font-medium">{g.group}</p>
-              <ul className="space-y-0.5">
-                {items.map((it, idx) => {
-                  const active = pathname === it.to || pathname.startsWith(it.to + "/");
-                  return (
-                    <li key={it.to} className={cn(it.pairTop && idx > 0 && "border-t border-white/10 pt-0.5 mt-0.5")}>
-
-                      <Link
-                        to={it.to}
-                        onClick={onNavigate}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition",
-                          active
-                            ? "bg-white/20 text-white font-medium"
-                            : "hover:bg-white/15",
-                        )}
-                      >
-                        <it.icon className="size-4 shrink-0" />
-                        <span className="truncate">{it.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          );
-        })}
+        {loading ? <SidebarSkeleton /> : groups.map((g) => (
+          <div key={g.group}>
+            <p className="px-3 mb-1 text-[10px] uppercase tracking-wider opacity-50 font-medium">{g.group}</p>
+            <ul className="space-y-0.5">
+              {g.items.map((it, idx) => {
+                const active = activeKey === it.key;
+                return (
+                  <li key={it.key} className={cn(it.pairTop && idx > 0 && "border-t border-white/10 pt-0.5 mt-0.5")}>
+                    <Link
+                      to={it.to}
+                      onClick={onNavigate}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition",
+                        active
+                          ? "bg-white/20 text-white font-medium"
+                          : "hover:bg-white/15",
+                      )}
+                    >
+                      <it.icon className="size-4 shrink-0" />
+                      <span className="truncate">{it.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
       <div className="p-3 border-t border-white/20 text-[11px] opacity-60">
         v1.0 · Demonstração

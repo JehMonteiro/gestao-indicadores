@@ -6,6 +6,7 @@ export type GlobalRole =
   | "superadmin"
   | "admin_corporativo"
   | "gestor_setor"
+  | "analista"
   | "colaborador"
   | "gestor_franquia"
   | "franqueado"
