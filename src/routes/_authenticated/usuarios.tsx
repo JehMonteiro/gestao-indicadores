@@ -31,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/usuarios")({
 
 const roleLabels: Record<GlobalRole, string> = {
   superadmin: "Superadmin", admin_corporativo: "Admin corporativo", gestor_setor: "Gestor de setor",
+  analista: "Analista",
   colaborador: "Colaborador", gestor_franquia: "Gestor de franquia", franqueado: "Franqueado", auditor: "Auditor",
 };
 
