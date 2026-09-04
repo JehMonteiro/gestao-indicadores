@@ -10,7 +10,12 @@ export function useMenuAccess(): {
   canPath: (pathname: string) => boolean;
   firstAllowedPath: string | null;
 } {
-  const { data, isLoading } = useAuthProfile();
+  const { user, loading: sessionLoading } = useSession();
+  const { data, isLoading, isError } = useAuthProfile();
+  // While the session is being restored the profile query is disabled (isLoading === false),
+  // so we must treat that window as loading to avoid a false "access denied" flash.
+  const loading = sessionLoading || (!!user && (isLoading || (!data && !isError)));
+  const rolesUnknown = !data;
   const roles: GlobalRole[] = data?.roles?.length ? data.roles : data?.role ? [data.role] : [];
   const rolesKey = roles.join(",");
 
