@@ -210,7 +210,11 @@ export function MyIndicatorsTable({ rows, loading }: { rows: MyIndicatorRow[]; l
                             </Button>
                           ) : (
                             <Button size="sm" asChild>
-                              <Link to="/lancamentos/novo" search={{ indicator: r.indicator.id }}>Lançar</Link>
+                              {r.indicator.entity_scope === "franquia" ? (
+                                <Link to="/lancamentos-franquia/novo" search={{ indicator: r.indicator.id }}>Lançar</Link>
+                              ) : (
+                                <Link to="/lancamentos/novo" search={{ indicator: r.indicator.id }}>Lançar</Link>
+                              )}
                             </Button>
                           )}
                         </TableCell>

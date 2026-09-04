@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAuthProfile } from "@/hooks/use-auth";
+import { useAuthProfile, useSession } from "@/hooks/use-auth";
 import { DEFAULT_ROLE_MENU, MENU_ENTRIES, resolveMenuKey, type MenuKey } from "@/lib/menu-registry";
 import type { GlobalRole } from "@/mocks/types";
 
@@ -10,7 +10,12 @@ export function useMenuAccess(): {
   canPath: (pathname: string) => boolean;
   firstAllowedPath: string | null;
 } {
-  const { data, isLoading } = useAuthProfile();
+  const { user, loading: sessionLoading } = useSession();
+  const { data, isLoading, isError } = useAuthProfile();
+  // While the session is being restored the profile query is disabled (isLoading === false),
+  // so we must treat that window as loading to avoid a false "access denied" flash.
+  const loading = sessionLoading || (!!user && (isLoading || (!data && !isError)));
+  const rolesUnknown = !data;
   const roles: GlobalRole[] = data?.roles?.length ? data.roles : data?.role ? [data.role] : [];
   const rolesKey = roles.join(",");
 
@@ -25,6 +30,8 @@ export function useMenuAccess(): {
   const can = (key: MenuKey) => allowedKeys.has(key);
 
   const canPath = (pathname: string) => {
+    // If roles could not be resolved (query error), do not hard-block the app.
+    if (rolesUnknown) return true;
     const key = resolveMenuKey(pathname);
     if (!key) return true;
     return allowedKeys.has(key);
@@ -32,5 +39,5 @@ export function useMenuAccess(): {
 
   const firstAllowedPath = MENU_ENTRIES.find((e) => allowedKeys.has(e.key))?.to ?? null;
 
-  return { loading: isLoading, allowedKeys, can, canPath, firstAllowedPath };
+  return { loading, allowedKeys, can, canPath, firstAllowedPath };
 }
