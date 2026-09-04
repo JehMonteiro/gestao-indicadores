@@ -73,7 +73,7 @@ function FranchiseIndicatorDetail() {
               <Link to="/franquias/$id/indicadores/$indId/editar" params={{ id, indId }}><Pencil className="size-4" />Editar</Link>
             </Button>
           )}
-          <Button asChild><Link to="/lancamentos/novo" search={{ indicator: ind.id }}>Lançar resultado</Link></Button>
+          <Button asChild><Link to="/lancamentos-franquia/novo" search={{ indicator: ind.id }}>Lançar resultado</Link></Button>
         </>}
       />
 
