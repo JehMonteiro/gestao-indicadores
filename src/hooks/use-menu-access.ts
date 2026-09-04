@@ -30,6 +30,8 @@ export function useMenuAccess(): {
   const can = (key: MenuKey) => allowedKeys.has(key);
 
   const canPath = (pathname: string) => {
+    // If roles could not be resolved (query error), do not hard-block the app.
+    if (rolesUnknown) return true;
     const key = resolveMenuKey(pathname);
     if (!key) return true;
     return allowedKeys.has(key);
@@ -37,5 +39,5 @@ export function useMenuAccess(): {
 
   const firstAllowedPath = MENU_ENTRIES.find((e) => allowedKeys.has(e.key))?.to ?? null;
 
-  return { loading: isLoading, allowedKeys, can, canPath, firstAllowedPath };
+  return { loading, allowedKeys, can, canPath, firstAllowedPath };
 }
