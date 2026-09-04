@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAuthProfile } from "@/hooks/use-auth";
+import { useAuthProfile, useSession } from "@/hooks/use-auth";
 import { DEFAULT_ROLE_MENU, MENU_ENTRIES, resolveMenuKey, type MenuKey } from "@/lib/menu-registry";
 import type { GlobalRole } from "@/mocks/types";
 
